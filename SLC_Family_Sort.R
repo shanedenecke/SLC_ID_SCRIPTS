@@ -1,0 +1,124 @@
+#!/usr/bin/Rscript
+
+## R script to sort SLC hits. The input is a formatted blast output table. 
+### Each gene is sorted into family or is discarded based on criteria similar to Hoglund et. al 2011
+
+## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
+
+
+
+##Import libraries
+shhh <- suppressPackageStartupMessages
+shhh(library(data.table))
+shhh(library(dplyr))
+shhh(library(tidyr))
+shhh(library(readr))
+
+############################ Set WD and arguments
+
+args = commandArgs(trailingOnly=TRUE)
+setwd('./recip_blast')
+##debug
+#args[1]="/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_dict.csv"
+
+divNA=function(x,y){
+  if(is.na(x) | is.na(y)){
+    return(1)
+  }else if(is.numeric(x) & is.numeric(y)){
+    return(x/y)
+  }
+}
+    
+    
+
+##format some tables. dict will be your starting SLC dict. dict.summary a counts table
+dict=fread(as.character(args[1]))
+dict.summary=dict %>% separate(col=name,sep='_',remove=T,into=c('slc','fam','subfam')) %>% unite(col='slc_fam',slc,fam,sep="_") %>% group_by(slc_fam) %>% summarize(fam_count=length(slc_fam))
+dict.summary$slc_fam=sapply(dict.summary$slc_fam, function(x) paste0(x,"_"))
+
+
+## initialize some empty lists
+slc.total=list()
+not.found=c()
+used.list=c()
+
+## Now start this moster for loop that will iterate through all blast files
+
+for (i in list.files()){ ### iterate through each blast output file
+  
+  
+  blast=fread(i,colClasses = c('character','character',rep('numeric',3))) ## raw blast output table
+  target.family=paste0(unlist(strsplit(i,split='.',fixed=T))[1],"_") ### target family== what family is to be searched
+  target.fam.size=dict.summary[dict.summary$slc_fam==target.family,'fam_count'] ### How many members in the target family are in the soruce genome
+
+  for (j in unique(blast$V1)){ ## iterate over genes in blast output
+    
+    if(j %in% used.list){ ## if the gene has already been asigned you can skip it
+      next
+    }
+    
+    
+    
+    
+    ## import the blast data. Top 5 hits no NAs
+    sub=subset(blast,V1==j)[1:5,] %>% na.omit
+    if (!grepl('_X',i)){
+      sub=sub %>% filter(!grepl('_X_',V2)) ### if it is not the SLCX case then filter out all the SLCX hits
+      if(dim(sub)[1]==0){
+        next
+      }
+    }else if(grepl('_X',i)){
+      sub=sub
+    }
+    
+    ## calculate some useful variables for the coming for loop
+    slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
+    slc.tab=table(slc_fams) ## returns table of which SLC families are there
+    com.name=names(sort(slc.tab,decreasing=TRUE)[1]) ## gets the most common SLC family
+    
+    
+    ##filter candidates out immediately
+    
+    if(slc_fams[1]!=target.family){ ## if the most significant hit is not from the target family
+      next
+    }
+  
+    #### Now see sort remaining genes
+    
+    if(length(unique(slc_fams))==1 & com.name==target.family){ ## all hits the same and this corresponds to the target family
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
+      used.list=c(used.list,j)
+    }
+    
+    else if(!(FALSE %in% (unique(slc_fams[1:3]) %in% target.family))){ ## Three top evalue hits are in the target family
+          slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams[1])) 
+          used.list=c(used.list,j)
+    }
+    
+    else if(slc_fams[grepl(target.family,slc_fams)]==target.fam.size){ ## all members of the family are detected in the top5
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
+      used.list=c(used.list,j)
+      
+    }
+      
+    else if(sub$V4[1]<1e-60 | divNA(sub$V4[2],sub$V4[1])>1e10){ # It is overwhelmingly significant
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
+      used.list=c(used.list,j)
+    }
+    
+    else if(length(slc.tab[names(slc.tab)==target.family][slc.tab>3])>0){ ## 4 out of the top 5 blast hits are the target family
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
+      used.list=c(used.list,j)
+    }
+      
+    else if(slc_fams[sapply(slc_fams,function(x) grepl('SLC',x))] %>% length()==length(slc_fams)){ ##if all 5 members are SLCs but none of the above conditions are met
+        slc.total[[j]]=data.table(geneid=sub[1,'V1'],family='SLC_Unsorted')
+        used.list=c(used.list,j)
+    }
+  }
+}
+
+a=rbindlist(slc.total) %>% arrange(family)
+cat(format_csv(a))
+#write.csv(a,file='./HMMsearch_SLC_table.csv',row.names = F)
+
