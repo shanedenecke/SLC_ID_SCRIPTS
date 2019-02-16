@@ -19,7 +19,8 @@ shhh(library(readr))
 args = commandArgs(trailingOnly=TRUE)
 setwd('./recip_blast')
 ##debug
-#args[1]="/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_dict.csv"
+#args[1]="/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_itertest_database/SLC_source_dict.csv"
+#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_itertest_search/recip_blast')
 
 divNA=function(x,y){
   if(is.na(x) | is.na(y)){
@@ -71,6 +72,20 @@ for (i in list.files()){ ### iterate through each blast output file
       sub=sub
     }
     
+    
+    
+    ## check to see if this is a reciprocal blast top hit with 100% identity
+    ## if it is and the hit is the target add it to the final output. If not remove it from the list and continue with the analysis
+    if(sub$V3[1]==100 & grepl(target.family,sub$V2[1])){
+      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
+      used.list=c(used.list,j)
+    }else{
+      sub=sub %>% filter(V3!=100)
+    }
+    if(dim(sub)[1]==0){ ## catch any instances where we might have deleted the last row
+      next
+    }
     ## calculate some useful variables for the coming for loop
     slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
     slc.tab=table(slc_fams) ## returns table of which SLC families are there

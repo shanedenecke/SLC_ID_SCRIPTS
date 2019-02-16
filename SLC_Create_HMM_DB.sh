@@ -80,7 +80,7 @@ mv ./muscle_alignments/*.hmm ./hmm_profiles
 
 cd $3
 #mkdir dictionary_create_FIND
-cp $2 $(pwd $3)'/SLC_dict.csv' ## needs to change name
+cp $2 $(pwd $3)'/SLC_source_dict.csv' ## needs to change name
 #cp $B $(pwd $C)'/dictionary_create_FIND/SLC_dict.csv' ## needs to change name
 #cp $B $(pwd $C'/SLC_dict.csv')
 #cp ~/Documents/SLC_id/general_reference/Hs_SLC_dict.csv ~/Documents/SLC_id/Human_HMM_SLC'/SLC_dict.csv'

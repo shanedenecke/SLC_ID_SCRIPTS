@@ -4,26 +4,26 @@
 ## argument 2= new proteome to search
 ## argument 3= New_database folder to create
 
-#A=/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC
-#B=/home/shanedenecke/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa
-#C=~/Documents/SLC_id/TEST_IT_Dros
+#A=~/Documents/SLC_id/Human_HMM_SLC
+#B=~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa
+#C=/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search
 
 
 ## reset bash and create new output directory
 source ~/.bashrc
 mkdir $3
 cd $3
-##mkdir $C
+##mkdir $C ### not making proper directory
 #cd $C
-rm -rf ./*
 
 
 ## search HMM profiles against target proteome using hmm search
 rm -rf ./hmm_outputs
 mkdir ./hmm_outputs
+rm $1/hmm_profile/*hmmoutput
 for i in $1/hmm_profiles/*; do
   base=$(echo $(basename $i))
-  hmmsearch --notextw -E 20 $i $2 > $i.hmmoutput
+  hmmsearch --notextw -E 20 $i $2 > ./hmm_outputs/$base.hmmoutput
   #hmmsearch --notextw -E 20 $i $B > ./hmm_outputs/$base.hmmoutput
 done
 
@@ -53,15 +53,14 @@ for i in ./SLC_fa/*.fa; do
   base=$(echo $(basename $i))
   #blastp -query $i -db $A/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 5 -max_hsps 1 > ./recip_blast/$base'_blast.tsv'
   blastp -query $i -db $1/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 5 -max_hsps 1 > ./recip_blast/$base'_blast.tsv'
-
 done
 find ./recip_blast/* -size 0 -delete
 
 
 ## Run R script to output table 
 mkdir ./prelim_summary
-#Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $A'/SLC_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
-Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+#Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $A'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
 
 
 
