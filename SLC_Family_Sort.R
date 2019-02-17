@@ -19,8 +19,8 @@ shhh(library(readr))
 args = commandArgs(trailingOnly=TRUE)
 setwd('./recip_blast')
 ##debug
-#args[1]="/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_itertest_database/SLC_source_dict.csv"
-#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_itertest_search/recip_blast')
+#args[1]="/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Post_Flybase_Xref_database/SLC_source_dict.csv"
+#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_iterative_search/recip_blast')
 
 divNA=function(x,y){
   if(is.na(x) | is.na(y)){
@@ -77,7 +77,7 @@ for (i in list.files()){ ### iterate through each blast output file
     ## check to see if this is a reciprocal blast top hit with 100% identity
     ## if it is and the hit is the target add it to the final output. If not remove it from the list and continue with the analysis
     if(sub$V3[1]==100 & grepl(target.family,sub$V2[1])){
-      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
+      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
       used.list=c(used.list,j)
     }else{

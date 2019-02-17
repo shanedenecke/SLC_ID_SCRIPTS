@@ -17,24 +17,29 @@ mkdir Drosophila_Database
 
 ## search from humans
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Human_HMM_SLC ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_skinnydict.csv ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database
+
+## Make database from Human search
+./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search/final_output/SLC_final_output.csv ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database
+
+# Iteratative search Drosophila proteome problem*************************
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search
+
+##Test iterative capability
+#./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_skinnydict.csv ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database
+#./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_search
+
 ## Xref with flybase SLC calls
 Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Drosophila_Database/SLC_source_dict_flybaseXref.csv
 
-# create Drosophila iteration 1 database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_source_dict_flybaseXref.csv ~/Documents/SLC_id/Drosophila_Database/Post_Flybase_Xref_database
-
-# Iteratative search Drosophila proteome problem*************************
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Post_Flybase_Xref_database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_search
 
 ## Make final Drosophila database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search/SLC_source_dict.csv ~/Documents/SLC_id/Dm_Final_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_source_dict_flybaseXref.csv ~/Documents/SLC_id/Dm_Final_Database
+
 
 ## Rename Dm database with R script
-Rscript ./SLC_id_scripts/Rename_Dm_SLCs.R > ./Dm_Final_Database/SLC_dict2.csv
-rm ~/Documents/SLC_id/Dm_Final_Database/SLC_dict.csv
-mv ~/Documents/SLC_id/Dm_Final_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_dict.csv
+Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./Dm_Final_Database/SLC_dict2.csv
+rm ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
+mv ~/Documents/SLC_id/Dm_Final_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
 
 
 ########################  3) Search species with Human database
