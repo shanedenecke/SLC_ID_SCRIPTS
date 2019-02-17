@@ -63,8 +63,8 @@ done
 mkdir ./muscle_alignments
 for i in ./family_fasta/*
 do
-~/Applications/muscle3.8.31_i86linux64 -in $i -out $i.aln
-~/Applications/trimal-trimAl/source/trimal -in $i.aln -out $i.trimmed
+~/Applications/muscle3.8.31_i86linux64 -in $i -out $i.aln.trimmed
+#~/Applications/trimal-trimAl/source/trimal -in $i.aln -out $i.trimmed
 done
 mv ./family_fasta/*.trimmed ./muscle_alignments
 rm ./family_fasta/*.aln
