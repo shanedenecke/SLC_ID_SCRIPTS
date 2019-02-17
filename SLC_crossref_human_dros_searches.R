@@ -6,7 +6,7 @@ library(readr)
 
 
 ## collate all SLC transporter lists from human and drosophila searches 
-setwd('/home/shanedenecke/Documents/SLC_id')
+setwd('~/Documents/SLC_id')
 
 sp.list=c()
 for(file in list.files('./proteomes')){
