@@ -14,5 +14,5 @@ start.dict=fread('./Dm_Final_Database/SLC_source_dict.csv')
 
 
 new.dict=merge(start.dict,key,by='code') %>% unique() %>% separate(col='name',into=c('slc','fam','junk')) %>% select(-junk) %>% unite(col='name',slc,fam,cg,symbol,sep="_")
-
+new.dict=new.dict[!duplicated(new.dict$code),]
 cat(format_csv(new.dict))

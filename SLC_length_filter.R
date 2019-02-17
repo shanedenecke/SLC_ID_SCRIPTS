@@ -10,11 +10,11 @@ shhh(library(readr))
 
 ## already got lengths from expression analysis
 
-#setwd('/home/shanedenecke/Documents/SLC_id/TEST_IT_Dros/length_analysis')
+#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search/length_analysis')
 setwd('./length_analysis')
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
-gene_lengths$family=gsub('(SLC_[0-9]+|X)_','\\1',gene_lengths$family,perl=T)
+gene_lengths$family=gsub('(SLC_.+)_','\\1',gene_lengths$family,perl=T)
 
 ## import keys and dictionaries for human SLC
 hs.key=fread('~/Documents/SLC_id/general_reference/SLC_info/Hs_master_key.csv')
@@ -45,7 +45,7 @@ for(i in 1:nrow(gene_lengths)){
   }
   
   ## get spread for human SLC family. maximum of either mean+stdev or 1.5*maximum
-  hs.stdev=hs.slcs[which(hs.slcs$slc_family==test.fam),'stdev']
+  hs.stdev=hs.slcs[which(hs.slcs$slc_family==test.fam),'stdev'] %>% as.numeric()
   hs.max1=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * 1.5
   hs.min1=hs.slcs[which(hs.slcs$slc_family==test.fam),'minimum'] * .6667
   

@@ -2,7 +2,8 @@
 
 cd ~/Documents/SLC_id/
 
-######################## 0) Download and Clean Sequences (Musca Manduca and Glossina still not working)
+
+######################## 0) Download and Clean Sequences 
 python3 ./SLC_id_scripts/SLC_Download_genomes.py
 cp ./general_reference/model_proteomes/HarArm_unigene.faa ./proteomes/
 find ./proteomes -type f -empty -delete
@@ -21,12 +22,8 @@ mkdir Drosophila_Database
 ## Make database from Human search
 ./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search/final_output/SLC_final_output.csv ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database
 
-# Iteratative search Drosophila proteome problem*************************
+# Iteratative search Drosophila
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search
-
-##Test iterative capability
-#./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_skinnydict.csv ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database
-#./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_itertest_search
 
 ## Xref with flybase SLC calls
 Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Drosophila_Database/SLC_source_dict_flybaseXref.csv
@@ -59,7 +56,7 @@ done
 
 ########################  5) collate searches for each species by Xref with Human and Drosophila searches
 
-Rscript ~/Documents/SLC_id/SLC_id_scripts/crossref_human_dros_searches.R
+Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_crossref_human_dros_searches.R
 
 
 ######################## 6) Iteratively search each species

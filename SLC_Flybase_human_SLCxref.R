@@ -14,6 +14,5 @@ hs.slcs=fread('~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search/final_
 fly.new=flybase.slc[!(code %in% hs.slcs$code)]
 
 final_table=rbind(hs.slcs,fly.new)
-
 cat(format_csv(final_table))
 #hs.slcs[!(code %in% flybase.slc$code)]

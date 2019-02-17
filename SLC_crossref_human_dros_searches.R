@@ -23,7 +23,7 @@ for(i in sp.list){
   par.match=dirs[sapply(i,grepl,dirs)]
   l2=list()
   for(j in par.match){
-    slcs=fread(paste0(j,'/SLC_dict.csv'))
+    slcs=fread(paste0(j,'/final_output/SLC_final_output.csv'))
     slcs$name=gsub("(SLC_[0-9]+)_[0-9]+$",'\\1',slcs$name)
     slcs$name=gsub("(SLC_X)_[0-9]+$",'\\1',slcs$name)
     l2[[j]]=slcs
@@ -51,7 +51,7 @@ setwd('Human_Drosophila_crossref')
 for (i in 1:length(l)){ 
   sub=l[[i]]
   n=names(l)[i]
-  write.csv(sub,file=paste0(n,"_SLC_dict.csv"),row.names = F)
+  write.csv(sub,file=paste0(n,"_SLC_source_dict.csv"),row.names = F)
 } 
 
 
