@@ -17,10 +17,11 @@ shhh(library(readr))
 ############################ Set WD and arguments
 
 args = commandArgs(trailingOnly=TRUE)
-#setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_BomMor_unigene.faa')
-setwd('./recip_blast')
 ##debug
-#args[1]="/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_source_dict.csv"
+setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BomMor')
+args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BomMor/SLC_source_dict.csv"
+
+setwd('./recip_blast')
 
 
 divNA=function(x,y){
@@ -30,7 +31,7 @@ divNA=function(x,y){
     return(x/y)
   }
 }
-    
+
     
 
 ##format some tables. dict will be your starting SLC dict. dict.summary a counts table
@@ -54,18 +55,47 @@ for (i in list.files()){ ### iterate through each blast output file
   target.fam.size=dict.summary[dict.summary$slc_fam==target.family,'fam_count'] ### How many members in the target family are in the soruce genome
 
   for (j in unique(blast$V1)){ ## iterate over genes in blast output
-    
+
     if(j %in% used.list){ ## if the gene has already been asigned you can skip it
       next
     }
+   
     
     
+    ## calculate some useful variables for the coming for loop
+    sub=subset(blast,V1==j)[1:5,] %>% na.omit
+    slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
+    slc.tab=table(slc_fams) ## returns table of which SLC families are there
+    com.name=names(sort(slc.tab,decreasing=TRUE)[1]) ## gets the most common SLC family
+    
+    
+    
+    ## check to see if this is a reciprocal blast top hit with 100% identity
+    ## if it is and the hit is the target family add it to the final output.
+    
+    if(sub$V3[1]==100 & grepl(target.family,slc_fams[1])){
+      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
+      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
+      used.list=c(used.list,j)
+      next
+    }else if(sub$V3[1]==100 & grepl('Unsorted',sub$V2[1])){ ## if there is a perfect blast hit but all other blast hits map to other family
+      sub=sub %>% filter(V3!=100)
+      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
+      if(slc_fams==1){ ### if all 4 remaining hits map to the same family
+        slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
+        used.list=c(used.list,j)
+      }else{
+        next
+      }
+    }else{
+      #sub=sub %>% filter(V3!=100)
+      #slc_fams=slc_fams[2:length(slc_fams)] %>% na.omit()
+    }
     
     
     ## import the blast data. Top 5 hits no NAs
-    sub=subset(blast,V1==j)[1:5,] %>% na.omit
-    if (!grepl('_X',i)){
-      sub=sub %>% filter(!grepl('_X_',V2)) ### if it is not the SLCX case then filter out all the SLCX hits
+    if (!grepl('_X|Unsorted',i)){
+      sub=sub %>% filter(!grepl('_X|Unsorted',V2)) ### if it is not the SLCX case then filter out all the SLCX hits
       if(dim(sub)[1]==0){
         next
       }
@@ -73,33 +103,18 @@ for (i in list.files()){ ### iterate through each blast output file
       sub=sub
     }
     
-    
-    
-    ## check to see if this is a reciprocal blast top hit with 100% identity
-    ## if it is and the hit is the target add it to the final output. If not remove it from the list and continue with the analysis
-    if(sub$V3[1]==100 & grepl(target.family,sub$V2[1])){
-      slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
-      slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
-      used.list=c(used.list,j)
-    }else{
-      sub=sub %>% filter(V3!=100)
-    }
-    if(dim(sub)[1]==0){ ## catch any instances where we might have deleted the last row
+    if(dim(sub)[1]==0){ ## catch any instances where we might have deleted the entire dataframe
       next
     }
-    ## calculate some useful variables for the coming for loop
-    slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
-    slc.tab=table(slc_fams) ## returns table of which SLC families are there
-    com.name=names(sort(slc.tab,decreasing=TRUE)[1]) ## gets the most common SLC family
     
-    
+   
     ##filter candidates out immediately
     
     if(slc_fams[1]!=target.family){ ## if the most significant hit is not from the target family
       next
     }
   
-    #### Now see sort remaining genes
+    #### Now sort remaining genes
     
     if(length(unique(slc_fams))==1 & com.name==target.family){ ## all hits the same and this corresponds to the target family
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
@@ -135,6 +150,11 @@ for (i in list.files()){ ### iterate through each blast output file
 }
 
 a=rbindlist(slc.total) %>% arrange(family) %>% unique.data.frame()
+
+## sometimes things are detected in initial search but not in iterative (e.g. SLC9 tr|H9JQM4|H9JQM4_BOMMO in bombyx mori just below threshold'
+## add in any mismatches from dictionary if recursive
+
+
 #filter(a,family=='SLC_2_')
 cat(format_csv(a))
 #write.csv(a,file='./HMMsearch_SLC_table.csv',row.names = F)

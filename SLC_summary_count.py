@@ -25,7 +25,7 @@ human_slc=pd.read_csv('/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_dic
 slc_fams=human_slc['name'].str.split('_',expand=True)[[0,1]].apply(lambda x: '_'.join(x), axis=1).unique().tolist()
 
 ##read dataframes into python list
-for i in os.listdir('./iterative_search/'):
+for i in os.listdir('./final_SLC_dicts/'):
     slc_table=pd.read_csv('./iterative_search/'+i+'/SLC_dict.csv')
     abbreviation= i.split('_')[-1]
 

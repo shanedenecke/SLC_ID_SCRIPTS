@@ -39,7 +39,7 @@ for(i in 1:nrow(gene_lengths)){
   test.name=gene_lengths[i,]$gene %>% as.character()
   test.fam=gene_lengths[i,]$family %>% as.character()
   
-  if(test.fam=='SLC_Unsorted'){
+  if(test.fam=='SLC_Unsorted' & test.len >100 & test.len<1500){
     l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='UNK',hs.slcs[which(hs.slcs$slc_family=="SLC_X"),]))
     next
   }

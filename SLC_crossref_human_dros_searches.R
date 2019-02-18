@@ -25,8 +25,7 @@ for(i in sp.list){
   l2=list()
   for(j in par.match){
     slcs=fread(paste0(j,'/final_output/SLC_final_output.csv'))
-    slcs$name=gsub("(SLC_[0-9]+)_[0-9]+$",'\\1',slcs$name)
-    slcs$name=gsub("(SLC_X)_[0-9]+$",'\\1',slcs$name)
+    slcs$name=gsub("(SLC_.+_)[0-9]+$",'\\1',slcs$name)
     l2[[j]]=slcs
   }
   unique_hits=rbindlist(l2) %>% unique()
@@ -35,7 +34,7 @@ for(i in sp.list){
   for(k in unique(unique_hits$name)){
     sub=subset(unique_hits,name==k)
     mem=seq(1,nrow(sub),by=1)
-    sub$name=paste(sub$nam,mem,sep='_')
+    sub$name=paste(sub$nam,mem,sep='')
     l3[[k]]=sub
   }
   named.hits=rbindlist(l3)

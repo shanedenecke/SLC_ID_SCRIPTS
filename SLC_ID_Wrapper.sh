@@ -16,7 +16,7 @@ find ./proteomes -type f -empty -delete
 ######################## 2) Bulild good quality Drosophila database
 mkdir Drosophila_Database
 
-## search from humans
+## search from humans 
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Human_HMM_SLC ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search
 
 ## Make database from Human search
@@ -75,7 +75,7 @@ mkdir iterative_search
 mkdir final_SLC_dicts
 for i in  ~/Documents/SLC_id/proteomes/*.faa; do
 e=$(echo $(basename $i) | cut -d '_' -f 1) 
-f=$(ls -d ~/Documents/SLC_id/iterative_database/iterative_database*$e/)
+f=$(ls -d ~/Documents/SLC_id/iterative_database/iterative_database*$e)
 ./SLC_id_scripts/SLC_HMM_Search.sh $f $i ~/Documents/SLC_id/iterative_search/'iterative_search_'$e
 cp ~/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv ~/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
 done
