@@ -4,16 +4,16 @@
 ## argument 2= new proteome to search
 ## argument 3= New_database folder to create
 
+#A=~/Documents/SLC_id/HomSap_Database
 #B=~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa
-#A=~/Documents/SLC_id/Human_HMM_SLC
-#C=~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search
+#C=~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search
 
 
 ## reset bash and create new output directory
 source ~/.bashrc
 mkdir $3
 cd $3
-##mkdir $C ### not making proper directory
+##mkdir $C 
 #cd $C
 
 
@@ -22,6 +22,7 @@ rm -rf ./hmm_outputs
 mkdir ./hmm_outputs
 rm $1/hmm_profile/*hmmoutput
 for i in $1/hmm_profiles/*; do
+#for i in $A/hmm_profiles/*; do
   base=$(echo $(basename $i))
   hmmsearch --notextw -E 20 $i $2 > ./hmm_outputs/$base.hmmoutput
   #hmmsearch --notextw -E 20 $i $B > ./hmm_outputs/$base.hmmoutput
@@ -80,5 +81,6 @@ mkdir final_output
 mv ./length_analysis/total_slc_table.csv ./final_output/total_slc_table.csv 
 pwd > dir.txt
 Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $1'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
+#Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $A'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
 rm dir.txt
 

@@ -34,23 +34,23 @@ Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SL
 
 
 ## Rename Dm database with R script
-Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./DroMel_Databasee/SLC_dict2.csv
-rm ~/Documents/SLC_id/DroMel_Database/SLC_source_dict.csv
-mv ~/Documents/SLC_id/DroMel_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
+#Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./DroMel_Databasee/SLC_dict2.csv
+#rm ~/Documents/SLC_id/DroMel_Database/SLC_source_dict.csv
+#mv ~/Documents/SLC_id/DroMel_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
 
 
 ########################  3) Search species with Human database
 mkdir Human_search
 for i in ~/Documents/SLC_id/proteomes/*.faa; do
 a=$(basename $i) 
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database $i ~/Documents/SLC_id/HomSap_search/'HUMAN_'$a
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database $i ~/Documents/SLC_id/Human_search/'HUMAN_'$a
 done
 
 ########################  4) Search other species with Drosohpila database
 mkdir Drosophila_search
 for i in ~/Documents/SLC_id/proteomes/*.fa*; do
 b=$(echo $(basename $i) | cut -d '_' -f 1) 
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/DroMel_Database $i ~/Documents/SLC_id/DroMel_search/'DROSOPHILA_'$b
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/DroMel_Database $i ~/Documents/SLC_id/Drosophila_search/'DROSOPHILA_'$b
 done
 
 

@@ -12,8 +12,8 @@ args = commandArgs(trailingOnly=TRUE)
 
 
 
-##args[1]='/home/shanedenecke/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv'
-##setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search')
+##args[1]='/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_source_dict.csv'
+##setwd('/home/shanedenecke/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
 ##args
 
 a=readLines('dir.txt')

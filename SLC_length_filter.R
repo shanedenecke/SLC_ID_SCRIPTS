@@ -18,7 +18,7 @@ gene_lengths$family=gsub('(SLC_.+)_','\\1',gene_lengths$family,perl=T)
 
 ## import keys and dictionaries for human SLC
 hs.key=fread('~/Documents/SLC_id/general_reference/SLC_info/Hs_master_key.csv')
-hs.dict=fread('~/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv',col.names = c('sd_name','HUGO_name')) %>% 
+hs.dict=fread('~/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict_new.csv',col.names = c('sd_name','HUGO_name')) %>% 
   separate(sd_name,into=c('1','2','C'),sep="_") %>% unite("slc_family",'1','2') %>% select(-C) 
 hs.dict$HUGO_name=gsub(" PE","",hs.dict$HUGO_name)
 
