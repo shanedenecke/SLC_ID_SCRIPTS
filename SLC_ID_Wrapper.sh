@@ -9,48 +9,48 @@ cp ./general_reference/model_proteomes/HarArm_unigene.faa ./proteomes/
 find ./proteomes -type f -empty -delete
 
 ######################## 1) Build Human Database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa ~/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv ~/Documents/SLC_id/Human_HMM_SLC
+./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa ~/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict_new.csv ~/Documents/SLC_id/HomSap_Database
 
 
 
 ######################## 2) Bulild good quality Drosophila database
-mkdir Drosophila_Database
+mkdir Dm_Database_Generate
 
 ## search from humans 
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Human_HMM_SLC ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search
 
 ## Make database from Human search
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search/final_output/SLC_final_output.csv ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
 
 # Iteratative search Drosophila
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/Dm_iterative_search
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
 
 ## Xref with flybase SLC calls
-Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Drosophila_Database/SLC_source_dict_flybaseXref.csv
+Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv
 
 
 ## Make final Drosophila database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Drosophila_Database/SLC_source_dict_flybaseXref.csv ~/Documents/SLC_id/Dm_Final_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/SLC_source_dict_flybaseXref.csv ~/Documents/SLC_id/DroMel_Database
 
 
 ## Rename Dm database with R script
-Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./Dm_Final_Database/SLC_dict2.csv
-rm ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
-mv ~/Documents/SLC_id/Dm_Final_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
+Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./DroMel_Databasee/SLC_dict2.csv
+rm ~/Documents/SLC_id/DroMel_Database/SLC_source_dict.csv
+mv ~/Documents/SLC_id/DroMel_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
 
 
 ########################  3) Search species with Human database
 mkdir Human_search
 for i in ~/Documents/SLC_id/proteomes/*.faa; do
 a=$(basename $i) 
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Human_HMM_SLC $i ~/Documents/SLC_id/Human_search/'HUMAN_'$a
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database $i ~/Documents/SLC_id/HomSap_search/'HUMAN_'$a
 done
 
 ########################  4) Search other species with Drosohpila database
 mkdir Drosophila_search
 for i in ~/Documents/SLC_id/proteomes/*.fa*; do
 b=$(echo $(basename $i) | cut -d '_' -f 1) 
-./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/Dm_Final_Database $i ~/Documents/SLC_id/Drosophila_search/'DROSOPHILA_'$b
+./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/DroMel_Database $i ~/Documents/SLC_id/DroMel_search/'DROSOPHILA_'$b
 done
 
 

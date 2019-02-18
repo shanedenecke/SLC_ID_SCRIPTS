@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BomMor')
-args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BomMor/SLC_source_dict.csv"
+#setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BomMor')
+#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BomMor/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -79,20 +79,19 @@ for (i in list.files()){ ### iterate through each blast output file
       used.list=c(used.list,j)
       next
     }else if(sub$V3[1]==100 & grepl('Unsorted',sub$V2[1])){ ## if there is a perfect blast hit but all other blast hits map to other family
+        sub=sub %>% filter(V3!=100)
+        slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
+        if(slc_fams==1){ ### if all 4 remaining hits map to the same family
+          slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
+          used.list=c(used.list,j)
+        }
+    }else if(sub$V3[1]==100){
       sub=sub %>% filter(V3!=100)
       slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
-      if(slc_fams==1){ ### if all 4 remaining hits map to the same family
-        slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
-        used.list=c(used.list,j)
-      }else{
-        next
+      slc_fams=slc_fams %>% na.omit()
       }
-    }else{
-      #sub=sub %>% filter(V3!=100)
-      #slc_fams=slc_fams[2:length(slc_fams)] %>% na.omit()
-    }
     
-    
+    ##################################################
     ## import the blast data. Top 5 hits no NAs
     if (!grepl('_X|Unsorted',i)){
       sub=sub %>% filter(!grepl('_X|Unsorted',V2)) ### if it is not the SLCX case then filter out all the SLCX hits
@@ -119,30 +118,20 @@ for (i in list.files()){ ### iterate through each blast output file
     if(length(unique(slc_fams))==1 & com.name==target.family){ ## all hits the same and this corresponds to the target family
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
       used.list=c(used.list,j)
-    }
-    
-    else if(!(FALSE %in% (unique(slc_fams[1:3]) %in% target.family))){ ## Three top evalue hits are in the target family
+    }else if(!(FALSE %in% (unique(slc_fams[1:3]) %in% target.family))){ ## Three top evalue hits are in the target family
           slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams[1])) 
           used.list=c(used.list,j)
-    }
-    
-    else if(slc_fams[grepl(target.family,slc_fams)]==target.fam.size){ ## all members of the family are detected in the top5
+    }else if(slc_fams[grepl(target.family,slc_fams)]==target.fam.size){ ## all members of the family are detected in the top5
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
       used.list=c(used.list,j)
       
-    }
-      
-    else if(sub$V4[1]<1e-60 | divNA(sub$V4[2],sub$V4[1])>1e10){ # It is overwhelmingly significant
+    }else if(sub$V4[1]<1e-60 | divNA(sub$V4[2],sub$V4[1])>1e10){ # It is overwhelmingly significant
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
       used.list=c(used.list,j)
-    }
-    
-    else if(length(slc.tab[names(slc.tab)==target.family][slc.tab>3])>0){ ## 4 out of the top 5 blast hits are the target family
+    }else if(length(slc.tab[names(slc.tab)==target.family][slc.tab>3])>0){ ## 4 out of the top 5 blast hits are the target family
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=target.family)
       used.list=c(used.list,j)
-    }
-      
-    else if(slc_fams[sapply(slc_fams,function(x) grepl('SLC',x))] %>% length()==length(slc_fams)){ ##if all 5 members are SLCs but none of the above conditions are met
+    }else if(slc_fams[sapply(slc_fams,function(x) grepl('SLC',x))] %>% length()==length(slc_fams)){ ##if all 5 members are SLCs but none of the above conditions are met
         slc.total[[j]]=data.table(geneid=sub[1,'V1'],family='SLC_Unsorted')
         used.list=c(used.list,j)
     }

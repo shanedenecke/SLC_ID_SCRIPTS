@@ -78,4 +78,7 @@ Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_length_filter.R > ./length_analysi
 ## final output
 mkdir final_output
 mv ./length_analysis/total_slc_table.csv ./final_output/total_slc_table.csv 
-Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_table_format.R > ./final_output/SLC_final_output.csv
+pwd > dir.txt
+Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $1'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
+rm dir.txt
+
