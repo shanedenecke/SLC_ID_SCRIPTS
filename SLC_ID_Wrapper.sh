@@ -63,25 +63,21 @@ Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_crossref_human_dros_searches.R
 
 ## create databases for each species
 mkdir iterative_database
-for i in  ~/Documents/SLC_id/proteomes/*.fa
-do
-c=$(echo $(basename $i) | cut -d '_' -f 1) 
-d=$(ls /home/shanedenecke/Documents/SLC_id/Human_Drosophila_crossref/$c*)
-./SLC_id_scripts/SLC_Create_HMM_DB.sh $i $d ~/Documents/SLC_id/iterative_database/'iterative_database_'$c
+for i in  ~/Documents/SLC_id/proteomes/*.faa; do
+  c=$(echo $(basename $i) | cut -d '_' -f 1) 
+  d=$(ls ~/Documents/SLC_id/Human_Drosophila_crossref/$c*)
+  ./SLC_id_scripts/SLC_Create_HMM_DB.sh $i $d ~/Documents/SLC_id/iterative_database/'iterative_database_'$c
 done
 
 
-## use iterative databases to search genome
+## use iterative databases to recursivley search genomes
 mkdir iterative_search
 mkdir final_SLC_dicts
-for i in  ~/Documents/SLC_id/proteomes/*.fa
-do
+for i in  ~/Documents/SLC_id/proteomes/*.faa; do
 e=$(echo $(basename $i) | cut -d '_' -f 1) 
-f=$(ls -d /home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database*$e/)
-
+f=$(ls -d ~/Documents/SLC_id/iterative_database/iterative_database*$e/)
 ./SLC_id_scripts/SLC_HMM_Search.sh $f $i ~/Documents/SLC_id/iterative_search/'iterative_search_'$e
-
-cp ~/Documents/SLC_id/iterative_search/'iterative_search_'$e/SLC_dict.csv ~/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_dict.csv'
+cp ~/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv ~/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
 done
 
 

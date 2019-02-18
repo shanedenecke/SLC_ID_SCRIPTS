@@ -1,9 +1,10 @@
-#
-library(data.table)
-library(dplyr)
-library(tidyr)
-library(readr)
+#!/usr/bin/Rscript
 
+shhh <- suppressPackageStartupMessages
+shhh(library(data.table))
+shhh(library(dplyr))
+shhh(library(tidyr))
+shhh(library(readr))
 
 ## collate all SLC transporter lists from human and drosophila searches 
 setwd('~/Documents/SLC_id')
@@ -42,7 +43,26 @@ for(i in sp.list){
 }
 
 
+#### filter out duplicates. If there is a duplicated where 1 is unsorted then keep the named one. Otherwise just take the first
+rem.dup=function(x){
+  final=list()
+  for (i in x$code){
+    sub=subset(x,code==i)
+    uns=table(sub$name %in% 'Unsorted')
+    if(dim(sub)[1]>1 & length(uns[uns==T])==1){
+      final[[i]]=sub %>% filter(grepl('Unsorted',name))
+    }else if(dim(sub)[1]>1){
+      final[[i]]=sub[1,]
+    }else{
+      final[[i]]=sub
+    }
+  }
+  return(rbindlist(final))
+}
+l=lapply(l,rem.dup)   
 
+
+l=lapply(l,function(x) x[!duplicated(x$code),])
 
 
 dir.create('Human_Drosophila_crossref')

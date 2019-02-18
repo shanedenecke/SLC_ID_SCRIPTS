@@ -17,10 +17,11 @@ shhh(library(readr))
 ############################ Set WD and arguments
 
 args = commandArgs(trailingOnly=TRUE)
+#setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_BomMor_unigene.faa')
 setwd('./recip_blast')
 ##debug
-#args[1]="/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Post_Flybase_Xref_database/SLC_source_dict.csv"
-#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Dm_iterative_search/recip_blast')
+#args[1]="/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_source_dict.csv"
+
 
 divNA=function(x,y){
   if(is.na(x) | is.na(y)){
@@ -48,8 +49,8 @@ used.list=c()
 for (i in list.files()){ ### iterate through each blast output file
   
   
-  blast=fread(i,colClasses = c('character','character',rep('numeric',3))) ## raw blast output table
-  target.family=paste0(unlist(strsplit(i,split='.',fixed=T))[1],"_") ### target family== what family is to be searched
+  blast=fread(i,colClasses = c('character','character',rep('numeric',3)),sep='\t') ## raw blast output table
+  target.family=unlist(strsplit(i,split='.',fixed=T))[1] ### target family== what family is to be searched
   target.fam.size=dict.summary[dict.summary$slc_fam==target.family,'fam_count'] ### How many members in the target family are in the soruce genome
 
   for (j in unique(blast$V1)){ ## iterate over genes in blast output
@@ -133,7 +134,8 @@ for (i in list.files()){ ### iterate through each blast output file
   }
 }
 
-a=rbindlist(slc.total) %>% arrange(family)
+a=rbindlist(slc.total) %>% arrange(family) %>% unique.data.frame()
+#filter(a,family=='SLC_2_')
 cat(format_csv(a))
 #write.csv(a,file='./HMMsearch_SLC_table.csv',row.names = F)
 

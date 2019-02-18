@@ -56,7 +56,7 @@ rm ./family_fasta/*
 IFS=$'\n'; 
 for next in $(cat ~/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt)
 do 
-  grep -A 1 ${next}"_" ./list/SLC_genes.fa | sed '/--/d' > ./family_fasta/${next}.fa
+  grep -A 1 ${next} ./list/SLC_genes.fa | sed '/--/d' > ./family_fasta/${next}.fa
 done
 
 ## align all sequences
