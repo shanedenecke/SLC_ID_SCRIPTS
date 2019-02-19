@@ -24,9 +24,18 @@ for(i in sp.list){
   par.match=dirs[sapply(i,grepl,dirs)]
   l2=list()
   for(j in par.match){
+    
+    ## catch any cases where file is missing
+    t <- try(fread(paste0(j,'/final_output/SLC_final_output.csv')))
+    if("try-error" %in% class(t)){
+      next
+    }
+    
+    ## read in files which exist
     slcs=fread(paste0(j,'/final_output/SLC_final_output.csv'))
     slcs$name=gsub("(SLC_.+_)[0-9]+$",'\\1',slcs$name)
     l2[[j]]=slcs
+    
   }
   unique_hits=rbindlist(l2) %>% unique()
   #unique_hits$name=paste(unique_hits$name,seq(1:length(unique_hits$name)),sep="_")
