@@ -4,7 +4,7 @@ cd ~/Documents/SLC_id/
 
 
 ######################## 0) Download and Clean Sequences 
-python3 ./SLC_id_scripts/SLC_Download_genomes.py
+python3 ./SLC_id_scripts/SLC_download_clean_genomes.py
 cp ./general_reference/model_proteomes/HarArm_unigene.faa ./proteomes/
 find ./proteomes -type f -empty -delete
 
