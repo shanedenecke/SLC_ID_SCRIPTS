@@ -19,7 +19,7 @@ mkdir Dm_Database_Generate
 ## search from humans 
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search
 
-## Make database from Human search
+## Make Drosophila database from Human search
 ./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv ~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
 
 # Iteratative search Drosophila

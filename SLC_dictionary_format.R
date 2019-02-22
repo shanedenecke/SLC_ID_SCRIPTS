@@ -12,11 +12,12 @@ args = commandArgs(trailingOnly=TRUE)
 
 
 
-##args[1]='/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_source_dict.csv'
-##setwd('/home/shanedenecke/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
+##args[1]='/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BemTab/SLC_source_dict.csv'
+##setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BemTab')
 ##args
 
 a=readLines('dir.txt')
+#a=getwd()
 startdir= a %>% strsplit(.,split='_') %>% unlist()
 start=startdir[grepl('[A-Z][a-z]{2}[A-Z][a-z]',startdir)]
 
@@ -38,20 +39,29 @@ if(length(end)==0){
 raw=fread('./final_output/total_slc_table.csv',select=c(1,2),sep=',',fill=T)
 source=fread(as.character(args[1]))
 
+
+if(start==end){
+  missing=source[code %in% source$code[!(source$code %in% raw$code)]] ## get values in source but not in final
+  full=rbind(raw,missing) %>% unique.data.frame() %>% arrange(name)
+}else{
+  full=raw
+}
+
+colnames(full)=c('code','name')
+
 ## get count series for each gene
 count=c()
-for(i in table(raw$family)){
+for(i in table(full$name)){
   count=c(count,1:i)
 }
 
-raw$temp=count
-final=unite(raw,col='name',family,temp)
-colnames(final)=c('code','name')
+full$temp=count
+final=unite(full,col='name',name,temp)
 
-if(start==end){
-  missing=source[code %in% source$code[!(source$code %in% final$code)]] ## get values in source but not in final
-  final=rbind(final,missing) %>% unique.data.frame()
-}
+
+## get count series for each gene
+
+
 
 cat(format_csv(final))
      

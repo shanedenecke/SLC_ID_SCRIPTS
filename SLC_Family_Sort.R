@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-#setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BomMor')
-#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BomMor/SLC_source_dict.csv"
+#setwd('/home/shanedenecke/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search')
+#args[1]="~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -43,6 +43,7 @@ dict.summary$slc_fam=sapply(dict.summary$slc_fam, function(x) paste0(x,"_"))
 ## initialize some empty lists
 slc.total=list()
 not.found=c()
+notwenty=c()
 used.list=c()
 
 ## Now start this moster for loop that will iterate through all blast files
@@ -67,29 +68,36 @@ for (i in list.files()){ ### iterate through each blast output file
     slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
     slc.tab=table(slc_fams) ## returns table of which SLC families are there
     com.name=names(sort(slc.tab,decreasing=TRUE)[1]) ## gets the most common SLC family
-    
-    
+    pident=sub$V3
+    if(length(pident)==1){
+      pident=c(pident,rep(100,4))
+    }
     
     ## check to see if this is a reciprocal blast top hit with 100% identity
     ## if it is and the hit is the target family add it to the final output.
     
-    if(sub$V3[1]==100 & grepl(target.family,slc_fams[1])){
+    if(sub$V3[1]==100 & grepl(target.family,slc_fams[1]) & pident[2]>20){
       slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
       slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
       used.list=c(used.list,j)
       next
-    }else if(sub$V3[1]==100 & grepl('Unsorted',sub$V2[1])){ ## if there is a perfect blast hit but all other blast hits map to other family
+    }else if(sub$V3[1]==100 & grepl('Unsorted',sub$V2[1]) & pident[2]>20){ ## if there is a perfect blast hit but all other blast hits map to other family
         sub=sub %>% filter(V3!=100)
         slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
         if(slc_fams==1){ ### if all 4 remaining hits map to the same family
           slc.total[[j]]=data.table(geneid=sub[1,'V1'],family=unique(slc_fams))
           used.list=c(used.list,j)
+          next
         }
-    }else if(sub$V3[1]==100){
+    }else if(sub$V3[1]==100 & !(pident[2]>20)){
+      print(i)
+      print(j)
+      next
+    }else if(sub$V3[1]==100){ #### if it is a reciprocal blast but none of the other conditions are met send it to the remaining critera
       sub=sub %>% filter(V3!=100)
       slc_fams=sapply(sub$V2, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
       slc_fams=slc_fams %>% na.omit()
-      }
+    }
     
     ##################################################
     ## import the blast data. Top 5 hits no NAs

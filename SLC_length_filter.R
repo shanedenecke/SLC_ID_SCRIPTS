@@ -69,6 +69,7 @@ for(i in 1:nrow(gene_lengths)){
 total=rbindlist(l)
 write.csv(total,'./Total_length_analysis.csv')
 final=total %>% filter(evaluation=='GOOD' | evaluation=='UNK' ) %>% select(gene,family) %>% data.table()
+colnames(final)=c('code','name')
 cat(format_csv(final))
 
   
