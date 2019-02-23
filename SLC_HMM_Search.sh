@@ -24,7 +24,7 @@ rm $1/hmm_profile/*hmmoutput
 for i in $1/hmm_profiles/*; do
 #for i in $A/hmm_profiles/*; do
   base=$(echo $(basename $i))
-  hmmsearch --notextw -E 20 --cpu 10 $i $2 > ./hmm_outputs/$base.hmmoutput
+  hmmsearch --notextw -E 20 --cpu 4 $i $2 > ./hmm_outputs/$base.hmmoutput
   #hmmsearch --notextw -E 20 $i $B > ./hmm_outputs/$base.hmmoutput
 done
 
@@ -53,7 +53,7 @@ mkdir ./recip_blast
 for i in ./SLC_fa/*.fa; do
   base=$(echo $(basename $i))
   #blastp -query $i -db $A/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 5 -max_hsps 1 > ./recip_blast/$base'_blast.tsv'
-  blastp -query $i -db $1/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 5 -max_hsps 1 -num_threads 10 > ./recip_blast/$base'_blast.tsv'
+  blastp -query $i -db $1/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 6 -max_hsps 1 -num_threads 4 > ./recip_blast/$base'_blast.tsv'
 done
 find ./recip_blast/* -size 0 -delete
 

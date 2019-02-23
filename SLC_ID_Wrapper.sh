@@ -33,12 +33,6 @@ Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SL
 ./SLC_id_scripts/SLC_Create_HMM_DB.sh ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/Dm_Database_Generate/SLC_source_dict_flybaseXref.csv ~/Documents/SLC_id/DroMel_Database
 
 
-## Rename Dm database with R script
-#Rscript ./SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./DroMel_Databasee/SLC_dict2.csv
-#rm ~/Documents/SLC_id/DroMel_Database/SLC_source_dict.csv
-#mv ~/Documents/SLC_id/DroMel_Database/SLC_dict2.csv ~/Documents/SLC_id/Dm_Final_Database/SLC_source_dict.csv
-
-
 ########################  3) Search species with Human database
 mkdir Human_search
 for i in ~/Documents/SLC_id/proteomes/*.faa; do
