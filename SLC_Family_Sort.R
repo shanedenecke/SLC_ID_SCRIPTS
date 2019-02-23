@@ -76,7 +76,7 @@ for (i in list.files()){ ### iterate through each blast output file
     ####################### ITERATIVE SEARCH
     
     if(pident[1]==100 & slc_fams[2]==target.family & pident[2]<20){ ## for recursive search if not 20% identity
-      filter.list=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
+      filter.list[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
       next
     }
 
@@ -92,6 +92,7 @@ for (i in list.files()){ ### iterate through each blast output file
       if(slc_fams==1){ ### if all 4 remaining hits map to the same family
         slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
         used.list=c(used.list,j)
+        next
       }
     }else if(gene_subset$pident[1]==100){
       gene_subset=gene_subset %>% filter(pident!=100) %>% head(5)
