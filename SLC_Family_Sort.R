@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-#setwd('/home/shanedenecke/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
-#args[1]="/home/shanedenecke/Documents/SLC_id/HomSap_Database/SLC_source_dict.csv"
+#setwd('~/Documents/SLC_id/iterative_search/iterative_search_AgrPla')
+#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_AgrPla/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -147,7 +147,7 @@ for (i in list.files()){ ### iterate through each blast output file
 
 a=rbindlist(slc.total) %>% arrange(family) %>% unique.data.frame()
 b=rbindlist(filter.list) %>% arrange(family) %>% unique.data.frame()
-write.csv(b,'filtered_out.csv')
+write.csv(b,'../prelim_summary/filtered_out.csv')
 ## sometimes things are detected in initial search but not in iterative (e.g. SLC9 tr|H9JQM4|H9JQM4_BOMMO in bombyx mori just below threshold'
 ## add in any mismatches from dictionary if recursive
 
