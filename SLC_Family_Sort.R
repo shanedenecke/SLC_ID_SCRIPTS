@@ -5,7 +5,7 @@
 
 ## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
 
-
+rm(list=ls())
 
 ##Import libraries
 shhh <- suppressPackageStartupMessages
@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-#setwd('~/Documents/SLC_id/iterative_search/iterative_search_AgrPla')
-#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_AgrPla/SLC_source_dict.csv"
+setwd('~/Documents/SLC_id/iterative_search/iterative_search_Blager')
+args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_Blager/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -75,21 +75,21 @@ for (i in list.files()){ ### iterate through each blast output file
     ####################### ITERATIVE SEARCH
     
     if(pident[1]==100 & slc_fams[2]==target.family & pident[2]<20){ ## for recursive search if not 20% identity
-      filter.list[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
+      filter.list[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family)
       next
     }
 
     
     if(pident[1]==100 & grepl(target.family,slc_fams[1])){
       slc_fams=sapply(gene_subset$subject, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
-      slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
+      slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family)
       used.list=c(used.list,j)
       next
     }else if(gene_subset$pident[1]==100 & grepl('Unsorted',gene_subset$subject[1])){ ## if there is a perfect blast hit but all other blast hits map to other family
       gene_subset=gene_subset %>% filter(pident!=100)
       slc_fams=sapply(gene_subset$subject, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
       if(length(slc_fams)==1){ ### if all 4 remaining hits map to the same family
-        slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
+        slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family)
         used.list=c(used.list,j)
         next
       }
@@ -123,10 +123,10 @@ for (i in list.files()){ ### iterate through each blast output file
     #### Now sort remaining genes
     
     if(length(unique(slc_fams))==1 & com.name==target.family){ ## all hits the same and this corresponds to the target family
-      slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
+      slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family)
       used.list=c(used.list,j)
     }else if(!(FALSE %in% (unique(slc_fams[1:3]) %in% target.family))){ ## Three top evalue hits are in the target family
-          slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams[1])) 
+          slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family) 
           used.list=c(used.list,j)
     }else if(slc_fams[grepl(target.family,slc_fams)]==target.fam.size){ ## all members of the family are detected in the top5
       slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=target.family)
@@ -145,7 +145,11 @@ for (i in list.files()){ ### iterate through each blast output file
   }
 }
 
-a=rbindlist(slc.total) %>% arrange(family) %>% unique.data.frame()
+a=rbindlist(slc.total) %>% data.table() 
+colnames(a)=c('geneid','family')
+
+a$family=unlist(a$family)
+final=a %>% arrange(family) %>% unique.data.frame()
 b=rbindlist(filter.list) %>% arrange(family) %>% unique.data.frame()
 write.csv(b,'../prelim_summary/filtered_out.csv')
 ## sometimes things are detected in initial search but not in iterative (e.g. SLC9 tr|H9JQM4|H9JQM4_BOMMO in bombyx mori just below threshold'
@@ -153,6 +157,6 @@ write.csv(b,'../prelim_summary/filtered_out.csv')
 
 
 #filter(a,family=='SLC_2_')
-cat(format_csv(a))
+cat(format_csv(final))
 #write.csv(a,file='./HMMsearch_SLC_table.csv',row.names = F)
 
