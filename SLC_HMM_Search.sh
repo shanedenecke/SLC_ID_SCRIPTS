@@ -16,11 +16,10 @@ cd $3
 ##mkdir $C 
 #cd $C
 
-
+echo 'Performing HMM search'
 ## search HMM profiles against target proteome using hmm search
 rm -rf ./hmm_outputs
 mkdir ./hmm_outputs
-rm $1/hmm_profile/*hmmoutput
 for i in $1/hmm_profiles/*; do
 #for i in $A/hmm_profiles/*; do
   base=$(echo $(basename $i))
@@ -48,6 +47,7 @@ for i in ./hmm_clean/*.table; do
 done
 
 ##perform blast with HMM hits as queries and the source genomes SLC_mark.fa proteome as a target 
+echo 'Blast away'
 rm -rf ./recip_blast
 mkdir ./recip_blast
 for i in ./SLC_fa/*.fa; do
