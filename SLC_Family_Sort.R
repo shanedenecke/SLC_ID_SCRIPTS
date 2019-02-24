@@ -5,7 +5,7 @@
 
 ## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
 
-rm(list=ls())
+#rm(list=ls())
 
 ##Import libraries
 shhh <- suppressPackageStartupMessages
@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-#setwd('~/Documents/SLC_id/iterative_search/iterative_search_Blager')
-#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_Blager/SLC_source_dict.csv"
+#setwd(/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_AcyPis')
+#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_AcyPis/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
