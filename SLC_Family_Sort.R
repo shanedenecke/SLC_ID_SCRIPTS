@@ -5,7 +5,7 @@
 
 ## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
 
-rm(list=ls())
+#rm(list=ls())
 
 ##Import libraries
 shhh <- suppressPackageStartupMessages
@@ -19,8 +19,8 @@ shhh(library(readr))
 args = commandArgs(trailingOnly=TRUE)
 
 ##debug
-setwd('~/Documents/SLC_id/iterative_search/iterative_search_AnoGam')
-args[1]="~/Documents/SLC_id/iterative_database/iterative_database_AnoGam/SLC_source_dict.csv"
+#setwd('~/Documents/SLC_id/iterative_search/iterative_search_AnoGam')
+#args[1]="~/Documents/SLC_id/iterative_database/iterative_database_AnoGam/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -133,8 +133,8 @@ colnames(filter.table)=c('code','name')
 filter.output=filter.table %>% merge(source.table,by='code')
 
 write.csv(filter.output,'../prelim_summary/filtered_out.csv')
-slc.table
-#cat(format_csv(slc.table))
+#slc.table
+cat(format_csv(slc.table))
 
 
 
