@@ -18,8 +18,8 @@ shhh(library(readr))
 
 args = commandArgs(trailingOnly=TRUE)
 ##debug
-setwd('~/Documents/SLC_id/iterative_search/iterative_search_Blager')
-args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_Blager/SLC_source_dict.csv"
+#setwd('~/Documents/SLC_id/iterative_search/iterative_search_Blager')
+#args[1]="/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_Blager/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
