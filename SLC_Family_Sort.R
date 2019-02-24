@@ -60,12 +60,11 @@ for (i in list.files()){ ### iterate through each blast output file
     }
     
     ## calculate some useful variables for the coming for loop
-    gene_subset=subset(blast,query==j) 
+    gene_subset=subset(blast,query==j)### subset blast results for gene
     slc_fams=sapply(gene_subset$subject, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_")) ## extract families and format with extra "_"
     if(length(slc_fams)==1){
       slc_fams=c(slc_fams,rep(slc_fams,4))
     }
-    
     slc.tab=table(slc_fams) ## returns table of which SLC families are there
     com.name=names(sort(slc.tab,decreasing=TRUE)[1]) ## gets the most common SLC family
     pident=gene_subset$pident
@@ -89,7 +88,7 @@ for (i in list.files()){ ### iterate through each blast output file
     }else if(gene_subset$pident[1]==100 & grepl('Unsorted',gene_subset$subject[1])){ ## if there is a perfect blast hit but all other blast hits map to other family
       gene_subset=gene_subset %>% filter(pident!=100)
       slc_fams=sapply(gene_subset$subject, function(x) strsplit(x,split='_') %>% unlist %>% .[c(1,2)] %>% paste0(collapse = "_") %>% paste0("_"))[1] ## extract families and format with extra "_"
-      if(slc_fams==1){ ### if all 4 remaining hits map to the same family
+      if(length(slc_fams)==1){ ### if all 4 remaining hits map to the same family
         slc.total[[j]]=data.table(geneid=gene_subset[1,'query'],family=unique(slc_fams))
         used.list=c(used.list,j)
         next
