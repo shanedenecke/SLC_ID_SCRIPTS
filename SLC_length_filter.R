@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 
-
+#rm(list=ls())
 ## SLC length analysis
 shhh <- suppressPackageStartupMessages
 shhh(library(data.table))
@@ -10,11 +10,20 @@ shhh(library(readr))
 
 ## already got lengths from expression analysis
 
-#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_Database/Hs_to_Dm_Search/length_analysis')
+#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_search/DROSOPHILA_DanPle')
 setwd('./length_analysis')
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
 gene_lengths$family=gsub('(SLC_.+)_','\\1',gene_lengths$family,perl=T)
+
+rows=dim(gene_lengths)[1]
+slc.len=length(gene_lengths$family[grepl('SLC_',gene_lengths$family)])
+
+if(slc.len<rows){
+  gene_lengths[rows,]$family=gene_lengths[rows-1,]$family
+}
+
+
 
 ## import keys and dictionaries for human SLC
 hs.key=fread('~/Documents/SLC_id/general_reference/SLC_info/Hs_master_key.csv')
@@ -48,7 +57,7 @@ for(i in 1:nrow(gene_lengths)){
   hs.stdev=hs.slcs[which(hs.slcs$slc_family==test.fam),'stdev'] %>% as.numeric()
   hs.max1=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * 1.5
   hs.min1=hs.slcs[which(hs.slcs$slc_family==test.fam),'minimum'] * .6667
-  
+ 
   if(is.na(hs.stdev)){
     hs.max2=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * 1.5
     hs.min2=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * .6667
@@ -56,6 +65,10 @@ for(i in 1:nrow(gene_lengths)){
     hs.max2=hs.max1 + hs.stdev
     hs.min2=hs.min1 - hs.stdev
   }
+  
+  ############ EXCEPTION
+  #if(dim(hs.max1)[1]==0 | dim(hs.min1)[1]==0){hs.max1=10000; hs.min1=0}
+  #if(dim(hs.max2)[1]==0 | dim(hs.min2)[1]==0){hs.max2=10000; hs.min2=0}
   
   if(test.len>hs.max1 & test.len>hs.max2){
     l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='LONG',hs.slcs[which(hs.slcs$slc_family==test.fam),]))

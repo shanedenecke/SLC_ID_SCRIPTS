@@ -5,7 +5,7 @@
 ## argument 3= New_database folder to create
 
 #A=~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
-#B=~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa
+#B=~/Documents/SLC_id/proteomes/DanPle_unigene.faa
 #C=~/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
 
 
@@ -69,7 +69,7 @@ Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_source_dict.
 mkdir length_analysis
 cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | ~/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
 #cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | ~/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
-cut -d ',' -f 2 ./prelim_summary/Family_sort_preliminary.csv | sed '1d' > ./length_analysis/length_families.txt
+cut -d ',' -f 2 ./prelim_summary/Family_sort_preliminary.csv | sed '1d' > ./length_analysis/length_families.txt ### why remove last line
 awk '/^>/ {if (seqlen) print seqlen;print;seqlen=0;next} {seqlen+=length($0)}END{print seqlen}' ./length_analysis/preliminary_SLC.fa > ./length_analysis/names_lengths.txt
 grep ">" ./length_analysis/names_lengths.txt | perl -pe  's/^>(.+$)/$1/;'| cut -d ' ' -f 1  > ./length_analysis/all_proteins.txt
 grep -E "^[0-9]" ./length_analysis/names_lengths.txt > ./length_analysis/all_lengths.txt
