@@ -40,6 +40,7 @@ Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SL
 mkdir Human_search
 for i in ~/Documents/SLC_id/proteomes/*.faa; do
 a=$(basename $i) 
+echo 'HUMAN SEARCH '$a
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/HomSap_Database $i ~/Documents/SLC_id/Human_search/'HUMAN_'$a
 done
 
@@ -47,6 +48,7 @@ done
 mkdir Drosophila_search
 for i in ~/Documents/SLC_id/proteomes/*.fa*; do
 b=$(echo $(basename $i) | cut -d '_' -f 1) 
+echo 'DROSOPHILA SEARCH '$b
 ./SLC_id_scripts/SLC_HMM_Search.sh ~/Documents/SLC_id/DroMel_Database $i ~/Documents/SLC_id/Drosophila_search/'DROSOPHILA_'$b
 done
 
@@ -62,6 +64,7 @@ Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_crossref_human_dros_searches.R
 mkdir iterative_database
 for i in  ~/Documents/SLC_id/proteomes/*.faa; do
   c=$(echo $(basename $i) | cut -d '_' -f 1) 
+  echo 'Iterative Database '$c
   d=$(ls ~/Documents/SLC_id/Human_Drosophila_crossref/$c*)
   ./SLC_id_scripts/SLC_Create_HMM_DB.sh $i $d ~/Documents/SLC_id/iterative_database/'iterative_database_'$c
 done
@@ -73,14 +76,14 @@ mkdir final_SLC_dicts
 for i in  ~/Documents/SLC_id/proteomes/*.faa; do
 e=$(echo $(basename $i) | cut -d '_' -f 1) 
 f=$(ls -d ~/Documents/SLC_id/iterative_database/iterative_database*$e)
-echo 'now performing '$e' analysis'
+echo 'Iterative search '$e
 ./SLC_id_scripts/SLC_HMM_Search.sh $f $i ~/Documents/SLC_id/iterative_search/'iterative_search_'$e
 cp ~/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv ~/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
 done
 
 
 ###################### 7) summarize counts of SLC tables
-#python3 ./SLC_id_scripts/SLC_summary_count.py
+python3 ./SLC_id_scripts/SLC_summary_count.py
 
 ###################### 8) Extract sequences from each relevant species. Perform alignment and phylogeny
 ./SLC_id_scripts/SLC_id_Align_and_tree.sh
