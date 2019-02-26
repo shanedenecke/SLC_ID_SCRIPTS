@@ -2,6 +2,7 @@
 
 cd ~/Documents/SLC_id/
 threads=$1
+HMMER_NCPU=$threads
 #threads=12
 
 echo 'Number of Threads = '$threads
