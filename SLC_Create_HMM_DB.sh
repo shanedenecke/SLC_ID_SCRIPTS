@@ -52,7 +52,7 @@ cat $2 | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 
 ## divide each family into independent fasta
 mkdir ./family_fasta 
-rm ./family_fasta/*
+rm -rf ./family_fasta/*
 IFS=$'\n'; 
 for next in $(cat ~/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt)
 do 
@@ -67,13 +67,13 @@ do
 #~/Applications/trimal-trimAl/source/trimal -in $i.aln -out $i.trimmed
 done
 mv ./family_fasta/*.trimmed ./muscle_alignments
-rm ./family_fasta/*.aln
+rm -rf ./family_fasta/*.aln
 
 ## build HMM profiles for each family
 mkdir ./hmm_profiles
 for i in ./muscle_alignments/*
 do
-hmmbuild --cpu 10 $i.hmm $i
+hmmbuild --cpu $threads $i.hmm $i
 done
 mv ./muscle_alignments/*.hmm ./hmm_profiles
 

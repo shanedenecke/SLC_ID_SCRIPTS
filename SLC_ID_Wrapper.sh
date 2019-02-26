@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 cd ~/Documents/SLC_id/
+threads=$1
+#threads=12
+
+echo 'Number of Threads = '$threads
+
 
 ######################## 0) Download and Clean Sequences 
 python3 ./SLC_id_scripts/SLC_download_clean_genomes.py
