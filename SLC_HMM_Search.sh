@@ -23,7 +23,7 @@ mkdir ./hmm_outputs
 for i in $1/hmm_profiles/*; do
 #for i in $A/hmm_profiles/*; do
   base=$(echo $(basename $i))
-  hmmsearch --notextw -E 20 --cpu 4 $i $2 > ./hmm_outputs/$base.hmmoutput
+  hmmsearch --notextw -E 20 --cpu 10 $i $2 > ./hmm_outputs/$base.hmmoutput
   #hmmsearch --notextw -E 20 $i $B > ./hmm_outputs/$base.hmmoutput
 done
 

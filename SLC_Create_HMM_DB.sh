@@ -73,7 +73,7 @@ rm ./family_fasta/*.aln
 mkdir ./hmm_profiles
 for i in ./muscle_alignments/*
 do
-hmmbuild $i.hmm $i
+hmmbuild --cpu 10 $i.hmm $i
 done
 mv ./muscle_alignments/*.hmm ./hmm_profiles
 

@@ -39,7 +39,7 @@ do
   raxfile=$(readlink -f  $a'.aln.trimm.phy')
   raxdir=$(readlink -f ./SLC_phylogeny)
   rm ./SLC_phylogeny/RAxML*
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 2 -T 10 -m PROTGAMMAAUTO -s $raxfile -n 'ABC_phylo' -w $raxdir 
+  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 2 -T 10 -m PROTGAMMAAUTO -s $raxfile -n -n $i'.tre' -w $raxdir 
   #~/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
 
 done
