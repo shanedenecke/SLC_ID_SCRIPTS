@@ -19,7 +19,7 @@ shhh(library(readr))
 args = commandArgs(trailingOnly=TRUE)
 
 ##debug
-#setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_HarArm_unigene.faa')
+#setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa')
 #args[1]="/home/shanedenecke/Documents/SLC_id/HomSap_Database/SLC_source_dict.csv"
 
 setwd('./recip_blast')
@@ -49,7 +49,7 @@ used.list=c()
 
 all.blast=list()
 for (i in list.files()){
-  all.blast[[i]]=fread(i,colClasses = c('character','character',rep('numeric',3)))
+  all.blast[[i]]=fread(i,colClasses = c('character','character',rep('numeric',3)),sep='\t')
 }
 all.blast=rbindlist(all.blast) %>% unique.data.frame()
 colnames(all.blast)=c('query','subject','pident','evalue','querycov')
