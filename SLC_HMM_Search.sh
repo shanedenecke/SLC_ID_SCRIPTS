@@ -4,9 +4,9 @@
 ## argument 2= new proteome to search
 ## argument 3= New_database folder to create
 
-#A=~/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
-#B=~/Documents/SLC_id/proteomes/DanPle_unigene.faa
-#C=~/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
+#A=~/Documents/SLC_id/Dm_Database_Generate/DroMel_Database
+#B=~/Documents/SLC_id/proteomes/HarArm_unigene.faa
+#C=~/Documents/SLC_id/Drosophila_search/DROSOPHILA_HarArm
 
 
 ## reset bash and create new output directory

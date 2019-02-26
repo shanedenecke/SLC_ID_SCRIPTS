@@ -20,14 +20,15 @@ os.mkdir('SLC_family_counts')
 
 
 ##import refrence data
-dros_slc=pd.read_csv('/home/shanedenecke/Documents/SLC_id/Dm_Final_Database/SLC_dict.csv')
-human_slc=pd.read_csv('/home/shanedenecke/Documents/SLC_id/Human_HMM_SLC/SLC_dict.csv')
+dros_slc=pd.read_csv('./DroMel_Database/SLC_source_dict.csv')
+human_slc=pd.read_csv('./HomSap_Database/SLC_source_dict.csv')
 slc_fams=human_slc['name'].str.split('_',expand=True)[[0,1]].apply(lambda x: '_'.join(x), axis=1).unique().tolist()
 
 ##read dataframes into python list
 for i in os.listdir('./final_SLC_dicts/'):
-    slc_table=pd.read_csv('./iterative_search/'+i+'/SLC_dict.csv')
-    abbreviation= i.split('_')[-1]
+    #slc_table=pd.read_csv('/final_SLC_dicts/'+i+'/SLC_dict.csv')
+    slc_table=pd.read_csv('./final_SLC_dicts/'+i)
+    abbreviation= i.split('_')[-3]
 
     
     ## clean up data frame
@@ -45,6 +46,6 @@ for i in os.listdir('./final_SLC_dicts/'):
     summary_count.index.name='family'   #count_tables.append(summary_count)
     
     ##Write to csv
-    summary_count.to_csv('./SLC_family_counts/'+i+'_SLC_counts.csv')
+    summary_count.to_csv('./SLC_family_counts/'+abbreviation+'_SLC_counts.csv')
 
 

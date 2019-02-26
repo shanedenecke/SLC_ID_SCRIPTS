@@ -19,8 +19,8 @@ shhh(library(readr))
 args = commandArgs(trailingOnly=TRUE)
 
 ##debug
-#setwd('~/Documents/SLC_id/iterative_search/iterative_search_AnoGam')
-#args[1]="~/Documents/SLC_id/iterative_database/iterative_database_AnoGam/SLC_source_dict.csv"
+#setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_HarArm_unigene.faa')
+#args[1]="/home/shanedenecke/Documents/SLC_id/HomSap_Database/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -49,7 +49,7 @@ used.list=c()
 
 all.blast=list()
 for (i in list.files()){
-  all.blast[[i]]=fread(i)
+  all.blast[[i]]=fread(i,colClasses = c('character','character',rep('numeric',3)))
 }
 all.blast=rbindlist(all.blast) %>% unique.data.frame()
 colnames(all.blast)=c('query','subject','pident','evalue','querycov')
@@ -130,7 +130,7 @@ slc.table=rbindlist(slc.total) %>% arrange(family) %>% data.table()
 colnames(slc.table)=c('code','name')
 filter.table=rbindlist(filter.list) 
 colnames(filter.table)=c('code','name') 
-filter.output=filter.table %>% merge(source.table,by='code')
+filter.output=filter.table %>% merge(source.table,by='code',all=T)
 
 write.csv(filter.output,'../prelim_summary/filtered_out.csv')
 #slc.table
