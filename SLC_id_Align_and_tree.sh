@@ -9,10 +9,15 @@ cp ./HomSap_Database/SLC_source_dict.csv ./final_SLC_dicts/HomSapFinal_SLC_table
 #### Make new directory for model insect dictionaries
 mkdir renamed_SLC_dicts
 mkdir marked_SLC_for_aligment
+mkdir SLC_align
+
 rm ./marked_SLC_for_aligment/SLC_all.fa
 touch ./marked_SLC_for_aligment/SLC_all.fa
 
-grep -A 1 "SLC_" ./DroMel_Database/reference_proteome/proteome_SLC_mark.fa | perl -pe 's/>/>DroMel_/' >> ./marked_SLC_for_aligment/SLC_all.fa
+Rscript ~/Documents/SLC_id/SLC_id_scripts/DroMel_phylo_rename.R 
+~/Applications/custom/fasta_rename.py ~/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa ~/Documents/SLC_id/SLC_align/updated_Dros_names.csv > ~/Documents/SLC_id/marked_SLC_for_aligment/Dros_renamed.fa
+
+grep -A 1 "SLC_" ~/Documents/SLC_id/marked_SLC_for_aligment/Dros_renamed.fa | perl -pe 's/>/>DroMel_/' >> ./marked_SLC_for_aligment/SLC_all.fa
 grep -A 1 "SLC_" ./HomSap_Database/reference_proteome/proteome_SLC_mark.fa | perl -pe 's/>/>HomSap_/'  >> ./marked_SLC_for_aligment/SLC_all.fa
 
 ## append species name to each SLC name and move to new directory
@@ -26,25 +31,27 @@ done
 find ./renamed_SLC_dicts/* -size 0 -delete
 
 ## Divide each SLC family by SLC_###_ marker align and tree
-mkdir SLC_phylogeny
+
 cat ./general_reference/SLC_info/SLC_families.txt | while read i
 do
-  a=./SLC_phylogeny/$i'.fa'
+  a=~/Documents/SLC_id/SLC_align/$i'.fa'
   grep -A 1 $i ./marked_SLC_for_aligment/SLC_all.fa | sed '/--/d' > $a ## isolate sequences in fasta format
-  ~/Applications/muscle3.8.31_i86linux64 -in $a -out $a'.aln'
+  #~/Applications/muscle3.8.31_i86linux64 -in $a -out $a'.aln'
+  mafft --threadtb 24 $a > $a'.aln'
   /home/pioannidis/Programs/trimAl/source/trimal -in $a'.aln' -out $a'.aln.trimm'
   #~/Applications/trimal-trimAl/source/trimal -in $a'.aln' -out $a'.aln.trimm' ## LOCAL
   ~/Applications/custom/fasta_2_phylip.sh $a'.aln.trimm' > $a'.aln.trimm.phy'
-  
-  raxfile=$(readlink -f  $a'.aln.trimm.phy')
-  raxdir=$(readlink -f ./SLC_phylogeny)
-  rm ./SLC_phylogeny/RAxML*
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 2 -T 24 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir 
-  #~/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
-
 done
 
-
-
+mkdir SLC_phylogeny
+for i in ~/Documents/SLC_id/SLC_align/*.phy
+do
+  b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
+  raxfile=$i
+  raxdir=~/Documents/SLC_id/SLC_phylogeny/
+  #rm ./SLC_phylogeny/RAxML*
+  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 36 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
+  #~/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
+done
 
 
