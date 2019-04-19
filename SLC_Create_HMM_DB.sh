@@ -14,9 +14,9 @@
 
 ## use these for debugging
 
-#A=~/Documents/SLC_id/proteomes/model/Dm_unigene.faa
+#A=/data2/shane/Documents/SLC_id/proteomes/model/Dm_unigene.faa
 #B=$d
-#C=~/Documents/SLC_id/Dm_Final_Database
+#C=/data2/shane/Documents/SLC_id/Dm_Final_Database
 ################################################################################
 
 
@@ -33,10 +33,10 @@ cd $3
 
 ## rename fasta files with tag for SLC family
 mkdir reference_proteome
-~/Applications/custom/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
-#~/Applications/custom/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
+/data2/shane/Applications/custom/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
+#/data2/shane/Applications/custom/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
 
-#~/Applications/custom/fasta_rename.py ~/Documents/omics_data/Homo_sapiens/unigene/Hs_unigene.fa ~/Dropbox/wp7_prodrug/SLC_id/general_reference/Hs_SLC_dict.csv > ./reference_proteome/proteome_SLC_mark.fa
+#/data2/shane/Applications/custom/fasta_rename.py /data2/shane/Documents/omics_data/Homo_sapiens/unigene/Hs_unigene.fa /data2/shane/Dropbox/wp7_prodrug/SLC_id/general_reference/Hs_SLC_dict.csv > ./reference_proteome/proteome_SLC_mark.fa
 
 ##Make blast dbs for target reference proteome
 makeblastdb -in ./reference_proteome/proteome_SLC_mark.fa -parse_seqids -dbtype prot
@@ -47,14 +47,14 @@ cat $2 | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 #cat $B | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 
 ## extract fasta of gene lists from Dmel
-~/Applications/custom/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
+/data2/shane/Applications/custom/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
 
 
 ## divide each family into independent fasta
 mkdir ./family_fasta 
 rm -rf ./family_fasta/*
 IFS=$'\n'; 
-for next in $(cat ~/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt)
+for next in $(cat /data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt)
 do 
   grep -A 1 ${next} ./list/SLC_genes.fa | sed '/--/d' > ./family_fasta/${next}.fa
 done
@@ -63,8 +63,8 @@ done
 mkdir ./muscle_alignments
 for i in ./family_fasta/*
 do
-~/Applications/muscle3.8.31_i86linux64 -in $i -out $i.aln.trimmed
-#~/Applications/trimal-trimAl/source/trimal -in $i.aln -out $i.trimmed
+mafft --threadtb 24 $i > $i.aln
+/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
 done
 mv ./family_fasta/*.trimmed ./muscle_alignments
 rm -rf ./family_fasta/*.aln
@@ -84,4 +84,4 @@ cd $3
 cp $2 $(pwd $3)'/SLC_source_dict.csv' ## needs to change name
 #cp $B $(pwd $C)'/dictionary_create_FIND/SLC_dict.csv' ## needs to change name
 #cp $B $(pwd $C'/SLC_dict.csv')
-#cp ~/Documents/SLC_id/general_reference/Hs_SLC_dict.csv ~/Documents/SLC_id/Human_HMM_SLC'/SLC_dict.csv'
+#cp /data2/shane/Documents/SLC_id/general_reference/Hs_SLC_dict.csv /data2/shane/Documents/SLC_id/Human_HMM_SLC'/SLC_dict.csv'

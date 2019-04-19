@@ -4,9 +4,9 @@
 ## argument 2= new proteome to search
 ## argument 3= New_database folder to create
 
-#A=~/Documents/SLC_id/HomSap_Database
-#B=~/Documents/SLC_id/proteomes/AttCep_unigene.faa
-#C=~/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa
+#A=/data2/shane/Documents/SLC_id/HomSap_Database
+#B=/data2/shane/Documents/SLC_id/proteomes/AttCep_unigene.faa
+#C=/data2/shane/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa
 
 
 ## reset bash and create new output directory
@@ -42,8 +42,8 @@ rm -rf ./SLC_fa
 mkdir ./SLC_fa
 for i in ./hmm_clean/*.table; do
   base=$(echo $(basename $i))
-  cut -f 9 $i | sed 's/\s+//g'| ~/Applications/custom/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
-  #cut -f 9 $i | sed 's/\s+//g' | ~/Applications/custom/unigene_fa_sub.sh $B - > ./SLC_fa/$base'.fa'
+  cut -f 9 $i | sed 's/\s+//g'| /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
+  #cut -f 9 $i | sed 's/\s+//g' | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./SLC_fa/$base'.fa'
 done
 find ./SLC_fa/* -size 0 -delete
 
@@ -61,27 +61,27 @@ find ./recip_blast/* -size 0 -delete
 
 ## Run R script to output table 
 mkdir ./prelim_summary
-#Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $A'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
-Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+#Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $A'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
 
 
 
 ## Filter based on lengths of human SLC geen family
 mkdir length_analysis
-cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | ~/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
-#cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | ~/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
+cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
+#cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
 cut -d ',' -f 2 ./prelim_summary/Family_sort_preliminary.csv | sed '1d' > ./length_analysis/length_families.txt ### why remove last line
 awk '/^>/ {if (seqlen) print seqlen;print;seqlen=0;next} {seqlen+=length($0)}END{print seqlen}' ./length_analysis/preliminary_SLC.fa > ./length_analysis/names_lengths.txt
 grep ">" ./length_analysis/names_lengths.txt | perl -pe  's/^>(.+$)/$1/;'| cut -d ' ' -f 1  > ./length_analysis/all_proteins.txt
 grep -E "^[0-9]" ./length_analysis/names_lengths.txt > ./length_analysis/all_lengths.txt
 paste -d',' ./length_analysis/all_proteins.txt ./length_analysis/all_lengths.txt ./length_analysis/length_families.txt > ./length_analysis/gene_lengths.txt
-Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_length_filter.R > ./length_analysis/total_slc_table.csv
+Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_length_filter.R > ./length_analysis/total_slc_table.csv
 
 ## final output
 mkdir final_output
 cp ./length_analysis/total_slc_table.csv ./final_output/total_slc_table.csv 
 pwd > dir.txt
-Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $1'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
-#Rscript ~/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $A'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
+Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $1'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
+#Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $A'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
 rm dir.txt
 

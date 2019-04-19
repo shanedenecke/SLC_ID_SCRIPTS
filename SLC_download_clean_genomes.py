@@ -16,7 +16,7 @@ import re
 
 ## Set WD
 
-os.chdir(os.path.expanduser('~')+'/Documents/SLC_id')
+os.chdir('/data2/shane/Documents/SLC_id')
 if 'proteomes' not in os.listdir(): 
     os.mkdir('./proteomes')
 os.chdir('./proteomes')
