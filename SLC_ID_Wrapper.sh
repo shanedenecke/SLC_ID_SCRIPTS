@@ -2,8 +2,6 @@
 
 cd /data2/shane/Documents/SLC_id
 
-echo 'Number of Threads = '$threads
-
 
 ######################## 0) Download and Clean Sequences 
 #python3 ./SLC_id_scripts/SLC_download_clean_genomes.py

@@ -4,6 +4,7 @@ cd /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes
 mkdir raw_fasta
 cp /data/panos/db/odb10/arthropoda/Rawdata/* ./raw_fasta
 
+
 mkdir clean_fasta
 while IFS=$'\t' read -r col1 col2
 do
@@ -16,17 +17,27 @@ done < ./Taxid_OrthoDB_key.tsv
 
 #### Remove empty duplicate sequences
 find ./clean_fasta/ -size  0 -print0 | xargs -0 rm --
-for i in ./clean_fasta*
+
+for i in ./clean_fasta/*_unigene.faa
 do
 sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' > temp.fasta
 awk '/^>/{id=$0;getline;arr[id]=$0}END{for(id in arr)printf("%s\n%s\n",id,arr[id])}' temp.fasta > $i
-mv temp.fasta $i
 done
 
+mkdir ./proteome_check/
+cp ./clean_fasta/* ./proteome_check/
+for i in ./proteome_check/*
+do
+makeblastdb -in $i -parse_seqids -dbtype prot
+done
+
+echo 'Total numberof proteomes is ' $(ls ./proteome_check/* | grep -E "*unigene.faa$" | wc -l)
+echo 'Numberof GOOD proteomes is ' $(ls ./proteome_check/* | grep -E "*psq$" | wc -l)
 
 
 cd /data2/shane/Documents/SLC_id
-cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
+mkdir proteomes
+cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/clean_fasta/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
 cp /data2/shane/Documents/SLC_id/general_reference/model_proteomes/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
 
 
