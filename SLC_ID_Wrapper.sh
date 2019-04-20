@@ -6,7 +6,7 @@ cd /data2/shane/Documents/SLC_id
 ######################## 0) Download and Clean Sequences 
 #python3 ./SLC_id_scripts/SLC_download_clean_genomes.py
 #cp ./general_reference/model_proteomes/* ./proteomes/
-./SLC_id_scripts/Proteome_prepare.sh
+./SLC_id_scripts/SLC_Proteome_prepare.sh
 #find ./proteomes -type f -empty -delete
 
 ######################## 1) Build Human Database
