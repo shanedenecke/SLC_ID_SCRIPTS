@@ -15,7 +15,7 @@ import pandas as pd
 
 
 ##working directory
-os.chdir(os.path.expanduser('~')+'/Documents/SLC_id')
+os.chdir('/data2/shane/Documents/SLC_id')
 os.mkdir('SLC_family_counts')
 
 
