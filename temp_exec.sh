@@ -1,32 +1,27 @@
-cd /data2/shane/Documents/SLC_id/general_reference/orthoDB_process
-rm ./output/*
+
+######################## 6) Iteratively search each species
+
+## create databases for each species
+mkdir iterative_database
+for i in  /data2/shane/Documents/SLC_id/proteomes/*.faa; do
+  c=$(echo $(basename $i) | cut -d '_' -f 1) 
+  echo 'Iterative Database '$c
+  d=$(ls /data2/shane/Documents/SLC_id/Human_Drosophila_crossref/$c*)
+  ./SLC_id_scripts/SLC_Create_HMM_DB.sh $i $d /data2/shane/Documents/SLC_id/iterative_database/'iterative_database_'$c
+done
 
 
-## copy files 
-cp /data/panos/db/odb10/arthropoda/Rawdata/* ./raw_fasta
-
-### CREATE TaxID code names (Manual filter to remove non-insect species)
-#ls ./raw_fasta | perl -pe 's/([0-9]+_0).fs/$1/g' > ./reference/insect_taxid_codes.tx
-#rm ./reference/insect_taxid_codes_names.txt
-#while read i
-#do
-#grep $i /data/panos/db/odb10/odb10v0_species.tab | cut -f 1,2 | sed 's/_0//g' | grep -v 'virus' |\
-#perl -pe 's/(^[0-9]+)\t([A-Z]..)[a-z]+ ([a-z]{3}).+$/$1\t$2$3/' >> ./reference/insect_taxid_codes_names.txt
-#done < ./reference/insect_taxid_codes.txt
-#################### DO NOT RUN every time
-#perl -i -pe 's/(.+[a-z]) ([a-z]+$)/$1_$2/g' ./reference/Taxid_key.tsv 
+## use iterative databases to recursivley search genomes
+mkdir iterative_search
+mkdir final_SLC_dicts
+for i in  /data2/shane/Documents/SLC_id/proteomes/*.faa; do
+e=$(echo $(basename $i) | cut -d '_' -f 1) 
+f=$(ls -d /data2/shane/Documents/SLC_id/iterative_database/iterative_database*$e)
+echo 'Iterative search '$e
+./SLC_id_scripts/SLC_HMM_Search.sh $f $i /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e
+cp /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
+done
 
 
-while IFS=$'\t' read -r col1 col2
-do
-#echo $col1 
-#echo $col2
-#done < ./reference/Taxid_key.tsv
-cp /data/panos/db/odb10/arthropoda/Rawdata/$col1* ./output/$col2'.fasta'
-grep -e "^$col1" ./reference/odb10v0_genes.tab | cut -f 1,3 > ./output/$col2'_OrthoDB_key.txt'
-echo -e "code,name" | cat - ./output/$col2'_OrthoDB_key.txt' | perl -pe 's/\t/,/g' > ./output/$col2'_OrthoDB_key_DICT.txt'
-/data2/shane/Applications/fasta_rename.py ./output/$col2'.fasta' ./output/$col2'_OrthoDB_key_DICT.txt' > ./output/$col2'_unigene.faa'
-done < ./reference/Taxid_key.tsv
-
-cd /data2/shane/Documents/SLC_id
-cp /data2/shane/Documents/SLC_id/general_reference/orthoDB_process/output/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
+###################### 7) summarize counts of SLC tables
+python3 ./SLC_id_scripts/SLC_summary_count.py

@@ -26,13 +26,16 @@ for(i in sp.list){
   for(j in par.match){
     
     ## catch any cases where file is missing
-    t <- try(fread(paste0(j,'/final_output/SLC_final_output.csv')))
-    if("try-error" %in% class(t)){
+    slcs <- try(fread(paste0(j,'/final_output/SLC_final_output.csv')))
+    if("try-error" %in% class(slcs)){
+      next
+    }
+    if(dim(slcs)[1]==0){
       next
     }
     
     ## read in files which exist
-    slcs=fread(paste0(j,'/final_output/SLC_final_output.csv'))
+    #slcs=fread(paste0(j,'/final_output/SLC_final_output.csv'))
     slcs$name=gsub("(SLC_.+_)[0-9]+$",'\\1',slcs$name)
     l2[[j]]=slcs
     
