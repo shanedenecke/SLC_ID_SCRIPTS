@@ -19,4 +19,5 @@ for (i in list.files('./SLC_family_counts/',full.names = T)){
 }
 
 g=Reduce(function(x, y) merge(x, y, ,by='family',all=TRUE), l)
-fwrite('./SLC_family_counts/TOTAL_FAMILY_COUNTS.csv')
+h=dcast(melt(g, id.vars = "family"), variable ~ family)
+fwrite(h,'./SLC_family_counts/TOTAL_FAMILY_COUNTS.csv')

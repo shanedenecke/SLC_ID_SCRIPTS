@@ -10,7 +10,7 @@ cd /data2/shane/Documents/SLC_id
 #find ./proteomes -type f -empty -delete
 
 ######################## 1) Build Human Database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa /data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict_new.csv /data2/shane/Documents/SLC_id/HomSap_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa /data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv /data2/shane/Documents/SLC_id/HomSap_Database
 
 
 

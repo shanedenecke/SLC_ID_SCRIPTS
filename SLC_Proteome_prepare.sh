@@ -36,7 +36,7 @@ echo 'Numberof GOOD proteomes is ' $(ls ./proteome_clean/proteome_check/* | grep
 
 mkdir proteomes
 cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/clean_fasta/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
-cp /data2/shane/Documents/SLC_id/general_reference/model_proteomes/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
+cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/uniprot_other/* /data2/shane/Documents/SLC_id/proteomes/
 
 
 
