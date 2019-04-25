@@ -82,6 +82,6 @@ done
 
 ###################### 7) summarize counts of SLC tables
 python3 ./SLC_id_scripts/SLC_summary_count.py
-
+#Rscript ./SLC_id_scripts/SLC_family_count_combine.R
 ###################### 8) Extract sequences from each relevant species. Perform alignment and phylogeny
 #./SLC_id_scripts/SLC_id_Align_and_tree.sh

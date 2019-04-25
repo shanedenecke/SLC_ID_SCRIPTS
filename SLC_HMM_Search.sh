@@ -68,11 +68,29 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_s
 
 ## Filter based on lengths of human SLC gene and on TM domains
 mkdir length_analysis
-cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
 
+### make fasta from reciprocal blast results
+cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
 #cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
-cut -d ',' -f 2 ./prelim_summary/Family_sort_preliminary.csv | sed '1d' > ./length_analysis/length_families.txt ### why remove last line
-awk '/^>/ {if (seqlen) print seqlen;print;seqlen=0;next} {seqlen+=length($0)}END{print seqlen}' ./length_analysis/preliminary_SLC.fa > ./length_analysis/names_lengths.txt
+#B=/data2/shane/Documents/SLC_id/proteomes/AcrEch_unigene.faa
+### Create table of each gene with corresponding number of TM domains
+/data2/shane/Applications/custom/tmhmm_filter.sh ./length_analysis/preliminary_SLC.fa 3 > ./length_analysis/preliminary_SLC_TMM_table.txt
+
+##Re generate dictionary filtered for TMM values
+rm -f ./length_analysis/SLC_TMM_filter_codes.csv
+for i in $(cat ./length_analysis/preliminary_SLC_TMM_table.txt | cut -f 1)
+do
+grep $i ./prelim_summary/Family_sort_preliminary.csv >> ./length_analysis/SLC_TMM_filter_codes.csv
+done
+sed  -i '1i code,name' ./length_analysis/SLC_TMM_filter_codes.csv
+
+## regenerate fasta file
+cut -d ',' -f 1 ./length_analysis/SLC_TMM_filter_codes.csv | sed '1d' | /data2/shane/Applications/custom/unigene_fa_sub.sh ./length_analysis/preliminary_SLC.fa - > ./length_analysis/TMM_Filter_SLC.fa
+
+cut -d ',' -f 2 ./length_analysis/SLC_TMM_filter_codes.csv | sed '1d' > ./length_analysis/length_families.txt ### why remove last line
+#grep ">" ./length_analysis/preliminary_SLC_TMHMM.fa | sed 's/>//g'
+
+awk '/^>/ {if (seqlen) print seqlen;print;seqlen=0;next} {seqlen+=length($0)}END{print seqlen}' ./length_analysis/TMM_Filter_SLC.fa > ./length_analysis/names_lengths.txt
 grep ">" ./length_analysis/names_lengths.txt | perl -pe  's/^>(.+$)/$1/;'| cut -d ' ' -f 1  > ./length_analysis/all_proteins.txt
 grep -E "^[0-9]" ./length_analysis/names_lengths.txt > ./length_analysis/all_lengths.txt
 paste -d',' ./length_analysis/all_proteins.txt ./length_analysis/all_lengths.txt ./length_analysis/length_families.txt > ./length_analysis/gene_lengths.txt
@@ -80,9 +98,20 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_length_filter.R > ./len
 
 
 
+
+#### Produce final fasta file
+rm -f ./length_analysis/SLC_final.faa
+for i in $(cat ./length_analysis/total_slc_table.csv | cut -d ',' -f 1)
+do
+grep -A 1 $i ./length_analysis/TMM_Filter_SLC.fa >> ./length_analysis/SLC_final.faa
+done
+
+
+
 ## final output
 mkdir final_output
 cp ./length_analysis/total_slc_table.csv ./final_output/total_slc_table.csv 
+cp ./length_analysis/SLC_final.faa ./final_output/SLC_final.faa
 pwd > dir.txt
 Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $1'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv
 #Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R $A'/SLC_source_dict.csv' > ./final_output/SLC_final_output.csv

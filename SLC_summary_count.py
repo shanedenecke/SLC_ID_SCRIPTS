@@ -12,7 +12,7 @@ Summarize counts of fasta tables
 ## import modules
 import os
 import pandas as pd
-
+from shutil import copyfile
 
 ##working directory
 os.chdir('/data2/shane/Documents/SLC_id')
@@ -20,6 +20,9 @@ os.mkdir('SLC_family_counts')
 
 
 ##import refrence data
+copyfile('./DroMel_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
+copyfile('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+
 dros_slc=pd.read_csv('./DroMel_Database/SLC_source_dict.csv')
 human_slc=pd.read_csv('./HomSap_Database/SLC_source_dict.csv')
 slc_fams=human_slc['name'].str.split('_',expand=True)[[0,1]].apply(lambda x: '_'.join(x), axis=1).unique().tolist()

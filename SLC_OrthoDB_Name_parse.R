@@ -2,7 +2,7 @@ library(data.table)
 library(tidyr)
 library(dplyr)
 
-a=fread('/data2/shane/Documents/SLC_id/general_reference/orthoDB_process/reference/Taxid_key.tsv')
+a=fread('/data2/shane/Documents/SLC_id/general_reference/orthoDB_process/reference/Taxid_key.csv')
 b=a %>% separate(V2,into=c('Species','Genus'),sep='_')
 
 firstup <- function(y) {
