@@ -2,19 +2,16 @@ cd /data2/shane/Documents/SLC_id/
 mkdir proteome_clean
 ## copy files 
 
-#mkdir ./proteome_clean/raw_fasta
-
-#Subset all orthoDB gene files for only insect ones 
-#while read i; do grep $i ./general_reference/non_model_proteomes/odb10v0_genes.tab >> ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab; done < ./general_reference/non_model_proteomes/TaxID_list.txt
-
+mkdir ./proteome_clean/raw_fasta
+cp /data/panos/db/odb10/arthropoda/Rawdata/* ./proteome_clean/raw_fasta
 
 mkdir ./proteome_clean/clean_fasta
 while IFS=$'\t' read -r col1 col2
 do
-cp ./general_reference/non_model_proteomes/raw_fasta/$col1* ./proteome_clean/clean_fasta/$col2'.fasta'
-grep -e "^$col1" ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
+cp /data/panos/db/odb10/arthropoda/Rawdata/$col1* ./proteome_clean/clean_fasta/$col2'.fasta'
+grep -e "^$col1" ./general_reference/non_model_proteomes/odb10v0_genes.tab | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
 echo -e "code,name" | cat - ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt' | perl -pe 's/\t/,/g' > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt'
-/data2/shane/Applications/custom/fasta_rename.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
+/data2/shane/Applications/fasta_rename.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
 done < ./general_reference/non_model_proteomes/Taxid_OrthoDB_key.tsv 
 
 
@@ -26,24 +23,24 @@ sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' > temp.fasta
 awk '/^>/{id=$0;getline;arr[id]=$0}END{for(id in arr)printf("%s\n%s\n",id,arr[id])}' temp.fasta > $i
 done
 
-#mkdir ./proteome_clean/proteome_check/
-#cp ./proteome_clean/clean_fasta/*_unigene.faa ./proteome_clean/proteome_check/
-for i in ./proteome_clean/clean_fasta/*_unigene.faa
+mkdir ./proteome_clean/proteome_check/
+cp ./proteome_clean/clean_fasta/* ./proteome_clean/proteome_check/
+for i in ./proteome_clean/proteome_check/*
 do
 makeblastdb -in $i -parse_seqids -dbtype prot
 done
 
-echo 'Total numberof proteomes is ' $(ls ./proteome_clean/clean_fasta/* | grep -E "*unigene.faa$" | wc -l)
-echo 'Numberof GOOD proteomes is ' $(ls ./proteome_clean/clean_fasta/* | grep -E "*psq$" | wc -l)
+echo 'Total numberof proteomes is ' $(ls ./proteome_clean/proteome_check/* | grep -E "*unigene.faa$" | wc -l)
+echo 'Numberof GOOD proteomes is ' $(ls ./proteome_clean/proteome_check/* | grep -E "*psq$" | wc -l)
 
-for i in ./proteome_clean/clean_fasta/*_unigene.faa
+for i in ./proteome_clean/proteome_check/*_unigene.faa
 do
 sed -i 's/\\//g' $i
 done
 
 mkdir proteomes
 #cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/clean_fasta/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
-cp ./proteome_clean/clean_fasta/*_unigene.faa ./proteomes/
+cp ./proteome_clean/proteome_check/*_unigene.faa ./proteomes/
 cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/uniprot_other/* /data2/shane/Documents/SLC_id/proteomes/
 
 

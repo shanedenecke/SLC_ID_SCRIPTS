@@ -7,10 +7,11 @@ shhh(library(data.table))
 shhh(library(dplyr))
 shhh(library(tidyr))
 shhh(library(readr))
+shhh(library(stringr))
 
 ## already got lengths from expression analysis
 
-#setwd('/home/shanedenecke/Documents/SLC_id/Drosophila_search/DROSOPHILA_DanPle')
+#setwd('/data2/shane/Documents/SLC_id/Drosophila_search/DROSOPHILA_CepCin')
 setwd('./length_analysis')
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
@@ -26,17 +27,34 @@ if(slc.len<rows){
 
 
 ## import keys and dictionaries for human SLC
-hs.key=fread('~/Documents/SLC_id/general_reference/SLC_info/Hs_master_key.csv')
-hs.dict=fread('~/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict_new.csv',col.names = c('sd_name','HUGO_name')) %>% 
-  separate(sd_name,into=c('1','2','C'),sep="_") %>% unite("slc_family",'1','2') %>% select(-C) 
+hs.key=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Hs_master_key.csv')
+#hs.dict=fread('./general_reference/SLC_info/HomSap_SLC_dict_new.csv',col.names = c('sd_name','HUGO_name')) %>% 
+  #separate(sd_name,into=c('1','2','C'),sep="_") %>% unite("slc_family",'1','2') %>% select(-C) 
+hs.dict=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Hs_SLC_length.csv')
 hs.dict$HUGO_name=gsub(" PE","",hs.dict$HUGO_name)
+dm.key=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Dm_master_key_by_gene.csv')
+dm.dict=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Dm_SLC_length.csv')
+
+
+
 
 ## get table of all SL lentths in humans
-hs.slcs=merge(hs.dict,hs.key,by='HUGO_name') %>% group_by(slc_family) %>% summarise(avg.length=mean(len),maximum=max(len),minimum=min(len)) %>% mutate(sp='hs')
-hs.slcs=merge(hs.dict,hs.key,by='HUGO_name') %>% group_by(slc_family) %>% 
-  summarise(avg.length=mean(len),maximum=max(len),minimum=min(len),stdev=sd(len)) %>% mutate(sp='hs') 
+#hs.slcs=merge(hs.dict,hs.key,by='HUGO_name') %>% group_by(family) %>% summarise(avg.length=mean(len),maximum=max(len),minimum=min(len)) %>% mutate(sp='hs')
+hs.slcs=merge(hs.dict,hs.key,by='HUGO_name') %>% group_by(family) %>% 
+  summarise(avg.length=mean(len),maximum=max(len),minimum=min(len),stdev=sd(len)) %>% mutate(sp='hs') %>% data.table()
+dm.slcs=merge(dm.dict,dm.key,by='Dm_FBgn') %>% group_by(family) %>% 
+  summarise(avg.length=mean(len),maximum=max(len),minimum=min(len),stdev=sd(len)) %>% mutate(sp='hs') %>% data.table()
 
-
+l2=list()
+for(i in hs.slcs$family){
+  dm=dm.slcs[family==i]
+  hs=hs.slcs[family==i]
+  min=min(dm$minimum,hs$minimum)
+  max=max(dm$maximum,hs$maximum)
+  stdev=max(dm$stdev,hs$stdev)
+  l2[[i]]=data.table(family=i,minimum=min,maximum=max,stdev=stdev)
+}
+com.slcs=rbindlist(l2)
 
 l=list()
 
@@ -49,18 +67,18 @@ for(i in 1:nrow(gene_lengths)){
   test.fam=gene_lengths[i,]$family %>% as.character()
   
   if(test.fam=='SLC_Unsorted' & test.len >100 & test.len<1500){
-    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='UNK',hs.slcs[which(hs.slcs$slc_family=="SLC_X"),]))
+    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='UNK',com.slcs[which(com.slcs$slc_family=="SLC_X"),]))
     next
   }
   
   ## get spread for human SLC family. maximum of either mean+stdev or 1.5*maximum
-  hs.stdev=hs.slcs[which(hs.slcs$slc_family==test.fam),'stdev'] %>% as.numeric()
-  hs.max1=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * 1.5
-  hs.min1=hs.slcs[which(hs.slcs$slc_family==test.fam),'minimum'] * .6667
+  hs.stdev=com.slcs[which(com.slcs$family==test.fam),'stdev'] %>% as.numeric()
+  hs.max1=com.slcs[which(com.slcs$family==test.fam),'maximum'] * 1.5
+  hs.min1=com.slcs[which(com.slcs$family==test.fam),'minimum'] * .667
  
   if(is.na(hs.stdev)){
-    hs.max2=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * 1.5
-    hs.min2=hs.slcs[which(hs.slcs$slc_family==test.fam),'maximum'] * .6667
+    hs.max2=com.slcs[which(com.slcs$family==test.fam),'maximum'] * 1.5
+    hs.min2=com.slcs[which(com.slcs$family==test.fam),'maximum'] * .667
   }else{
     hs.max2=hs.max1 + hs.stdev
     hs.min2=hs.min1 - hs.stdev
@@ -71,13 +89,19 @@ for(i in 1:nrow(gene_lengths)){
   #if(dim(hs.max2)[1]==0 | dim(hs.min2)[1]==0){hs.max2=10000; hs.min2=0}
   
   if(test.len>hs.max1 & test.len>hs.max2){
-    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='LONG',hs.slcs[which(hs.slcs$slc_family==test.fam),]))
+    l[[i]]=data.table(cbind(gene_lengths[i,c('gene','len')],evaluation='LONG',com.slcs[which(com.slcs$family==test.fam),]))
   }else if(test.len<hs.min1 & test.len<hs.min2){
-    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='SHORT',hs.slcs[which(hs.slcs$slc_family==test.fam),]))
+    l[[i]]=data.table(cbind(gene_lengths[i,c('gene','len')],evaluation='SHORT',com.slcs[which(com.slcs$family==test.fam),]))
   }else{
-    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='GOOD',hs.slcs[which(hs.slcs$slc_family==test.fam),]))
+    l[[i]]=data.table(cbind(gene_lengths[i,c('gene','len')],evaluation='GOOD',com.slcs[which(com.slcs$family==test.fam),]))
   }
 }
+
+comp.score=nrow(total)/nrow(total[evaluation=='SHORT'])
+a=str_split(getwd(),c('_','/')) %>% unlist() 
+score.name=a[length(a)-1]
+fwrite(data.table(comp.score,score.name),'/data2/shane/Documents/SLC_id/genome_score/comp_score.txt',append=T)
+
 
 total=rbindlist(l)
 write.csv(total,'./Total_length_analysis.csv')

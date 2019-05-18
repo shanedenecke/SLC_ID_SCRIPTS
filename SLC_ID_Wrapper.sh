@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 cd /data2/shane/Documents/SLC_id
-
+mkdir genome_score
 
 ######################## 0) Download and Clean Sequences 
-#python3 ./SLC_id_scripts/SLC_download_clean_genomes.py
-#cp ./general_reference/model_proteomes/* ./proteomes/
 ./SLC_id_scripts/SLC_Proteome_prepare.sh
-#find ./proteomes -type f -empty -delete
 
 ######################## 1) Build Human Database
 ./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa /data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv /data2/shane/Documents/SLC_id/HomSap_Database
