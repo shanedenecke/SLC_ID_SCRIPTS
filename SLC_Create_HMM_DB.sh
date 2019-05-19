@@ -14,9 +14,9 @@
 
 ## use these for debugging
 
-#A=/data2/shane/Documents/SLC_id/proteomes/model/Dm_unigene.faa
-#B=$d
-#C=/data2/shane/Documents/SLC_id/Dm_Final_Database
+#A=/data2/shane/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa
+#B=/data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv
+#C=/data2/shane/Documents/SLC_id/HomSap_Database
 ################################################################################
 
 

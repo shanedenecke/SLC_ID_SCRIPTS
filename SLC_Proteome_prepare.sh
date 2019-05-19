@@ -5,7 +5,7 @@ mkdir proteome_clean
 #mkdir ./proteome_clean/raw_fasta
 
 #Subset all orthoDB gene files for only insect ones 
-#while read i; do grep $i ./general_reference/non_model_proteomes/odb10v0_genes.tab >> ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab; done < ./general_reference/non_model_proteomes/TaxID_list.txt
+#while read i; do grep $i ./general_reference/non_model_proteomes/odb10v0_genes.tab >> ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab; done < ./general_reference/non_model_proteomes/keys/OrthoDB_taxids.tsv
 
 
 mkdir ./proteome_clean/clean_fasta
@@ -14,8 +14,8 @@ do
 cp ./general_reference/non_model_proteomes/raw_fasta/$col1* ./proteome_clean/clean_fasta/$col2'.fasta'
 grep -e "^$col1" ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
 echo -e "code,name" | cat - ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt' | perl -pe 's/\t/,/g' > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt'
-/data2/shane/Applications/custom/fasta_rename.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
-done < ./general_reference/non_model_proteomes/Taxid_OrthoDB_key.tsv 
+/data2/shane/Applications/custom/fasta_rename_fast_only_exact.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
+done < ./general_reference/non_model_proteomes/keys/Taxid_OrthoDB_master_key_abrev_only.tsv
 
 
 #### Remove empty duplicate sequences
