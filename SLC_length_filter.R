@@ -11,7 +11,7 @@ shhh(library(stringr))
 
 ## already got lengths from expression analysis
 
-#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/')
+#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search')
 setwd('./length_analysis')
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
@@ -54,6 +54,7 @@ for(i in hs.slcs$family){
   stdev=max(dm$stdev,hs$stdev)
   l2[[i]]=data.table(family=i,minimum=min,maximum=max,stdev=stdev)
 }
+l2[['Unsorted']]=data.table(family='SLC_Unsorted',minimum=0,maximum=10000,stdev=100)
 com.slcs=rbindlist(l2)
 
 l=list()
@@ -67,7 +68,7 @@ for(i in 1:nrow(gene_lengths)){
   test.fam=gene_lengths[i,]$family %>% as.character()
   
   if(test.fam=='SLC_Unsorted' & test.len >100 & test.len<1500){
-    l[[i]]=data.table(cbind(gene_lengths[i,],evaluation='UNK',com.slcs[which(com.slcs$slc_family=="SLC_X"),]))
+    l[[i]]=data.table(cbind(gene_lengths[i,c('gene','len')],evaluation='UNK',com.slcs[family==test.fam]))
     next
   }
   
@@ -101,7 +102,7 @@ for(i in 1:nrow(gene_lengths)){
 total=rbindlist(l)
 
 
-comp.score=nrow(total)/nrow(total[evaluation=='SHORT'])
+comp.score=nrow(total[evaluation=='SHORT'])/nrow(total)
 a=str_split(getwd(),c('_','/')) %>% unlist() 
 score.name=a[length(a)-1]
 fwrite(data.table(comp.score,score.name),'/data2/shane/Documents/SLC_id/genome_score/comp_score.txt',append=T)

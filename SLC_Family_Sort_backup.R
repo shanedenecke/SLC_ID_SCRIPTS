@@ -83,7 +83,7 @@ for (x in 1:length(unigenes)){
     else if(grepl('SLC_Unsorted',sub.blast$subject[1])){ ### if the gene is previously unsorted
       if(slc_tab[1]>=length(slc_tab)-1){ ## all hits but one are in concordance
         slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
-       next
+        next
       }else{
         slc.total[[i]]=data.table(geneid=top_hit_gene,family='SLC_Unsorted_')
       }
@@ -108,14 +108,14 @@ for (x in 1:length(unigenes)){
   ###exceptions
   if(is.nan(evalues[2]/evalues[1])){evalues[2]=1e-100;evalues[1]=1e-100} ## when both evalues are 0
   if(is.na(fam_count)){fam_count=100}
-
+  
   ####################### Non iterative
   
   if(!grepl('SLC_',names(slc_tab[1]))){ ## filter out any that have top blast hit not an SLC
     filter.list[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
-  }else if(length(which(slc_fams %in% top_hit_fam))==fam_count){ ## where all members of a family are present in the list
-    slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
   }else if(slc_tab[1]>=length(slc_tab)-1){ ## include any where all are from from one SLC family except 1
+    slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
+  }else if(length(which(slc_fams %in% top_hit_fam))==fam_count){ ## where all members of a family are present in the list
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
   }else if((evalues[2]/evalues[1]> 1e30) & grepl('SLC_',top_hit_fam)){ ## Keep where top hit is SLC and overwhelmingly significant
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)

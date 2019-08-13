@@ -6,25 +6,26 @@ mkdir proteome_clean
 
 #Subset all orthoDB gene files for only insect ones 
 #while read i; do grep $i ./general_reference/non_model_proteomes/odb10v0_genes.tab >> ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab; done < ./general_reference/non_model_proteomes/keys/OrthoDB_taxids.tsv
-
+# R script ./SLC_id_scripts/old/orthodb_table_prepare.R
 
 mkdir ./proteome_clean/clean_fasta
 while IFS=$'\t' read -r col1 col2
 do
 cp ./general_reference/non_model_proteomes/raw_fasta/$col1* ./proteome_clean/clean_fasta/$col2'.fasta'
-grep -e "^$col1" ./general_reference/non_model_proteomes/Insect_OrthoDB.genes.tab | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
+grep -e "^$col1" ./general_reference/non_model_proteomes/insect_orthoDB_genes.tsv | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
 echo -e "code,name" | cat - ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt' | perl -pe 's/\t/,/g' > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt'
 /data2/shane/Applications/custom/fasta_rename_fast_only_exact.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
-done < ./general_reference/non_model_proteomes/keys/Taxid_OrthoDB_master_key_abrev_only.tsv
+done < ./general_reference/non_model_proteomes/keys/OrthoDB_tax_key_2col.tsv
 
 
 #### Remove empty duplicate sequences
-find ./proteome_clean/clean_fasta/ -size  0 -print0 | xargs -0 rm --
+#find ./proteome_clean/clean_fasta/ -size  0 -print0 | xargs -0 rm --
 for i in ./proteome_clean/clean_fasta/*_unigene.faa
 do
-sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' > temp.fasta
+sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' | sed 's/\\//g' | tr '[:lower:]' '[:upper:]' > temp.fasta
 awk '/^>/{id=$0;getline;arr[id]=$0}END{for(id in arr)printf("%s\n%s\n",id,arr[id])}' temp.fasta > $i
 done
+rm temp.fasta
 
 #mkdir ./proteome_clean/proteome_check/
 #cp ./proteome_clean/clean_fasta/*_unigene.faa ./proteome_clean/proteome_check/
@@ -36,15 +37,11 @@ done
 echo 'Total numberof proteomes is ' $(ls ./proteome_clean/clean_fasta/* | grep -E "*unigene.faa$" | wc -l)
 echo 'Numberof GOOD proteomes is ' $(ls ./proteome_clean/clean_fasta/* | grep -E "*psq$" | wc -l)
 
-for i in ./proteome_clean/clean_fasta/*_unigene.faa
-do
-sed -i 's/\\//g' $i
-done
 
 mkdir proteomes
 #cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/clean_fasta/*_unigene.faa /data2/shane/Documents/SLC_id/proteomes/
 cp ./proteome_clean/clean_fasta/*_unigene.faa ./proteomes/
-cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/uniprot_other/* /data2/shane/Documents/SLC_id/proteomes/
+cp /data2/shane/Documents/SLC_id/general_reference/model_proteomes/uniprot/* /data2/shane/Documents/SLC_id/proteomes/
 
 
 
@@ -65,4 +62,8 @@ cp /data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/uniprot_o
 #perl -pe 's/(^[0-9]+)\t([A-Z]..)[a-z]+_([a-z]{3}).+$/$1\t$2$3/' /data2/shane/Documents/SLC_id/general_reference/orthoDB_process/reference/Taxid_key.tsv
 
 
+#for i in ./proteome_clean/clean_fasta/*_unigene.faa
+#do
+#sed -i 's/\\//g' $i
+#done
 #################### DO NOT RUN every time

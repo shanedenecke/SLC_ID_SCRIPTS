@@ -5,8 +5,8 @@
 ## argument 3= New_database folder to create
 
 #A=/data2/shane/Documents/SLC_id/HomSap_Database
-#B=/data2/shane/Documents/SLC_id/proteomes/AttCep_unigene.faa
-#C=/data2/shane/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa
+#B=/data2/shane/Documents/SLC_id/proteomes/HUMAN_DenPon_unigene.faa
+#C=/data2/shane/Documents/SLC_id/Human_search/HUMAN_DenPon_unigene.faa
 
 
 ## reset bash and create new output directory
@@ -74,7 +74,7 @@ cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Appl
 #cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
 #B=/data2/shane/Documents/SLC_id/proteomes/AcrEch_unigene.faa
 ### Create table of each gene with corresponding number of TM domains
-/data2/shane/Applications/custom/tmhmm_filter.sh ./length_analysis/preliminary_SLC.fa 3 > ./length_analysis/preliminary_SLC_TMM_table.txt
+/data2/shane/Applications/custom/tmhmm_filter.sh ./length_analysis/preliminary_SLC.fa 0 > ./length_analysis/preliminary_SLC_TMM_table.txt
 
 ##Re generate dictionary filtered for TMM values
 rm -f ./length_analysis/SLC_TMM_filter_codes.csv

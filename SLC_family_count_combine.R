@@ -9,6 +9,7 @@ shhh(library(readr))
 setwd('/data2/shane/Documents/SLC_id')
 co.variables=fread('./general_reference/Co_variables/co_variables.csv')
 #### read all fastas into list
+
 l=list()
 for (i in list.files('./SLC_family_counts/',full.names = T)){
   a=fread(i)
@@ -23,7 +24,7 @@ for (i in list.files('./SLC_family_counts/',full.names = T)){
 
 
 g=Reduce(function(x, y) merge(x, y, ,by='family',all=TRUE), l)
-k=fread('/data2/shane/Documents/SLC_id/general_reference/orthoDB_process/reference/Taxid_OrthoDB_master_key.tsv',
+k=fread('/data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/keys/Taxid_master_key_full.tsv',
         col.names=c('taxid','short','long_name'))
 for(i in 2:length(colnames(g))){
   s.name=colnames(g)[i]
