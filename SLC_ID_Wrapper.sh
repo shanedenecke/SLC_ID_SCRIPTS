@@ -23,12 +23,8 @@ mkdir Dm_Database_Generate
 # Iteratative search Drosophila
 ./SLC_id_scripts/SLC_HMM_Search.sh /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
 
-## Xref with flybase SLC calls
-Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv
-
-
 ## Make final Drosophila database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/SLC_source_dict_flybaseXref.csv /data2/shane/Documents/SLC_id/DroMel_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/DroMel_Database
 
 
 ########################  3) Search species with Human database
@@ -82,3 +78,11 @@ python3 ./SLC_id_scripts/SLC_summary_count.py
 #Rscript ./SLC_id_scripts/SLC_family_count_combine.R
 ###################### 8) Extract sequences from each relevant species. Perform alignment and phylogeny
 #./SLC_id_scripts/SLC_id_Align_and_tree.sh
+
+
+
+
+### JUNK
+## Xref with flybase SLC calls
+#Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv
+

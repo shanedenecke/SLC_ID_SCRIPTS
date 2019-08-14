@@ -8,11 +8,13 @@ dir.create('Pipeline_compare')
 transporter.db=fread('./general_reference/SLC_info/Dm_Transporter_DB_manual.csv')
 flybase=fread('./general_reference/SLC_info/DroMel_SLC_table_flybase.csv')
 
+initial=fread('./Dm_Database_Generate/Hs_to_DroMel_Search/final_output/total_slc_table.csv')
+initial$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",initial$code)
 test=fread('./Dm_Database_Generate/DroMel_iterative_search/final_output/total_slc_table.csv')
 test$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",test$code)
 
-l=list(transporter.db$CG,flybase$CG,test$CG)
-names(l)=c('TransporterDB','Flybase','Test')
+l=list(transporter.db$CG,flybase$CG,initial$CG,test$CG)
+names(l)=c('TransporterDB','Flybase','initial','Test')
 
 l2=l[1:3]
 venn.diagram(l2,'./Pipeline_compare/test.tiff')
@@ -26,3 +28,5 @@ fwrite(unique.test,'./Pipeline_compare/Unique_test_table.csv')
 writeLines(unique.test.codes,'./Pipeline_compare/Unique_test_codes.txt')
 
 
+transporter.db[CG %in% setdiff(l$TransporterDB,l$initial)] %>% fwrite('initial_missed.csv')
+unique.initial=initial[CG %in% (setdiff(setdiff(l$initial,l$TransporterDB),l$Flybase))]

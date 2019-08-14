@@ -6,7 +6,7 @@
 ## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
 
 #rm(list=ls())
-#setwd('/data2/shane/Documents/SLC_id/Human_search/HUMAN_DenPon_unigene.faa')
+#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
 ##Import libraries
 shhh <- suppressPackageStartupMessages
 shhh(library(data.table))
@@ -20,7 +20,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 ##debug
 #setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa')
-#args[1]="/data2/shane/Documents/SLC_id/HomSap_Database/SLC_source_dict.csv"
+#args[1]="/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -67,9 +67,10 @@ for (x in 1:length(unigenes)){
   sub.blast=subset(all.blast,query==i)
   slc_fams=sub.blast$subject
   slc_tab=table(slc_fams) %>% sort(decreasing = T)
-  top_hit_fam=names(slc_tab)[1] 
-  top_hit_gene=sub.blast$query[1]
-  pident=sub.blast$pident[2]
+  #top_hit_fam=names(slc_tab)[1]
+  top_hit_fam=slc_fams[1] 
+  top_hit_gene=sub.blast$query[1] 
+  pident=sub.blast$pident[2] 
   if(is.na(pident)){pident=100}
   evalues=sub.blast$evalue
   if(length(evalues)==1){evalues=c(evalues,rep(100,4))}
