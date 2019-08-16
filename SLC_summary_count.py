@@ -17,7 +17,7 @@ from shutil import copyfile
 ##working directory
 os.chdir('/data2/shane/Documents/SLC_id')
 os.mkdir('SLC_family_counts')
-
+#
 
 ##import refrence data
 copyfile('./DroMel_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')

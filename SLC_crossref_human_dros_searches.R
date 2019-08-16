@@ -52,7 +52,7 @@ for(i in sp.list){
   named.hits=rbindlist(l3)
   l[[i]]=named.hits
 }
-
+#
 
 #### filter out duplicates. If there is a duplicated where 1 is unsorted then keep the named one. Otherwise just take the first
 rem.dup=function(x){
@@ -76,13 +76,13 @@ l=lapply(l,rem.dup)
 l=lapply(l,function(x) x[!duplicated(x$code),])
 
 
-dir.create('Human_Drosophila_crossref')
-setwd('Human_Drosophila_crossref')
+dir.create('final_SLC_dicts')
+setwd('final_SLC_dicts')
 
 for (i in 1:length(l)){ 
   sub=l[[i]]
   n=names(l)[i]
-  write.csv(sub,file=paste0(n,"_SLC_source_dict.csv"),row.names = F)
+  write.csv(sub,file=paste0(n,"Final_SLC_table.csv"),row.names = F)
 } 
 
 

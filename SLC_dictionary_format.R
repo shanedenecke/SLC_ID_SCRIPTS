@@ -8,19 +8,47 @@ shhh(library(tidyr))
 shhh(library(readr))
 shhh(library(utils))
 
-args = commandArgs(trailingOnly=TRUE)
+##setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/')
+setwd('./final_output')
+raw.table=fread('total_slc_table.csv')
+slc.fams=raw.table$name %>% unique()
+
+l=list()
+for(i in slc.fams){
+  sub=subset(raw.table,name==i)
+  for(j in 1:dim(sub)[1]){
+    add=as.character(j)
+    sub$name[j]=paste(sub$name[j],add,sep='_')
+  }
+  l[[i]]=sub
+}
+final=rbindlist(l)
+
+cat(format_csv(final))
 
 
 
-##args[1]='/home/shanedenecke/Documents/SLC_id/iterative_database/iterative_database_BemTab/SLC_source_dict.csv'
-##setwd('/home/shanedenecke/Documents/SLC_id/iterative_search/iterative_search_BemTab')
-##args
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 a=readLines('dir.txt')
 #a=getwd()
 startdir= a %>% strsplit(.,split='_') %>% unlist()
 start=startdir[grepl('[A-Z][a-z]{2}[A-Z][a-z]',startdir)]
-
+#
 
 if(length(start)==0){
   start='goodbye'

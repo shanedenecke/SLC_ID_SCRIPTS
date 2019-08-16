@@ -18,7 +18,7 @@
 #B=/data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv
 #C=/data2/shane/Documents/SLC_id/HomSap_Database
 ################################################################################
-
+#
 
 ## reset bash
 source ~/.bashrc

@@ -15,7 +15,7 @@ shhh(library(tidyr))
 shhh(library(readr))
 
 ############################ Set WD and arguments
-
+#
 args = commandArgs(trailingOnly=TRUE)
 
 ##debug
@@ -112,7 +112,7 @@ for (x in 1:length(unigenes)){
 
   ####################### Non iterative
   
-  if(!grepl('SLC_',names(slc_tab[1]))){ ## filter out any that have top blast hit not an SLC
+  if(!grepl('SLC_',sub.blast$subject[1])){ ## filter out any that have top blast hit not an SLC
     filter.list[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
   }else if(length(which(slc_fams %in% top_hit_fam))==fam_count){ ## where all members of a family are present in the list
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
