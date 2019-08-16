@@ -21,7 +21,9 @@ dash.remove=function(x){
   return(final)
 }
 
-
+var.me=function(x){
+  return(var(x)/mean(x))
+}
 shane.transpose=function(dt,newcol){
   new.rows=colnames(dt)[2:length(colnames(dt))]
   a=transpose(dt)
@@ -53,13 +55,24 @@ count.summary=shane.transpose(count.summary)
 nams=count.summary$newcol
 count.summary$newcol=NULL
 totals.matrix=apply(count.summary,2,as.numeric)
-varrow=apply(count.summary,2,var)
+
+varrow=apply(totals.matrix,2,var.me)
+var.table=t(data.frame(varrow)) %>% data.frame()
+var.table$abbrevaition='blank'
+var.table$slc_total='blank'
+#var.table=select(var.table,abbreviation,slc_total,everything())
+
 totals=rowSums(totals.matrix)
+
 count.summary=data.table(count.summary)
 count.summary$abbreviation=nams
 count.summary$slc_total=totals
+count.summary=rbind(count.summary,var.table,use.names=F)
+ 
+
+
 count.summary=select(count.summary,abbreviation,slc_total,everything())
-rbind(count.summary,varrow)
+#rbindlist(count.summary,varrow2,use.names = T,fill=T)
 fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
 
 
