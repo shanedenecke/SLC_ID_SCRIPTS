@@ -17,14 +17,11 @@ mkdir Dm_Database_Generate
 ## search from humans 
 ./SLC_id_scripts/SLC_HMM_Search.sh /data2/shane/Documents/SLC_id/HomSap_Database /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search
 
-## Make Drosophila database from Human search
-./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
-
-# Iteratative search Drosophila
-./SLC_id_scripts/SLC_HMM_Search.sh /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
+## Xref with flybase
+Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv
 
 ## Make final Drosophila database
-./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/DroMel_Database
+./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/SLC_source_dict_flybaseXref.csv /data2/shane/Documents/SLC_id/DroMel_Database
 
 
 ########################  3) Search species with Human database
@@ -63,7 +60,7 @@ python3 ./SLC_id_scripts/SLC_summary_count.py
 
 ### JUNK
 ## Xref with flybase SLC calls
-#Rscript ./SLC_id_scripts/SLC_Flybase_human_SLCxref.R > ./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv
+
 ######################## 6) Iteratively search each species
 
 ## create databases for each species
@@ -86,3 +83,9 @@ python3 ./SLC_id_scripts/SLC_summary_count.py
 #./SLC_id_scripts/SLC_HMM_Search.sh $f $i /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e
 #cp /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
 #done
+
+# Iteratative search Drosophila
+#./SLC_id_scripts/SLC_HMM_Search.sh /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
+
+## Make Drosophila database from Human search
+#./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database

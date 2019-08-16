@@ -25,7 +25,7 @@ colnames(fb.slc.gene)=c('Family','code')
   
 
 
-hs.slcs=fread('/data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search/final_output/SLC_final_output.csv')# %>%
+hs.slcs=fread('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv')# %>%
   #mutate(FBgn=code) %>% separate(FBgn,into=c('FBgn','junk'),sep='_') %>% select(-junk)
 
 

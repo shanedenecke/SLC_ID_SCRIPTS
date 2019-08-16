@@ -11,7 +11,7 @@ shhh(library(stringr))
 
 ## already got lengths from expression analysis
 
-#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search')
+#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/')
 setwd('./length_analysis')
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
@@ -30,7 +30,9 @@ if(slc.len<rows){
 hs.key=fread('/data2/shane/Documents/SLC_id/general_reference/keys/Hs_master_key.csv')
 #hs.dict=fread('./general_reference/SLC_info/HomSap_SLC_dict_new.csv',col.names = c('sd_name','HUGO_name')) %>% 
   #separate(sd_name,into=c('1','2','C'),sep="_") %>% unite("slc_family",'1','2') %>% select(-C) 
-hs.dict=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Hs_SLC_length.csv')
+hs.dict=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv')
+colnames(hs.dict)[2]='HUGO_name'
+hs.dict$family=gsub('(SLC_.+)_.+$','\\1',hs.dict$name)
 hs.dict$HUGO_name=gsub(" PE","",hs.dict$HUGO_name)
 dm.key=fread('/data2/shane/Documents/SLC_id/general_reference/keys/Dm_master_key_by_gene.csv')
 dm.dict=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/Dm_SLC_length.csv')
