@@ -5,32 +5,21 @@ shhh(library(data.table))
 shhh(library(dplyr))
 shhh(library(tidyr))
 shhh(library(readr))
-
+dir.create('SLC_family_counts')
 setwd('/data2/shane/Documents/SLC_id')
-co.variables=fread('./general_reference/Co_variables/co_variables.csv')
-#### read all fastas into list
+co.variables=fread('./general_reference/Co_variables/Olympia_table_august_2019_order_condense.csv',header=T)
 
-l=list()
-for (i in list.files('./SLC_family_counts/',full.names = T)){
-  a=fread(i)
-  b=unlist(strsplit(i,split='/',fixed=T))
-  c=b[length(b)]  
-  d=unlist(strsplit(c,'_'))[1]
-  e=gsub("Final","",d)
-  colnames(a)[2]=e
-  l[[i]]=a
+file.copy('./DroMel_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
+file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+
+
+######################## functions
+dash.remove=function(x){
+  split=unlist(strsplit(x,'_'))
+  toge=paste(split[1],split[2],sep='_')
+  final=toge
+  return(final)
 }
-
-
-
-g=Reduce(function(x, y) merge(x, y, ,by='family',all=TRUE), l)
-k=fread('/data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/keys/Taxid_master_key_full.tsv',
-        col.names=c('taxid','short','long_name'))
-for(i in 2:length(colnames(g))){
-  s.name=colnames(g)[i]
-  colnames(g)[i]=k[which(k$short==s.name)]$long_name
-}
-
 
 
 shane.transpose=function(dt,newcol){
@@ -41,11 +30,78 @@ shane.transpose=function(dt,newcol){
   b=mutate(a,newcol=new.rows) %>% select(newcol,everything())
   return(b)
 }
+########################################3
 
-trans=shane.transpose(g,'SLC_family') %>% data.table()
-colnames(trans)[1]='Species_name'
+slc_fams=readLines('/data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt')
+slc_fams=sapply(slc_fams,dash.remove)
+names(slc_fams)=NULL
 
-annot=merge(trans,co.variables,by='Species_name')
+l=list()
+##read dataframes into python list
+for (i in list.files('./final_SLC_dicts/')){
+  slc_table=fread(paste0('./final_SLC_dicts/',i))
+  abbreviation=gsub('Final','',unlist(strsplit(i,'_'))[1])
+  slc_table$family=sapply(slc_table$name,dash.remove)
+  with.count=slc_table %>% group_by(family) %>% summarise(count=length(family))
+  colnames(with.count)[2]=abbreviation
+  l[[i]]=with.count
+}
+
+count.summary=Reduce(function(x, y) merge(x, y, ,by='family',all=TRUE), l) %>% data.table()
+count.summary[is.na(count.summary)]=0
+count.summary=shane.transpose(count.summary) 
+nams=count.summary$newcol
+count.summary$newcol=NULL
+totals.matrix=apply(count.summary,2,as.numeric)
+varrow=apply(count.summary,2,var)
+totals=rowSums(totals.matrix)
+count.summary=data.table(count.summary)
+count.summary$abbreviation=nams
+count.summary$slc_total=totals
+count.summary=select(count.summary,abbreviation,slc_total,everything())
+rbind(count.summary,varrow)
+fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
+
+
+hist(count.summary$slc_total)
+
+## merge to olympia's data
+full=merge(count.summary,co.variables,by="abbreviation")
+
+comps=c('Order','Phagy','Vory','Pre-adult_feeding_category','Adult_feeding_category')
+l=list()
+for(i in slc_fams){
+  for(j in comps){
+    
+    ##Filter for infrequent categories
+    good=names(which(table(full[[j]])>8))
+    sub=full[which(full[[j]] %in% good)]
+    counts=sub[[i]] %>% as.character() %>% as.numeric()
+    
+    model=lm(formula=counts~sub[[j]])
+    coef=summary(model)$coefficients 
+    comparison=rownames(coef)
+  l[[paste(i,j,sep='_')]]= coef %>% data.table(comp=comparison,family=i,co_variable=j) 
+}}
+
+final=rbindlist(l) %>% filter(!grepl("Intercept",comp)) %>% data.table()
+colnames(final)=gsub('Pr(>|t|)','p.value',colnames(final),fixed=T)
+final$comp=gsub('sub[[j]]','',final$comp,fixed=T)
+final$fdr=p.adjust(final$p.value,method='fdr')
+final$bonf=p.adjust(final$p.value,method='bonferroni')
+final=arrange(final,bonf) %>% filter(bonf<.05) %>% data.table()
+fwrite(final,'./SLC_family_counts/correlation_anlaysis.csv')
+
+
+
+
+
+
+
+
+
+
+
 
 cols=colnames(annot)
 expl=cols[68:73]
@@ -54,6 +110,7 @@ slcs=cols[2:66]
 for(i in expl){annot[[i]]=as.factor(annot[[i]])}
 annot=annot[!is.na(Host_use_category)]
 l=list()
+
 for(i in slcs){
   s=annot[[i]] %>% as.character() %>% as.numeric()
   reg=lm(formula=s~annot$Host_use_category)
