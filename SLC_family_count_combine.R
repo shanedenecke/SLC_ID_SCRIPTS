@@ -5,12 +5,16 @@ shhh(library(data.table))
 shhh(library(dplyr))
 shhh(library(tidyr))
 shhh(library(readr))
-dir.create('SLC_family_counts')
+#setwd('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id') #local
 setwd('/data2/shane/Documents/SLC_id')
+dir.create('SLC_family_counts')
 co.variables=fread('./general_reference/Co_variables/Olympia_table_august_2019_order_condense.csv',header=T)
+#co.variables=fread('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id/family_size_variation/Olympia_table_august_2019.csv',header=T)
 
-file.copy('./DroMel_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
-file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+
+
+#file.copy('./DroMel_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
+#file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
 
 
 ######################## functions
@@ -22,7 +26,7 @@ dash.remove=function(x){
 }
 
 var.me=function(x){
-  return(var(x)/mean(x))
+  range(x)[2]-range(x)[1]
 }
 shane.transpose=function(dt,newcol){
   new.rows=colnames(dt)[2:length(colnames(dt))]
@@ -35,6 +39,7 @@ shane.transpose=function(dt,newcol){
 ########################################3
 
 slc_fams=readLines('/data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt')
+#slc_fams=readLines('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id/old/general_reference/SLC_info/SLC_families.txt')
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
@@ -63,52 +68,106 @@ var.table$slc_total='blank'
 #var.table=select(var.table,abbreviation,slc_total,everything())
 
 totals=rowSums(totals.matrix)
+#good.slcs=names(which(colSums(totals.matrix)>(3*140)))
 
 count.summary=data.table(count.summary)
 count.summary$abbreviation=nams
 count.summary$slc_total=totals
-count.summary=rbind(count.summary,var.table,use.names=F)
- 
+draft.sum=rbind(count.summary,var.table,use.names=F)
 
 
-count.summary=select(count.summary,abbreviation,slc_total,everything())
-#rbindlist(count.summary,varrow2,use.names = T,fill=T)
-fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
+############### SLC53 listed twice
+for(i in slc_fams){
+  sub=as.numeric(draft.sum[[i]])
+  
+  #if(max(sub)<10){# & sub[173]<.5){
+  if(sub[173]<10){
+    print(i)
+    draft.sum[[i]]=NULL
+  }
+}
 
 
-hist(count.summary$slc_total)
+
+draft.sum=select(draft.sum,abbreviation,slc_total,everything())
+#rbindlist(draft.sum,varrow2,use.names = T,fill=T)
+fwrite(draft.sum,'./SLC_family_counts/count_summary.csv')
+
+draft.sum=draft.sum[1:172]
+hist(as.numeric(draft.sum$slc_total))
+
+test=count.summary %>%
+  mutate_at(vars(matches("SLC")), funs(as.numeric(as.character(.)))) %>%
+  data.table()
+apply(select(test,matches('SLC')),2,mean)
+
+mns=apply(select(test,matches('SLC')),2,mean)
+size.adjust=data.table(fam=names(mns),avg=mns)
+
 
 ## merge to olympia's data
-full=merge(count.summary,co.variables,by="abbreviation")
+full=merge(draft.sum,co.variables,by="abbreviation")
 
-comps=c('Order','Phagy','Vory','Pre-adult_feeding_category','Adult_feeding_category')
+comps=c('overall_phylo','Diet_category')
 l=list()
-for(i in slc_fams){
+for(i in slc_fams[slc_fams %in% colnames(full)]){
   for(j in comps){
     
     ##Filter for infrequent categories
     good=names(which(table(full[[j]])>8))
     sub=full[which(full[[j]] %in% good)]
     counts=sub[[i]] %>% as.character() %>% as.numeric()
-    
+    #model=aov(formula=counts~sub[[j]])
     model=lm(formula=counts~sub[[j]])
     coef=summary(model)$coefficients 
     comparison=rownames(coef)
   l[[paste(i,j,sep='_')]]= coef %>% data.table(comp=comparison,family=i,co_variable=j) 
 }}
 
-final=rbindlist(l) %>% filter(!grepl("Intercept",comp)) %>% data.table()
-colnames(final)=gsub('Pr(>|t|)','p.value',colnames(final),fixed=T)
-final$comp=gsub('sub[[j]]','',final$comp,fixed=T)
-final$fdr=p.adjust(final$p.value,method='fdr')
-final$bonf=p.adjust(final$p.value,method='bonferroni')
-final=arrange(final,bonf) %>% filter(bonf<.05) %>% data.table()
+final=rbindlist(l) %>% filter(!grepl("Intercept",comp)) %>% data.table() 
+colnames(final)=gsub('Pr(>|t|)','p.value',colnames(final),fixed=T) 
+final$comp=gsub('sub[[j]]','',final$comp,fixed=T) 
+final$fdr=p.adjust(final$p.value,method='fdr') 
+final$bonf=p.adjust(final$p.value,method='bonferroni') 
+
+for(i in 1:nrow(final)){final$adjusted_Estimate[i]=final[i]$Estimate/(size.adjust[fam==final[i]$family])$avg}
+
+
+
+final=arrange(final,bonf) %>% filter(bonf<1e-10)  %>% filter(abs(adjusted_Estimate)>1) %>% data.table()
 fwrite(final,'./SLC_family_counts/correlation_anlaysis.csv')
 
 
+dir.create('comparison_plots')
+
+for(i in 1:nrow(final)){
+  row=final[i]
+  co.var=row$co_variable
+  fam=row$family
+  plot=select(full,fam,co.var)
+  plot[[fam]]=as.numeric(plot[[fam]])
+  
+  plot=plot[plot[[co.var]] %in% names(which(table(plot[[co.var]])>5))]
+  
+  plot[duplicated(plot)]
+  
+  pdf(paste0('./comparison_plots/',co.var,'_',fam,'.pdf'))
+  gp=ggplot(plot,aes_string(x=co.var,y=fam,fill=co.var))
+  gp=gp+geom_boxplot()
+  gp=gp+labs(x=paste0('\n',co.var),y=paste0(fam,'\n'))
+  gp=gp+theme_bw()
+  gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
+              axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
+              strip.text=element_text(size=20),strip.background=element_rect("white"),
+              axis.title=element_text(size=17),axis.text.x=element_text(angle=45,hjust=1))
+  
+  print(gp)
+  dev.off()
+}
+  
 
 
-
+############################################## JUNK
 
 
 
