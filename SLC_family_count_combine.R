@@ -54,6 +54,7 @@ l=list()
 ##Get all counts data into master table. Rows SLC families. Columns species
 for (i in list.files('./final_SLC_dicts/')){
   slc_table=fread(paste0('./final_SLC_dicts/',i))
+  #slc_table=fread('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id/HomSap_SLC_dict.csv')
   abbreviation=gsub('Final','',unlist(strsplit(i,'_'))[1])
   slc_table$family=sapply(slc_table$name,dash.remove)
   with.count=slc_table %>% group_by(family) %>% summarise(count=length(family))
