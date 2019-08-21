@@ -9,78 +9,63 @@ Created on Sat May 18 17:20:39 2019
 import os
 import pandas as pd
 
-os.chdir('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB')
+os.chdir('/data2/shane/Documents/SLC_id/ultrametric_tree')
 
-pd.set_option('display.max_rows', 10)
-pd.set_option('display.max_columns', 500)
-
-#a=pd.read_csv('node_6656_taxid_85310_29058.og.eog',sep='\t',header=None)
-a=pd.read_csv('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/OrthoDB10_clean_arthropod_suset.tsv',sep='\t',header=0)
-taxid=pd.read_csv('Taxid_OrthoDB_master_key.tsv',sep='\t',header=None)
+## import data
+raw_orthodb=pd.read_csv('./OrthoDB10_clean_arthropod_suset.tsv',sep='\t',header=0)
+taxid=pd.read_csv('/data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/keys/Taxid_master_key_full.tsv',sep='\t',header=None)
 taxid.columns=['taxid','abbreviation','Species_name']
-#a=a.drop(a.columns[2:9],axis=1)
-#a[['taxid','gene']]=a[1].str.split(':',expand=True)
-#a.columns=['OG','junk','taxid','gene']
+raw_orthodb['taxid']=pd.to_numeric(raw_orthodb['taxid'])
+all_taxids=list(set(raw_orthodb['taxid']))
 
-a['taxid']=pd.to_numeric(a['taxid'])
-
-
-#b=list(set(a[0]))
-all_taxids=list(set(a['taxid']))
-
-#df = pd.DataFrame(columns=['OG','species_present','total'])
     
-    
+## aggregate data frame based on how many counts each ortho group has
 def unicount(series):
     return len(list(set(series)))
+agg=raw_orthodb.groupby('OG')['taxid'].agg({'total_genes':'count','unique_taxids':unicount})
 
-unicount(['A','A','B'])  
 
-
-df=a.groupby('OG')['taxid'].agg({'total_genes':'count','unique_taxids':unicount})
-
-d=[]
-for i in range(df.shape[0]):
-    #if abs(df.iloc[i]['total_genes']-df.iloc[i]['unique_taxids'])>0 & abs(df.iloc[i]['total_genes']-df.iloc[i]['unique_taxids'])<3:
-    if abs(df.iloc[i]['total_genes']-df.iloc[i]['unique_taxids'])<7:
+## filter for ortho groups with close to 1:1 orthology
+final_og=[]
+for i in range(agg.shape[0]):
+    #if abs(agg.iloc[i]['total_genes']-agg.iloc[i]['unique_taxids'])>0 & abs(agg.iloc[i]['total_genes']-agg.iloc[i]['unique_taxids'])<3:
+    if abs(agg.iloc[i]['total_genes']-agg.iloc[i]['unique_taxids'])<7:
    
-        if df.iloc[i]['unique_taxids']>160:
-            d.append(df.index[i])
-len(d)
+        if agg.iloc[i]['unique_taxids']>160:
+            final_og.append(agg.index[i])
 
 
-final_og=d
-
-with open('1_to_1ish_arthropod_orthologues', 'w') as f:
-    for item in final_og:
-        f.write("%s\n" % item)
-
-
-
-final_og = [line.strip() for line in open("1_to_1ish_arthropod_orthologues.txt", 'r')]
-
-subset=a[a.OG.isin(final_og)]
-
+## subset full arhtropod dicitonary with only those genes which have ortho groups with close to 1:1 orthology
+subset=raw_orthodb[raw_orthodb.OG.isin(final_og)]
 merged=pd.merge(subset,taxid)
+
+
 unigene_codes=[str(merged['taxid'][x])+'_'+str(merged['gene'][x]) for x in range(0,merged.shape[0])]
 final_names=[str(merged['Species_name'][x])+'_'+str(merged['abbreviation'][x])+'_'+str(merged['OG'][x])+'_'+str(merged['gene'][x]) for x in range(0,merged.shape[0])]
 
+
+## write renaming dictionary
 final_dict=pd.DataFrame(
         {'code':unigene_codes,
          'name':final_names
          })
 
-final_dict.to_csv(r'./test.csv',index=None)
+final_dict.to_csv(r'./renaming_dictionary.csv',index=None)
 
 
 
+## write test file with unicodes
+with open('unicodes_fa_subset.txt', 'w') as f:
+    for item in unigene_codes:
+        f.write("%s\n" % item)
 
-############## BIN
-        
-df=pd.DataFrame()
-for i in range(len(b)):
-    sub=a[a[0]==b[i]]
-    sub_taxids=len(list(set(sub['taxid'])))
-    dic={'OG':[b[1]], 'species_present':[sub_taxids], 'total':[sub.shape[0]]}
-    df=df.append(pd.DataFrame.from_dict(data=dic))
- 
+
+
+##write OGS
+with open('oto_ish_arthropod_orthologues.txt', 'w') as f:
+    for item in final_og:
+        f.write("%s\n" % item)
+
+
+
+#final_og = [line.strip() for line in open("1_to_1ish_arthropod_orthologues.txt", 'r')]

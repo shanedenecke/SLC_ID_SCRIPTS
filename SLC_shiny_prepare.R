@@ -3,11 +3,14 @@ library(dplyr)
 library(ggplot2)
 library(seqinr)
 
+
+## Set Working directory
 setwd('/data2/shane/Documents/SLC_id')
 
 
-#### DICT
+#### Create dictionary 
 
+## table with some info on each species
 co.var=fread('./general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T) %>%
   select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Vory,Diet_category)
 
@@ -18,6 +21,8 @@ dash.remove=function(x){
   final=toge
   return(final)
 }
+#########################
+
 
 l=list()
 for(i in list.files('./final_SLC_dicts',full.names = T)){

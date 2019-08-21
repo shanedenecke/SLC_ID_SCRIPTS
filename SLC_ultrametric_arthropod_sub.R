@@ -1,12 +1,14 @@
 library(data.table)
 library(dplyr)
 
-tax=fread('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/odb10_taxid.txt')
-genes=fread('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/odb10_genes.txt',header=F)
-groups=fread('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/odb10_groups.txt',header=F)
-oly=fread('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id/family_size_variation/Olympia_table_august_2019.csv',header=T)
+setwd('/data2/shane/Documents/SLC_id/ultrametric_tree')
 
-tax.key=fread('/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/Taxid_OrthoDB_master_key.tsv')
+tax=fread('./odb10_taxid.txt')
+genes=fread('./odb10_genes.txt',header=F)
+groups=fread('./odb10_groups.txt',header=F)
+oly=fread('/data2/shane/Documents/SLC_id/general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T)
+
+tax.key=fread('/data2/shane/Documents/SLC_id/general_reference/non_model_proteomes/keys/Taxid_master_key_full.tsv')
 
 ids=tax.key[V2 %in% oly$abbreviation]$V1
 
@@ -22,4 +24,4 @@ colnames(group.sub)='OG'
 
 final=data.table(ids.sub,gene.sub,group.sub)
 
-fwrite(final,'/home/shanedenecke/Dropbox/wp7_prodrug/common_orthoDB/OrthoDB10_clean_arthropod_suset.tsv',sep='\t')
+fwrite(final,'./OrthoDB10_clean_arthropod_suset.tsv',sep='\t')
