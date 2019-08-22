@@ -1,5 +1,5 @@
 ################### ALIGN AND TREE #####################
-
+cd /data2/shane/Documents/SLC_id
 
 ## copy Dromel and Homsap tables to final dictionary file
 #Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./final_SLC_dicts/DroMelFinal_SLC_table.csv
@@ -103,12 +103,12 @@ do
   /data2/shane/Applications/custom/fasta_2_phylip.sh $a'.aln.trimm' > $a'.aln.trimm.phy'
 done
 
-mkdir SLC_phylogeny
+mkdir ./phylogeny/SLC_phylogeny
 for i in /data2/shane/Documents/SLC_id/SLC_align/*.phy
 do
   b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
   raxfile=$i
-  raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
+  raxdir=/data2/shane/Documents/SLC_id/phylogeny/SLC_phylogeny/
   #rm ./SLC_phylogeny/RAxML*
   /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 36 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
   #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
