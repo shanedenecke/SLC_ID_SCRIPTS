@@ -18,7 +18,7 @@ dir.create('Pipeline_compare')
 transporter.db=fread('../general_reference/SLC_info/Dm_Transporter_DB_manual.csv')
 flybase=fread('../general_reference/SLC_info/DroMel_SLC_table_flybase.csv')
 
-dros.slcs=fread('./Dm_Database_Generate/Hs_to_DroMel_Search/final_output/total_slc_table.csv')
+dros.slcs=fread('../Dm_Database_Generate/Hs_to_DroMel_Search/final_output/total_slc_table.csv')
 dros.slcs$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",dros.slcs$code)
 #test=fread('./Dm_Database_Generate/DroMel_iterative_search/final_output/total_slc_table.csv')
 #test$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",test$code)
@@ -28,6 +28,14 @@ names(l)=c('TransporterDB','Flybase','This Study \n(Denecke et. al 2020)')
 ven=venn.diagram(l,filename=NULL,cex=1.5,fill=c('coral','cadetblue','gold'))
 ggsave(ven,file='./Pipeline_compare/Figure2_Pipeline_compare.svg',device='svg',width=10,height=10,units='cm')
 
+uni.shane=setdiff(dros.slcs$CG,transporter.db$CG) %>% setdiff(flybase$CG)
+uni.tdb=setdiff(transporter.db$CG,dros.slcs$CG) %>% setdiff(flybase$CG)
+
+shane.uni=dros.slcs[CG %in% uni.shane]
+fwrite(shane.uni,'Unique_to_our_study.csv')
+
+tdb.uni=transporter.db[CG %in% uni.tdb]
+fwrite(tdb.uni,'Unique_to_transporter_DB.csv')
 
 #################### FIGURE 3
 

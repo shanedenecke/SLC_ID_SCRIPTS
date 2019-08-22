@@ -73,10 +73,6 @@ count.summary$slc_total=rowSums(count.summary[,2:68])
 colnames(count.summary)[1]='abbreviation'
 count.summary=select(count.summary,abbreviation,everything())
 
-##Produce histogram of total SLC famiy size
-hist(as.numeric(count.summary$slc_total))
-
-
 ##write totals to file
 fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
 
@@ -215,73 +211,3 @@ for(i in 1:nrow(plot.table)){
 
 ############################################## JUNK
 
-
-
-
-
-
-
-cols=colnames(annot)
-expl=cols[68:73]
-slcs=cols[2:66]
-
-for(i in expl){annot[[i]]=as.factor(annot[[i]])}
-annot=annot[!is.na(Host_use_category)]
-l=list()
-
-for(i in slcs){
-  s=annot[[i]] %>% as.character() %>% as.numeric()
-  reg=lm(formula=s~annot$Host_use_category)
-  coef=summary(reg)$coefficients 
-  comparison=rownames(coef)
-  
-  l[[i]]= coef %>% data.table(comp=comparison,family=i) 
-}
-rbindlist(l) %>% filter(!grepl("Intercept",comp)) %>% filter(`Pr(>|t|)`<.05)%>% arrange(`Pr(>|t|)`) %>% data.table()
-
-
-
-
-for(i in expl){
-  for(j in slcs){
-    e=annot[[i]]
-    s=annot[[j]] %>% as.numeric()
-    
-    cor(e,s)
-  }
-}
-
-
-
-nams=count.summary$newcol
-count.summary$newcol=NULL
-totals.matrix=apply(count.summary,2,as.numeric)
-
-varrow=apply(totals.matrix,2,var.me)
-var.table=t(data.frame(varrow)) %>% data.frame()
-var.table$abbrevaition='blank'
-var.table$slc_total='blank'
-#var.table=select(var.table,abbreviation,slc_total,everything())
-
-totals=rowSums(totals.matrix)
-#good.slcs=names(which(colSums(totals.matrix)>(3*140)))
-
-count.summary=data.table(count.summary)
-count.summary$abbreviation=nams
-count.summary$slc_total=totals
-draft.sum=rbind(count.summary,var.table,use.names=F)
-
-
-
-
-
-
-
-
-
-fwrite(g,'./SLC_family_counts/TOTAL_FAMILY_COUNTS.csv',row.names = F)
-
-
-
-#h=dcast(melt(g, id.vars = "family"), variable ~ family) 
-#colnames(h)[1]='SLC_family'

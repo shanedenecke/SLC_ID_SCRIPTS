@@ -1,9 +1,67 @@
 ################### ALIGN AND TREE #####################
-
+cd /data2/shane/Documents/SLC_id
 
 ## copy Dromel and Homsap tables to final dictionary file
-Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./final_SLC_dicts/DroMelFinal_SLC_table.csv
-cp ./HomSap_Database/SLC_source_dict.csv ./final_SLC_dicts/HomSapFinal_SLC_table.csv
+#Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Rename_Dm_SLCs.R > ./final_SLC_dicts/DroMelFinal_SLC_table.csv
+
+#cp ./DroMel_Database/SLC_source_dict.csv ./final_SLC_dicts/DroMelFinal_SLC_table.csv
+#cp ./HomSap_Database/SLC_source_dict.csv ./final_SLC_dicts/HomSapFinal_SLC_table.csv
+
+mkdir phylogeny
+mkdir ./phylogeny/renamed_dicts
+mkdir ./phylogeny/SLC_fa
+rm ./phylogeny/renamed_dicts/*
+rm ./phylogeny/SLC_fa/*
+cat ./general_reference/SLC_info/Phylo_list.txt | while read i
+do
+  cp ./final_SLC_dicts/$i'Final_SLC_table.csv' ./phylogeny/renamed_dicts/
+  csvcut -c name ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' | sed 's/"//g' > nam.txt
+  csvcut -c code ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' | sed 's/"//g' > cod.txt
+  paste  -d '_' nam.txt cod.txt | sed -e "s/^/"$i"_/g" | sed -e '1s/.*/name/g' > newcol.txt
+  paste -d ',' newcol.txt cod.txt > ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv'
+  
+  if [ $i == 'DroMel' ] || [ $i == 'HomSap' ]
+  then
+    /data2/shane/Applications/custom/unigene_fa_sub.sh ./general_reference/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
+  else
+    /data2/shane/Applications/custom/unigene_fa_sub.sh ./proteome_clean/clean_fasta/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa' || /data2/shane/Applications/custom/unigene_fa_sub.sh ./general_reference/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
+  fi
+  /data2/shane/Applications/custom/fasta_rename.py ./phylogeny/SLC_fa/$i'_SLC.faa' ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' >> ./phylogeny/SLC_fa/combined_renamed.faa
+done
+  
+  
+  
+mkdir ./phylogeny/SLC_byfam  
+mkdir ./phylogeny/alignments
+mkdir ./phylogeny/trimms
+mkdir ./phylogeny/phylip
+cat ./general_reference/SLC_info/SLC_families.txt | while read i
+do
+#echo $i
+#done
+  grep -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
+  mafft --threadtb 24 './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
+  /home/pioannidis/Programs/trimAl/source/trimal -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
+  /data2/shane/Applications/custom/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
+done
+
+  
+mkdir SLC_phylogeny
+for i in /data2/shane/Documents/SLC_id/phylogeny/phylip/*.phy
+do
+  b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
+  raxfile=$i
+  raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
+  #rm ./SLC_phylogeny/RAxML*
+  /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 36 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
+  #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
+done
+  
+
+
+
+
+
 
 
 #### Make new directory for model insect dictionaries
@@ -19,6 +77,8 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/DroMel_phylo_rename.R
 
 grep -A 1 "SLC_" /data2/shane/Documents/SLC_id/marked_SLC_for_aligment/Dros_renamed.fa | perl -pe 's/>/>DroMel_/' >> ./marked_SLC_for_aligment/SLC_all.fa
 grep -A 1 "SLC_" ./HomSap_Database/reference_proteome/proteome_SLC_mark.fa | perl -pe 's/>/>HomSap_/'  >> ./marked_SLC_for_aligment/SLC_all.fa
+
+
 
 ## append species name to each SLC name and move to new directory
 cat ./general_reference/SLC_info/important_species_codes.txt | while read i
@@ -43,12 +103,12 @@ do
   /data2/shane/Applications/custom/fasta_2_phylip.sh $a'.aln.trimm' > $a'.aln.trimm.phy'
 done
 
-mkdir SLC_phylogeny
+mkdir ./phylogeny/SLC_phylogeny
 for i in /data2/shane/Documents/SLC_id/SLC_align/*.phy
 do
   b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
   raxfile=$i
-  raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
+  raxdir=/data2/shane/Documents/SLC_id/phylogeny/SLC_phylogeny/
   #rm ./SLC_phylogeny/RAxML*
   /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 36 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
   #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL

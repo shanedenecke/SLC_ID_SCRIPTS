@@ -45,47 +45,17 @@ done
 
 Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_crossref_human_dros_searches.R
 
-#
+####################### 6) summarize counts of SLC tables
 
-
-
-###################### 7) summarize counts of SLC tables
-#python3 ./SLC_id_scripts/SLC_summary_count.py
 Rscript ./SLC_id_scripts/SLC_family_count_combine.R
-###################### 8) Extract sequences from each relevant species. Perform alignment and phylogeny
+
+
+###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny
 ./SLC_id_scripts/SLC_id_Align_and_tree.sh
 
+##################### 8) Prepare Ultrametric Tree
+./SLC_id/scripts/CAFE/SLC_ultrametric_tree_prepare.sh
 
 
-
-### JUNK
-## Xref with flybase SLC calls
-
-######################## 6) Iteratively search each species
-
-## create databases for each species
-#mkdir iterative_database
-#for i in  /data2/shane/Documents/SLC_id/proteomes/*.faa; do
-#  c=$(echo $(basename $i) | cut -d '_' -f 1) 
-#  echo 'Iterative Database '$c
-#  d=$(ls /data2/shane/Documents/SLC_id/Human_Drosophila_crossref/$c*)
-#  ./SLC_id_scripts/SLC_Create_HMM_DB.sh $i $d /data2/shane/Documents/SLC_id/iterative_database/'iterative_database_'$c
-#done
-
-
-## use iterative databases to recursivley search genomes
-#mkdir iterative_search
-#mkdir final_SLC_dicts
-#for i in  /data2/shane/Documents/SLC_id/proteomes/*.faa; do
-#e=$(echo $(basename $i) | cut -d '_' -f 1) 
-#f=$(ls -d /data2/shane/Documents/SLC_id/iterative_database/iterative_database*$e)
-#echo 'Iterative search '$e
-#./SLC_id_scripts/SLC_HMM_Search.sh $f $i /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e
-#cp /data2/shane/Documents/SLC_id/iterative_search/'iterative_search_'$e/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/final_SLC_dicts/$e'Final_SLC_table.csv'
-#done
-
-# Iteratative search Drosophila
-#./SLC_id_scripts/SLC_HMM_Search.sh /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/DroMel_iterative_search
-
-## Make Drosophila database from Human search
-#./SLC_id_scripts/SLC_Create_HMM_DB.sh /data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv /data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database
+##################### 9) Prepare shiny material
+Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R
