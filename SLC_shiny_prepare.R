@@ -126,3 +126,41 @@ fa.search=paste(fam,'_',sep='')
 ind=which(grepl(fa.search,names(raw.fa)))
 #names(ind)=NULL
 fasta.sub=raw.fa[ind]
+
+
+## Tree
+
+### Pre processing  
+load('tree_list')
+tree.groups=gsub("RAxML_bipartitions.","",names(l))
+
+
+## make searchable form of input variable
+tree.search=paste0(fam,'.tre')
+
+if(tree.search %in% tree.groups){ ## check to see if there are any arhtropod SLCs in fam variable
+  
+  tree=l[grepl(tree.search,names(l))][[1]]  ## subset tree
+  
+  ## scale size to number of observations
+  no.obs=length(tree$tip.label)
+  text.size=min(250/no.obs,3)
+  
+  
+  ### plot graph
+  gp=ggtree(tree,branch.length=.1)
+  gp=gp+geom_tiplab(size=text.size)
+  gp=gp+xlim(0, 8)
+  gp=gp+theme_tree()
+  print(gp)
+  
+  ggsave(paste0('./test_trees/',fam,'.pdf'),gp,device='pdf',width=20,height=10)  ## allow users to download pdf or png 
+  write.tree(tree) ## write raw tree output 
+}else{ ## if no SLCs detected print error message
+  print(paste0('Error: No Tree can be generated for the ',fam,' family. Probably no arthropod SLCs were detected'))
+}
+
+
+#### Boxplots
+
+
