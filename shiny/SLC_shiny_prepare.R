@@ -6,13 +6,13 @@ library(seqinr)
 
 ## Set Working directory
 setwd('/data2/shane/Documents/SLC_id')
-
+dir.create('shiny_prep')
 
 #### Create dictionary 
 
 ## table with some info on each species
 co.var=fread('./general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T) %>%
-  select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Vory,Diet_category)
+  select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Vory)
 
 ######################## functions
 dash.remove=function(x){
@@ -45,7 +45,8 @@ rename.dict=data.table(name=fasta.name,code=all$code)
 #rename.dict$name=paste(rename.dict$name,rena)
 all$Species_name=gsub(' ','_',all$Species_name)
 
-fwrite(all,'./shiny_prep/Reference_csv_dictionary.csv')
+
+
 fwrite(rename.dict,'./shiny_prep/Rename_SLC_dict.csv')
 writeLines(rename.dict$code,'shiny_prep/slc_codes.txt')
 
@@ -57,9 +58,17 @@ cd /data2/shane/Documents/SLC_id
 cat ./proteomes/* ./general_reference/model_proteomes/*.faa > ./shiny_prep/all_proteomes.faa
 /data2/shane/Applications/custom/unigene_fa_sub.sh ./shiny_prep/all_proteomes.faa ./shiny_prep/slc_codes.txt > ./shiny_prep/SLC_all_raw.faa
 /data2/shane/Applications/custom/fasta_rename.py ./shiny_prep/SLC_all_raw.faa ./shiny_prep/Rename_SLC_dict.csv > ./shiny_prep/Renamed_SLC.faa
+
+/data2/shane/Applications/custom/tmhmm_filter.sh ./shiny_prep/Renamed_SLC.faa 0 > ./shiny_prep/TMHMM_scores.txt
 ')
 
-raw.fa=read.fasta('./shiny_prep/Renamed_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
+SLC_named_fasta=read.fasta('./shiny_prep/Renamed_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
+
+save(SLC_named_fasta,file='./shiny_prep/SLC_named_fasta.Robj')
 
 
+## output dictionaries with TMM calculations
+all$TMHMM=fread('./shiny_prep/TMHMM_scores.txt',header=F)$V2
+fwrite(all,'./shiny_prep/Reference_csv_dictionary_full.csv')
+fwrite(select(all,abbreviation:Species_name),'./shiny_prep/Reference_csv_dictionary.csv')
 
