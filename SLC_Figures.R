@@ -12,8 +12,8 @@ setwd('/data2/shane/Documents/SLC_id')
 dir.create('Figures')
 setwd('Figures')
 
-co.var=fread('../general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T) %>%
-  select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Phagy2,Vory,Diet_category)
+co.var=fread('../general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T) #%>%
+  #select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Phagy2,Vory,Diet_category)
 full.count=fread('/data2/shane/Documents/SLC_id/SLC_family_counts/count_summary.csv')
 full.table=fread('../shiny_prep/Reference_csv_dictionary.csv') ### Need to generate this file
 total.counts=full.table %>% group_by(Species_name) %>% summarize(fam_size=length(Species_name)) %>% data.table() ##  probably can delete
@@ -115,7 +115,7 @@ for(i in colnames(count.sum)[2:length(count.sum)]){
 meta=merge(count.sum,co.var,by="abbreviation")
 
 ## set varaibles for loop
-comps=c('Taxanomic_Classification','Phagy2','Vory')
+comps=c('Taxanomic_Classification','Phagy','Vory')
 l=list()
 
 ### Perform loop which goes through each SL family and comparison and builds linear model for each
@@ -152,7 +152,7 @@ for(i in 1:nrow(plot.table)){
   row=plot.table[i]
   co=row$co_variable
   fam=row$family
-  red=select(full.counts,fam,co)
+  red=select(m,fam,co)
   red[[fam]]=as.numeric(red[[fam]])
   
   plot=red[red[[co]] %in% names(which(table(red[[co]])>5))] ### remove elements that aren't present at least 5 times

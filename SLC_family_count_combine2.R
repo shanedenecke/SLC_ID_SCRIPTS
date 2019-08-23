@@ -18,7 +18,7 @@ human.hmm=fread('./general_reference/SLC_info/Human_SLC_HMM.txt')
 colnames(human.hmm)=c('code','tm_domains')
 #slc.function=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_function_groups.csv')
 #co.variables=fread('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id/family_size_variation/Olympia_table_august_2019.csv',header=T) ##local
-arth.hmm=fread('./shiny_prep/TMHMM_scores.txt') ### NEED TO DERIVE THIS FILE FIRST
+arth.hmm=fread('./general_reference/SLC_info/Arthropod_SLC_TMHMM_scores.txt') ### NEED TO DERIVE THIS FILE FIRST
 
 ### copy DroMel and HomSap databases 
 file.remove('/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
@@ -26,6 +26,28 @@ file.remove('/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table
 file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
 file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
 
+
+
+### Drosophila verify
+dros=fread('/data2/shane/Documents/SLC_id/dros_tmhmm.txt')
+dros$family=sapply(dros$V1,dash.remove)
+slc_table=dros
+tm.l=list()
+tm.filter.out=list()
+for(j in 1:nrow(slc_table)){
+  test.tm=slc_table[j]$V2
+  tfam=slc_table[j]$family
+  human.min=human.hmm.key[family==tfam]$minimum
+  
+  if(length(test.tm)==0){
+    tm.l[[j]]=slc_table[j]
+  }else if(test.tm>=human.min){
+    tm.l[[j]]=slc_table[j]
+  }else{
+    tm.filter.out[[j]]=slc_table[j]
+  }
+}
+rbindlist(tm.filter.out)
 
 ######################## functions
 dash.remove=function(x){
@@ -61,7 +83,8 @@ human.hmm.key=rbindlist(list(human.hmm.key,data.table(family='SLC_Unsorted',mini
 
 
 
-l=list()
+count.l=list()
+full.list=list()
 remove.list=list()
 ### FILTER TM values 
 ##Get all counts data into master table. Rows SLC families. Columns species
@@ -96,7 +119,8 @@ for (i in list.files('./final_SLC_dicts/')){
   l[[i]]=with.count
   remove.list[[i]]=rbindlist(tm.filter.out)
 }
-  
+
+tmhmm.filtered.out=rbindlist(remove.list)
   
 ## combine list into count.summary variable and transpose to revers rows/cols
 count.summary=Reduce(function(x, y) merge(x, y, ,by='family',all=TRUE), l)  %>% 

@@ -68,7 +68,14 @@ save(SLC_named_fasta,file='./shiny_prep/SLC_named_fasta.Robj')
 
 
 ## output dictionaries with TMM calculations
-all$TMHMM=fread('./shiny_prep/TMHMM_scores.txt',header=F)$V2
+#all$TMHMM=
+
+
+a=fread('./shiny_prep/TMHMM_scores.txt',header=F)
+b=a[V2==0]
+c=b[!grepl('SLC_25',V1)]
+fwrite(c,'./shiny_prep/HMM_test.csv')
+
 fwrite(all,'./shiny_prep/Reference_csv_dictionary_full.csv')
 fwrite(select(all,abbreviation:Species_name),'./shiny_prep/Reference_csv_dictionary.csv')
 
