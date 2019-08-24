@@ -12,11 +12,13 @@ setwd('/data2/shane/Documents/SLC_id')
 dir.create('Figures')
 setwd('Figures')
 
-co.var=fread('../general_reference/Co_variables/Olympia_table_august_2019_shaemod.csv',header=T) #%>%
+co.var=fread('../general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
   #select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Phagy2,Vory,Diet_category)
-full.count=fread('/data2/shane/Documents/SLC_id/SLC_family_counts/count_summary.csv')
-full.table=fread('../shiny_prep/Reference_csv_dictionary.csv') ### Need to generate this file
-total.counts=full.table %>% group_by(Species_name) %>% summarize(fam_size=length(Species_name)) %>% data.table() ##  probably can delete
+full.count=fread('../Final_raw_outputs/count_summary.csv')
+full.table=fread('../Final_raw_outputs/Full_dict_table.csv') ### Need to generate this file
+#total.counts=full.table %>% group_by(Species_name) %>% summarize(fam_size=length(Species_name)) %>% data.table() ##  probably can delete
+
+
 
 ################ FIGURE 2
 dir.create('Pipeline_compare')
@@ -49,7 +51,7 @@ fwrite(tdb.uni,'Unique_to_transporter_DB.csv')
 
 #sub.size=total.counts[Species_name==sp.input.mod]$fam_size
 
-gp=ggplot(full.count,aes(x=slc_total))
+gp=ggplot(full.count,aes(x=SLC_total))
 gp=gp+geom_histogram(colour="black", fill="grey75",binwidth=20)
 gp=gp+geom_density(alpha=.2, fill="#FF6666")
 gp=gp+labs(x='\nTotal SLCs Identified in Species',y='Frequency\n')
@@ -84,7 +86,7 @@ for(i in 1:nrow(m)){
   }
 }
 counts.matrix=m %>% 
-  select(-abbreviation,-SLC_Unsorted,-slc_total,-Species_name,-Taxanomic_Classification, -Phagy, -Vory, -Diet_category) %>%
+  select(matches("SLC"),-SLC_Unsorted,-SLC_total) %>%
   as.matrix() %>% t()
 colnames(counts.matrix)=m$Species_name
 
@@ -98,7 +100,7 @@ dev.off()
 
 ################# FIGURE 5 ##################33
 
-count.sum=select(full.count,-SLC_Unsorted,-slc_total)
+count.sum=select(full.count,-SLC_Unsorted,-SLC_total)
 
 ############### filter out SLC families which have <100 total members in dataset 
 for(i in colnames(count.sum)[2:length(count.sum)]){
@@ -188,7 +190,7 @@ for(i in 1:nrow(plot.table)){
 }
 
 grid.plot=grid.arrange(Taxanomic_Classification.SLC_36,
-             Taxanomic_Classification.SLC_7,
+             Taxanomic_Classification.SLC_22,
              Taxanomic_Classification.SLC_2,
              Taxanomic_Classification.SLC_35,
              Taxanomic_Classification.SLC_60,
