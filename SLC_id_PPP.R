@@ -41,6 +41,11 @@ meta.data=fread('./general_reference/Co_variables/Arthropod_species_metadata.csv
 human.hmm=fread('./general_reference/SLC_info/Human_SLC_HMM.txt')
 colnames(human.hmm)=c('code','tm_domains')
 
+comp.score=fread('./genome_score/comp_score.txt') %>% 
+  filter(grepl('DROSOPHILA',score.name)) %>% separate(score.name,into=c('dros','abbreviation'),'_') %>% 
+  data.table()
+
+
 dros.hmm=fread('./general_reference/SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
 colnames(dros.hmm)=c('code','tm_domains','family')
 
@@ -139,14 +144,41 @@ count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 writeLines(tmhmm.filtered.full$name,'./TMHMM_filter/Filtered_SLC_codes.txt')
 
 system('
-  /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./Final_raw_outputs/SLC_filtered_all_raw.faa 
+  /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa 
        ')
 
 
-##write totals to file
-fwrite(count.summary,'./Final_raw_outputs/count_summary.csv')
-fwrite(tmhmm.removed,'./Final_raw_outputs/TMM_filtered_out.csv')
-fwrite(tmhmm.filtered.full,'./Final_raw_outputs/Full_dict_table.csv')
+
+###### Now filter out those with very bad genome completeness scores
+
+
+## so you don't have to run the same script over and over again
+## count.summary=fread('./Final_raw_outputs/count_summary.csv')
+## tmhmm.filtered.full=fread('./Final_raw_outputs/Full_dict_table.csv')
+
+comp.score2=comp.score[!duplicated(abbreviation)] 
+
+comp.score3=merge(comp.score2,count.summary,by='abbreviation')
+
+with(comp.score3,cor.test(comp.score,SLC_total))
+with(comp.score3,plot(comp.score~SLC_total)) ### make figure
+
+comp.score4=comp.score3[comp.score<.3]
+
+good_spec=c(comp.score4$abbreviation,'DroMel','HomSap')
+bad_spec=comp.score3[comp.score>=.3]$abbreviation
   
+count.summary2=count.summary[abbreviation %in% good_spec]
+tmhmm.filtered.full2=tmhmm.filtered.full[abbreviation %in% good_spec]
+
+fa=read.fasta('./TMHMM_filter/SLC_filtered_all_raw.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
+fa.final=fa[!grepl(paste0(bad_spec,collapse='|'),names(fa))]
+
+
+##write totals to file
+fwrite(count.summary2,'./Final_raw_outputs/TableS4_count_summary.csv')
+fwrite(tmhmm.removed,'./Final_raw_outputs/TMM_filtered_out.csv')
+fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS3_Full_dict_table.csv')
+write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_All_SLC_final.faa',nbchar=10000,as.string=T)
   
   

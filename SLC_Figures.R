@@ -6,6 +6,7 @@ library(svglite)
 library(gplots)
 library(ggplot2)
 library(ggsci)
+library(gridExtra)
 
 setwd('/data2/shane/Documents/SLC_id')
 
@@ -13,9 +14,9 @@ dir.create('Figures')
 setwd('Figures')
 
 co.var=fread('../general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
-  #select(Species_name,abbreviation,Taxanomic_Classification,Phagy,Phagy2,Vory,Diet_category)
-full.count=fread('../Final_raw_outputs/count_summary.csv')
-full.table=fread('../Final_raw_outputs/Full_dict_table.csv') ### Need to generate this file
+  #select(Species_name,abbreviation,Taxonomic_Classification,Phagy,Phagy2,Vory,Diet_category)
+full.count=fread('../Final_raw_outputs/TableS4_count_summary.csv')
+full.table=fread('../Final_raw_outputs/TableS3_Full_dict_table.csv') ### Need to generate this file
 #total.counts=full.table %>% group_by(Species_name) %>% summarize(fam_size=length(Species_name)) %>% data.table() ##  probably can delete
 
 
@@ -46,7 +47,7 @@ fwrite(tdb.uni,'Unique_to_transporter_DB.csv')
 
 #################### FIGURE 3
 
-## Figure 3A
+## Figure 3
 
 
 #sub.size=total.counts[Species_name==sp.input.mod]$fam_size
@@ -62,7 +63,7 @@ gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_bla
             legend.position = 'none',plot.title = element_text(hjust = 0.5))
 print(gp)
 
-ggsave(gp,file='./Figure3A_histogram.pdf',device='pdf',width=20,height=10,units='cm')
+ggsave(gp,file='./Figure3_histogram.pdf',device='pdf',width=20,height=10,units='cm')
 
 ##################### FIGURE 4 #####################
 counts.summary=full.count
@@ -71,13 +72,13 @@ m=merge(counts.summary,co.var,by='abbreviation')
 
 
 groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida','Crustacea')
-#cols=c('red','blue','orange','green','purple','magenta','gold')
-cols=pal_aaas('default')(7)
+cols=c('firebrick2','blue4','khaki3','green3','black','mediumorchid3','gold3')
+#cols=pal_aaas('default')(7)
 
 names(groups)=cols
 final.cols=c()
 for(i in 1:nrow(m)){
-  g=m$Taxanomic_Classification[i]
+  g=m$Taxonomic_Classification[i]
   
   if(g %in% groups){
   final.cols[i]=names(groups[which(groups==g)])
@@ -85,10 +86,10 @@ for(i in 1:nrow(m)){
     final.cols[i]='black'
   }
 }
-counts.matrix=m %>% 
+counts.matrix=m %>% filter(abbreviation!='HomSap') %>%
   select(matches("SLC"),-SLC_Unsorted,-SLC_total) %>%
   as.matrix() %>% t()
-colnames(counts.matrix)=m$Species_name
+colnames(counts.matrix)=m$Species_name[m$Species_name!='Homo_sapiens']
 
 #par(mar=c(1,4,10,3)) 
 pdf('Figure4_heatmap.pdf',width=20,height=10)
@@ -103,11 +104,12 @@ dev.off()
 count.sum=select(full.count,-SLC_Unsorted,-SLC_total)
 
 ############### filter out SLC families which have <100 total members in dataset 
+v=c()
 for(i in colnames(count.sum)[2:length(count.sum)]){
   sub=as.numeric(count.sum[[i]])
   #if(max(sub)<10){# & sub[173]<.5){
-  if(sum(sub)<100 | max(sub)<20){
-    print(i)
+  if(sum(sub)<100 | max(sub)<10){
+    v=c(v,i)
     count.sum[[i]]=NULL
   }
 }
@@ -117,7 +119,7 @@ for(i in colnames(count.sum)[2:length(count.sum)]){
 meta=merge(count.sum,co.var,by="abbreviation")
 
 ## set varaibles for loop
-comps=c('Taxanomic_Classification','Phagy','Vory')
+comps=c('Taxonomic_Classification','Phagy','Vory')
 l=list()
 
 ### Perform loop which goes through each SL family and comparison and builds linear model for each
@@ -139,7 +141,7 @@ for(i in colnames(meta)[grep('SLC_',colnames(meta))]){
 summary=rbindlist(l)  
 summary$bonf=p.adjust(summary$pval,method='bonferroni') 
 
-tab.one=summary %>% arrange(bonf) %>% filter(bonf<1e-5)  %>% filter(max_effect>3) %>% data.table()
+tab.one=summary %>% arrange(bonf) %>% filter(bonf<1e-5)  %>% filter(max_effect>4) %>% data.table()
 
 
 fwrite(summary,'./ANOVA_full.csv')
@@ -165,7 +167,7 @@ for(i in 1:nrow(plot.table)){
   
   pdf(paste0('./ANOVA_meta_plots/',co,'_',fam,'.pdf'))
   gp=ggplot(plot,aes_string(co,y=fam,fill=co))
-  gp=gp+geom_boxplot()
+  gp=gp+geom_boxplot(outlier.size=1)
   gp=gp+labs(x=xlab,y=ylab)
   gp=gp+scale_fill_rickandmorty()
   gp=gp+ggtitle(tit)
@@ -182,19 +184,19 @@ for(i in 1:nrow(plot.table)){
   gp2=gp2+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
                    axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
                    axis.text.x=element_blank(),title=element_text(size=10),
-                   legend.position='right',plot.title = element_text(hjust = 0.5))
+                   legend.position='none',plot.title = element_text(hjust = 0.5))
   gp2=gp2+ggtitle(fam)
   
   assign(paste0(co,'.',fam),gp2)
   dev.off()
 }
 
-grid.plot=grid.arrange(Taxanomic_Classification.SLC_36,
-             Taxanomic_Classification.SLC_22,
-             Taxanomic_Classification.SLC_2,
-             Taxanomic_Classification.SLC_35,
-             Taxanomic_Classification.SLC_60,
-             Taxanomic_Classification.SLC_33,
+grid.plot=grid.arrange(Taxonomic_Classification.SLC_36,
+             Taxonomic_Classification.SLC_22,
+             Taxonomic_Classification.SLC_2,
+             Taxonomic_Classification.SLC_35,
+             Taxonomic_Classification.SLC_60,
+             Taxonomic_Classification.SLC_33,
              nrow=2)
 
 ggsave(grid.plot,file='Figure5_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')
