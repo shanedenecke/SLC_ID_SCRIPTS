@@ -115,8 +115,8 @@ count.summary$slc_total=rowSums(count.summary[,2:67])
 colnames(count.summary)[1]='abbreviation'
 count.summary=select(count.summary,abbreviation,everything())
 
-##write totals to file
-fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
+  ##write totals to file
+  fwrite(count.summary,'./SLC_family_counts/count_summary.csv')
 
 
 

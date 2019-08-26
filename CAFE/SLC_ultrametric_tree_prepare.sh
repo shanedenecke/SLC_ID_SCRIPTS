@@ -15,10 +15,6 @@ Rscript ../SLC_id_scripts/CAFE/SLC_ultrametric_arthropod_sub.R
 python3 ../SLC_id_scripts/CAFE/SLC_ultrameric_1t1_sub.py
 
 
-## ok one random shiny prep command in here
-cat ./proteomes/* ./general_reference/model_proteomes/*.faa > ./shiny_prep/all_proteomes.faa
-
-
 /data2/shane/Applications/custom/unigene_fa_sub.sh ./arthropod_raw_orthodb.faa ./unicodes_fa_subset.txt > ./Raw_ultrametric.faa
 /data2/shane/Applications/custom/fasta_rename.py ./Raw_ultrametric.faa ./renaming_dictionary.csv > ./Renamed_ultrameric.faa
 
