@@ -8,6 +8,7 @@ shhh(library(readr))
 shhh(library(ggplot2))
 shhh(library(ggsci))
 shhh(library(stringi))
+shhh(library(seqinr))
 
 
 ######################## functions
@@ -94,11 +95,11 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
   file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-  system('
+  #system('
         
-        /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
-        /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
-          ')
+  #      /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
+  #      /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
+  #        ')
 }
 
 
@@ -161,7 +162,10 @@ comp.score2=comp.score[!duplicated(abbreviation)]
 comp.score3=merge(comp.score2,count.summary,by='abbreviation')
 
 with(comp.score3,cor.test(comp.score,SLC_total))
-with(comp.score3,plot(comp.score~SLC_total)) ### make figure
+
+pdf('./Figures/FigureS1_length_filter_out.pdf',width=20,height=10)
+with(comp.score3,plot(comp.score~SLC_total,xlab='Total Number of SLCs',ylab='Fracion of proteins too short',cex=1.5,cex.lab=1.5)) ### make figure
+dev.off()
 
 comp.score4=comp.score3[comp.score<.3]
 
@@ -180,5 +184,5 @@ fwrite(count.summary2,'./Final_raw_outputs/TableS4_count_summary.csv')
 fwrite(tmhmm.removed,'./Final_raw_outputs/TMM_filtered_out.csv')
 fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS3_Full_dict_table.csv')
 write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_All_SLC_final.faa',nbchar=10000,as.string=T)
-  
+#save(fa.final,file='./Final_raw_outputs//All_SLCs_fasta.Robj')
   

@@ -68,11 +68,11 @@ ggsave(gp,file='./Figure3_histogram.pdf',device='pdf',width=20,height=10,units='
 ##################### FIGURE 4 #####################
 counts.summary=full.count
 counts.summary$SLC_62=NULL
-m=merge(counts.summary,co.var,by='abbreviation')
+m=merge(counts.summary,co.var,by='abbreviation') %>% filter(abbreviation!='HomSap') %>% data.table()
 
 
 groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida','Crustacea')
-cols=c('firebrick2','blue4','khaki3','green3','black','mediumorchid3','gold3')
+cols=c('firebrick2','blue4','magenta','green3','brown','mediumorchid3','gold3')
 #cols=pal_aaas('default')(7)
 
 names(groups)=cols
@@ -86,7 +86,7 @@ for(i in 1:nrow(m)){
     final.cols[i]='black'
   }
 }
-counts.matrix=m %>% filter(abbreviation!='HomSap') %>%
+counts.matrix=m %>% 
   select(matches("SLC"),-SLC_Unsorted,-SLC_total) %>%
   as.matrix() %>% t()
 colnames(counts.matrix)=m$Species_name[m$Species_name!='Homo_sapiens']
