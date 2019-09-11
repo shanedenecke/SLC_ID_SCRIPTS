@@ -70,7 +70,8 @@ rem.dup=function(x){
   }
   return(rbindlist(final))
 }
-l=lapply(l,rem.dup)   
+
+l=lapply(l,rem.dup)
 
 
 l=lapply(l,function(x) x[!duplicated(x$code),])

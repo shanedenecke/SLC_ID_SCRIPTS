@@ -1,6 +1,11 @@
  cd /data2/shane/Documents/SLC_id
 
-#/data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/Rename_SLC_dict.csv > ./TMHMM_filter/Renamed_unfiltered_SLC.faa
-#/data2/shane/Applications/custom/tmhmm_filter.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa 0 > ./TMHMM_filter/SLC_TMHMM_scores.txt
-
-/home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep "Number of predicted" | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
+for i in /data2/shane/Documents/SLC_id/phylogeny/phylip/*.phy
+do
+  b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
+  raxfile=$i
+  raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
+  #rm ./SLC_phylogeny/RAxML*
+  /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T 12 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
+  #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
+done

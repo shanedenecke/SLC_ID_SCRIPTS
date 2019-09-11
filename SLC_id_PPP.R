@@ -71,13 +71,13 @@ file.copy('./general_reference/model_proteomes/HomSap_unigene.faa','./proteomes/
 ###Generate HMM filter tables
 human.hmm$family=sapply(human.hmm$code,dash.remove)
 model.hmm=rbindlist(list(human.hmm,dros.hmm))
-model.hmm.key=human.hmm %>% group_by(family) %>% summarize(minimum=max(0,min(tm_domains)-2)) %>% data.table()
+model.hmm.key=human.hmm %>% group_by(family) %>% summarize(minimum=max(0,min((min(tm_domains)-2),(min(tm_domains)/2)))) %>% data.table()
 model.hmm.key=rbindlist(list(model.hmm.key,data.table(family='SLC_Unsorted',minimum=0)),use.names = T)
 
 
 ########## GET PRELIMINARY LIST AND SUBSET FASTA
 
-
+#i='./final_SLC_dicts/CaeEleFinal_SLC_table.csv'
 l=list()
 for(i in list.files('./final_SLC_dicts',full.names = T)){
   dict=fread(i)
@@ -87,6 +87,7 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
   dict$abbreviation=abbrev
   dict$family=fam
   dict2=merge(dict,select(meta.data,Species_name,abbreviation),by='abbreviation',use.names=T) %>% mutate(name)
+  #dict2=dict
   dict2$name=paste(dict2$Species_name,dict2$abbreviation,dict2$code,dict2$name,sep='___')
   dict2$name=gsub(' ','_',dict2$name)
   l[[i]]=dict2
@@ -103,9 +104,9 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
 }
 
 
-system("
-       /home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
-       ")
+#system("
+#       /home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
+#       ")
 
 unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
 
@@ -113,10 +114,12 @@ unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA
 all=rbindlist(l,use.names = T)
 
 arth.hmm=fread('./TMHMM_filter/SLC_TMHMM_scores.txt') 
+#arth.hmm=fread('./TMHMM_filter/Cae_SLC_TMHMM_scores.txt',header=F,sep='\t') 
 colnames(arth.hmm)=c('name','tm_count')
 arth.hmm=arth.hmm[grepl('___',name)]
 
 m=merge(arth.hmm,all,by='name') %>% merge(meta.data,by=c('Species_name','abbreviation'))
+#m=merge(arth.hmm,all,by='name') 
 
 g.l=list()
 b.l=list()
@@ -128,9 +131,10 @@ for(i in 1:nrow(model.hmm.key)){
   sub=m[family==fam]
   
   good=sub[tm_count>=mini]
+  #good=sub[tm_count>=mini | tm_count>4]
   g.l[[i]]=good
   
-  bad=sub[tm_count<mini]
+  bad=sub[tm_count<mini & tm_count<=4]
   b.l[[i]]=bad
 }
 tmhmm.filtered.full=rbindlist(g.l)
@@ -138,7 +142,7 @@ tmhmm.removed=rbindlist(b.l)
 
 count.summary=tmhmm.filtered.full %>% group_by(family,abbreviation) %>% summarize(count=length(family)) %>% spread(key=family,value=count) %>% data.table()
 count.summary[is.na(count.summary)]=0
-select(count.summary,matches('SLC')) %>% as.matrix()  
+#select(count.summary,matches('SLC')) %>% as.matrix()  
 
 count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 
@@ -146,6 +150,8 @@ writeLines(tmhmm.filtered.full$name,'./TMHMM_filter/Filtered_SLC_codes.txt')
 
 system('
   /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa 
+  python3 /data2/shane/Applications/custom/unigene_fa_sub_update.py ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw2.faa 
+     
        ')
 
 
@@ -186,3 +192,12 @@ fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS3_Full_dict_table.csv')
 write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_All_SLC_final.faa',nbchar=10000,as.string=T)
 #save(fa.final,file='./Final_raw_outputs//All_SLCs_fasta.Robj')
   
+
+a=fread('./Final_raw_outputs/TableS3_Full_dict_table.csv') %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
+  select(-family) %>% data.table()
+
+lapply(split(a,a$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./real_final_SLC_tables/',x$abbreviation[1],'_final_SLC_table.csv')))
+
+
+
+

@@ -47,15 +47,17 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_crossref_human_dros_sea
 
 ####################### 6) summarize counts of SLC tables
 
-Rscript ./SLC_id_scripts/SLC_family_count_combine.R
-
+#Rscript ./SLC_id_scripts/SLC_family_count_combine.R
+Rscript ./SLC_id_scripts/SLC_id_PPP.R
 
 ###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny
 ./SLC_id_scripts/SLC_id_Align_and_tree.sh
 
 ##################### 8) Prepare Ultrametric Tree
-./SLC_id/scripts/CAFE/SLC_ultrametric_tree_prepare.sh
+#./SLC_id/scripts/CAFE/SLC_ultrametric_tree_prepare.sh
 
 
 ##################### 9) Prepare shiny material
-Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R
+#Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R
+
+Rscript 

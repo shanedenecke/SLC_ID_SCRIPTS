@@ -14,20 +14,21 @@ rm ./phylogeny/renamed_dicts/*
 rm ./phylogeny/SLC_fa/*
 cat ./general_reference/SLC_info/Phylo_list.txt | while read i
 do
-  cp ./final_SLC_dicts/$i'Final_SLC_table.csv' ./phylogeny/renamed_dicts/
-  csvcut -c name ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' | sed 's/"//g' > nam.txt
-  csvcut -c code ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' | sed 's/"//g' > cod.txt
-  paste  -d '_' nam.txt cod.txt | sed -e "s/^/"$i"_/g" | sed -e '1s/.*/name/g' > newcol.txt
-  paste -d ',' newcol.txt cod.txt > ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv'
-  
+  cp ./real_final_SLC_tables/$i'_final_SLC_table.csv' ./phylogeny/renamed_dicts/
+  #csvcut -c name ./real_final_SLC_tables/$i'_final_SLC_table.csv' | sed 's/"//g' > nam.txt
+  csvcut -c code ./real_final_SLC_tables/$i'_final_SLC_table.csv' | sed 's/"//g' > cod.txt
+  #paste  -d '_' nam.txt cod.txt | sed -e "s/^/"$i"_/g" | sed -e '1s/.*/name/g' > newcol.txt
+  #paste -d ',' newcol.txt cod.txt > ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv'
   if [ $i == 'DroMel' ] || [ $i == 'HomSap' ]
   then
     /data2/shane/Applications/custom/unigene_fa_sub.sh ./general_reference/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
   else
-    /data2/shane/Applications/custom/unigene_fa_sub.sh ./proteome_clean/clean_fasta/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa' || /data2/shane/Applications/custom/unigene_fa_sub.sh ./general_reference/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
+    /data2/shane/Applications/custom/unigene_fa_sub.sh ./proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa' || /data2/shane/Applications/custom/unigene_fa_sub.sh ./general_reference/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
   fi
-  /data2/shane/Applications/custom/fasta_rename.py ./phylogeny/SLC_fa/$i'_SLC.faa' ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv' >> ./phylogeny/SLC_fa/combined_renamed.faa
+  /data2/shane/Applications/custom/fasta_rename.py ./phylogeny/SLC_fa/$i'_SLC.faa' ./phylogeny/renamed_dicts/$i'_final_SLC_table.csv' >> ./phylogeny/SLC_fa/combined_renamed.faa
+rm cod.txt
 done
+
   
   
   
@@ -37,9 +38,7 @@ mkdir ./phylogeny/trimms
 mkdir ./phylogeny/phylip
 cat ./general_reference/SLC_info/SLC_families.txt | while read i
 do
-#echo $i
-#done
-  grep -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
+  grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
   mafft --threadtb 24 './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
   /home/pioannidis/Programs/trimAl/source/trimal -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
   /data2/shane/Applications/custom/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
@@ -53,7 +52,7 @@ do
   raxfile=$i
   raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
   #rm ./SLC_phylogeny/RAxML*
-  /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 36 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
+  /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 42 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
   #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
 done
   
