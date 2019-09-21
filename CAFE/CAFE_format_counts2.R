@@ -2,6 +2,7 @@ library(dplyr)
 library(data.table)
 library(stringr)
 library(ape)
+library(ggtree)
 
 setwd('/data2/shane/Documents/SLC_id')
 counts=fread('./Final_raw_outputs/TableS4_count_summary.csv')
@@ -103,12 +104,46 @@ for (i in iter){
   rax.tree.name=gsub('7227_0','DroMel',rax.tree)
   writeLines(rax.tree.name,paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre'))
   
+  ## read in named raxmL tree
+  tr=read.tree(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre'))
+  
+  nodes <- c(); maxes=c()
+  maxes=c()
+  mins=c()
+  if(("CaeEle" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("CaeEle","DroMel")));maxes=c(maxes,1000);mins=c(800)}
+  if(("AcyPis" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AcyPis","DroMel")));maxes=c(maxes,353);mins=c(mins,302)}
+  if(("ApiMel" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("ApiMel","DroMel")));maxes=c(maxes,372);mins=c(mins,317)} ## has fossil
+  if(("AedAeg" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AcyPis","DroMel")));maxes=c(maxes,206);mins=c(mins,107)} ## has fossil
+  if(("NilLug" %in% tr$tip.label) & ("AcyPis" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AcyPis","NilLug")));maxes=c(maxes,346);mins=c(mins,232)}
+  if(("TetUrt" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("TetUrt","DroMel")));maxes=c(maxes,579);mins=c(mins,539)}
+  if(("PluXyl" %in% tr$tip.label) & ("BomMor" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("PluXyl","BomMor")));maxes=c(maxes,579);mins=c(mins,539)} ## has fossil
+  
  
   ## create ultrametric tree
-  l.tree.ch=chronopl(read.tree(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
-  l.tree.ch$edge.length=l.tree.ch$edge.length*1000
-  l.tree.ch$node.label=NULL
-  write.tree(l.tree.ch, file=paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))
+  ### Credit to Alex SL for format https://phylobotanist.blogspot.com/2019/
+  mycalibration=makeChronosCalib(tr, node=c(nodes), age.min=mins,age.max=maxes)
+  mytimetree=chronos(tr, lambda = 1, model = "discrete", calibration = mycalibration, control = chronos.control(nb.rate.cat=1))
+  write.tree(mytimetree, file=paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))
+  
+  
+  #### Plot tree
+  plot.tree=read.tree(paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))
+  
+  pdf(paste0("./CAFE/trees/",i,'_tree_ultrametric.pdf'))
+  gp=ggtree(plot.tree)#, mrsd = "2010-01-01")
+  gp=gp+geom_tiplab(size=6)#,face='bold')
+  gp=gp+geom_nodepoint()
+  gp=gp+geom_nodelab(hjust=.15)
+  gp=gp+xlim(0, max(maxes)+100)
+  gp=gp+theme_tree()
+  #gp=gp+theme(
+  print(gp)
+  dev.off()
+  
+  #l.tree.ch=chronopl(read.tree(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
+  #l.tree.ch$edge.length=l.tree.ch$edge.length*1000
+  #l.tree.ch$node.label=NULL
+  #write.tree(l.tree.ch, file=paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))
   
   ## create lambda file
   writeLines(lambda.convert(readLines(paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))),paste0("./CAFE/trees/",i,'_tree_lambda.txt')) 
