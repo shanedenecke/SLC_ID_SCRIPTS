@@ -88,7 +88,11 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/CAFE_format_coutns.R
 
 ## create CAFE script files
 
-for i in $DataList;
+rm ./scripts/*Cafe_Script.*
+rm ./outputs/*
+rm ./logfiles/*
+
+for i in $DataList
 do
   touch ./scripts/$i'_Cafe_Script.cafe'
   echo '#!cafe' >> ./scripts/$i'_Cafe_Script.cafe'
@@ -101,11 +105,12 @@ do
   
   ## run cafe
   cafe ./scripts/$i'_Cafe_Script.cafe'
-  python2 ./scripts/Fulton_python_scripts/cafetutorial_report_analysis.py -i outputs/$i'_cafe_output.cafe' -o outputs/$i'_summary.txt'
+  python2  /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/Fulton_python_scripts/cafetutorial_report_analysis.py -i outputs/$i'_cafe_output.cafe' -o outputs/$i'_summary.txt'
 done
 
-python2 ./scripts/Fulton_python_scripts/cafetutorial_report_analysis.py -i ./outputs/Lepidopteran_cafe_output.cafe -o ./outputs/Lepidopteran_summary.txt
-### Arthropod
+
+############ DRAW TREES
+
 
 python2 ./scripts/Fulton_python_scripts/cafetutorial_draw_tree.py -i ./outputs/Arth_summary.txt_node.txt \
 -t '(((TetUrt:57.81880282,(LimPol:49.71837335,IxoSca:49.71837335):8.100429473):5.959877943,((FolCan:56.07268736,DapPul:56.07268736):3.997986376,((CalSpl:20.20918347,LadFul:20.20918347):33.5137095,((LocMig:41.76599698,ZooNev:41.76599698):9.795154716,(((HalHal:42.30200991,AcyPis:42.30200991):5.261729612,PedHum:47.56373952):2.754776794,((((DanPle:12.92318211,BomMor:12.92318211):28.0946928,(DroMel:28.58784296,AnoGam:28.58784296):12.43003196):3.232169938,(LepDec:21.14607746,TriCas:21.14607746):23.1039674):3.355186797,(ApiMel:23.6822136,NasVit:23.6822136):23.92301805):2.713284662):1.242635384):2.161741264):6.347780776):3.708007023):36.22131924,CaeEle:100)' \

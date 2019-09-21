@@ -82,6 +82,7 @@ fwrite(full.counts,'./CAFE/CAFE_tables/CAFE_FULL.tsv',sep='\t')
 
 ######################### CLEAN UP TRE FILES
 iter=list.files('/data2/shane/Documents/SLC_id/CAFE/trees')[grepl('raxml_tree',list.files('/data2/shane/Documents/SLC_id/CAFE/trees'))] %>% 
+  {.[!str_detect(., "named_")]} %>%
   str_remove('raxml_tree_') %>% str_remove('.tre')
 taxid.codes$cafe_code=paste(taxid.codes$taxid_code,'0',sep='_')
 taxid.codes=rbind(taxid.codes,data.table(taxid_code=6239,abbreviation='CaeEle',species_name='Caenorhabditis elegans',cafe_code="6239_0"))
