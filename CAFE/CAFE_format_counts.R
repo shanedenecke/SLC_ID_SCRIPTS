@@ -35,9 +35,9 @@ shane.transpose=function(dt,newcol){
 }
 
 lambda.convert=function(x){
-  a=gsub("[A-z]+:0.[0-9]+",1,x)
+  a=gsub("[A-z]+:[0-9]+.[0-9]+",1,x)
   b=gsub("[0-9]{2,}:0.[0-9]+",1,a)
-  c=gsub(":0.[0-9]+",1,b)
+  c=gsub(":[0-9]+.[0-9]+",1,b)
   d=gsub('[A-z]+:[0-9]+',1,c)
   return(d)
 }
@@ -47,7 +47,7 @@ lambda.convert=function(x){
 ######################### CLEAN UP TRE FILES
 
 
-l.tree=readLines('./general_reference/CAFE/Lepi_RAxML_bipartitions.concat_genes.fs.aln.trimmed.phy.tre')
+l.tree=readLines('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_Lepidopteran.tre')
 h.tree=readLines('./general_reference/CAFE/Hemi_RAxML_bipartitions.concat_genes.fs.aln.trimmed.phy.tre')
 a.tree=readLines('./general_reference/CAFE/Arth_RAxML_bipartitions.concat_genes.fs.aln.trimmed.phy.tre')
 full_list=c(l.tree,h.tree,a.tree)
@@ -76,44 +76,53 @@ for(i in 1:length(full_list)){
 
 l.tree=read.tree('./CAFE/trees/raxml_treeLepi.tre')
 l.tree.ch=chronopl(l.tree, lambda=0.1)
+l.tree.ch$edge.length=l.tree.ch$edge.length*1000
+l.tree.ch$node.label=NULL
 write.tree(l.tree.ch, file="./CAFE/trees/Lepi_tree_ultrametric.tre")
 
 l.tree=read.tree('./CAFE/trees/raxml_treeHemi.tre')
 l.tree.ch=chronopl(l.tree, lambda=0.1)
+l.tree.ch$edge.length=l.tree.ch$edge.length*1000
+l.tree.ch$node.label=NULL
 write.tree(l.tree.ch, file="./CAFE/trees/Hemi_tree_ultrametric.tre")
 
 
 l.tree=read.tree('./CAFE/trees/raxml_treeArth.tre')
 l.tree.ch=chronopl(l.tree, lambda=0.1)
+l.tree.ch$edge.length=l.tree.ch$edge.length*1000
+l.tree.ch$node.label=NULL
 write.tree(l.tree.ch, file="./CAFE/trees/Arth_tree_ultrametric.tre")
 
 
-hem=str_extract_all(readLines('./CAFE/trees/Hemi_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
+hem=str_extract_all(readLines('./CAFE/trees/Hemipteran_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
 hem=hem[hem!='_']
-lep=str_extract_all(readLines('./CAFE/trees/Lepi_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
+lep=str_extract_all(readLines('./CAFE/trees/Lepidopteran_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
 lep=lep[lep!='_']
-art=str_extract_all(readLines('./CAFE/trees/Arth_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
+art=str_extract_all(readLines('./CAFE/trees/Arthropod_tree_ultrametric.tre'),pattern = "[A-z]+",simplify = T)
 art=art[art!='_']
 
-writeLines(lambda.convert(readLines('./CAFE/trees/Hemi_tree_ultrametric.tre')),'./CAFE/trees/Hemi_tree_lambda.txt')
-#writeLines(lambda.convert(readLines('./CAFE/trees/Hemi_tree_ultrametric.tre')),'./CAFE/trees/Hemi_tree_lambda.txt')
-writeLines(lambda.convert(readLines('./CAFE/trees/Arth_tree_ultrametric.tre')),'./CAFE/trees/Arth_tree_lambda.txt')
+writeLines(lambda.convert(readLines('./CAFE/trees/Hemipteran_tree_ultrametric.tre')),'./CAFE/trees/Hemipteran_tree_lambda.txt')
+writeLines(lambda.convert(readLines('./CAFE/trees/Lepidopteran_tree_ultrametric.tre')),'./CAFE/trees/Lepidopteran_tree_lambda.txt')
+writeLines(lambda.convert(readLines('./CAFE/trees/Arthropod_tree_ultrametric.tre')),'./CAFE/trees/Arthropod_tree_lambda.txt')
 
 ######## CLEAN UP CAFE TABLES
 counts2=rbindlist(list(counts,ce.counts),use.names = T,fill=T)
 
+
+##################################### ONLY RUN FOR FILTER
 counts2[is.na(counts2)]=0
 v=c()
 
 for(i in colnames(counts2)[2:length(counts2)]){
   sub=as.numeric(counts2[[i]])
-  if(max(sub)-min(sub)>10 | sum(sub)<20){
+  if(max(sub)-min(sub)>300 | sum(sub)<60){
     #if(sum(sub)<100 | max(sub)<10){
     v=c(v,i)
     counts2[[i]]=NULL
   }
 }
 counts2[['SLC_total']]=NULL
+####################################################
 
 trans.counts=shane.transpose(counts2) %>% data.table()
 
@@ -125,17 +134,17 @@ trans.counts=shane.transpose(counts2) %>% data.table()
 colnames(trans.counts)[1]='Family ID'
 trans.counts$`Family ID`=gsub('_','',trans.counts$`Family ID`)
 trans.counts$Desc='(null)'
-trans.counts=rbindlist(list(trans.counts,sup.counts),use.names = T,fill=T)
+#trans.counts=rbindlist(list(trans.counts,sup.counts),use.names = T,fill=T)
 full.counts=select(trans.counts,Desc,everything())
 
 #colnames(full.counts)[3:length(colnames(full.counts))]=sapply(colnames(full.counts)[3:length(colnames(full.counts))],abbrev)
-#lepi=full.counts %>% select(c('Desc','Family ID',lep)) #%>% filter(`Family ID`=='SLC_22')
+lepi=full.counts %>% select(c('Desc','Family ID',lep)) #%>% filter(`Family ID`=='SLC_22')
 hemi=full.counts %>% select(c('Desc','Family ID',hem)) #%>% filter(`Family ID`=='SLC_33')
 repi=full.counts %>% select(c('Desc','Family ID',art)) #%>% filter(`Family ID`=='SLC_22')
 
 fwrite(full.counts,'./CAFE/CAFE_tables/CAFE_FULL.tsv',sep='\t')
 
-#fwrite(lepi,'./CAFE/Lepidotperan_SLC_CAFE_table.tsv',sep='\t') #### Tree includes HelLat and ChiSup which are not in counts data
+fwrite(lepi,'./CAFE/CAFE_tables/Lepidotperan_SLC_CAFE_table.tsv',sep='\t') #### Tree includes HelLat and ChiSup which are not in counts data
 fwrite(hemi,'./CAFE/CAFE_tables/Hemipteran_SLC_CAFE_table.tsv',sep='\t')
 fwrite(repi,'./CAFE/CAFE_tables/Arthropod_SLC_CAFE_table.tsv',sep='\t')
 
