@@ -40,6 +40,7 @@ mkdir ./phylogeny/SLC_byfam
 mkdir ./phylogeny/alignments
 mkdir ./phylogeny/trimms
 mkdir ./phylogeny/phylip
+#cat ./general_reference/SLC_info/SLC_families.txt | while read i
 cat ./general_reference/SLC_info/SLC_families.txt | while read i
 do
   grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'

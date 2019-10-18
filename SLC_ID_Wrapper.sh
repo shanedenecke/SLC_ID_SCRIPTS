@@ -55,7 +55,11 @@ Rscript ./SLC_id_scripts/SLC_id_PPP.R
 
 ##################### 8) Prepare Ultrametric Tree
 #./SLC_id/scripts/CAFE/SLC_ultrametric_tree_prepare.sh
-./SLC_id_scripts/CAFE/CAFE_follow_up.sh
+./SLC_id_scripts/CAFE/Ultrametric_tree_generate.sh
+
+
+## RUN CAFE
+./SLC_id_scripts/CAFE/CAFE_run_full.sh
 
 ##################### 9) Prepare shiny material
 #Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R

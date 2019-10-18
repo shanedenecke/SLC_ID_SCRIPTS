@@ -47,3 +47,38 @@ gp=gp+geom_nodepoint(size=2,col=cols)
 gp=gp+theme_tree2()
 gp=gp+scale_x_continuous(breaks=diff+ma.r,labels=as.character(rev(ma.r)),limits=c(0,xma))
 print(gp)
+
+suba=read.tree('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_Hemipteran.tre')
+a=read.tree('/data2/shane/Documents/SLC_id/CAFE/trees/Hemipteran_tree_ultrametric.tre')
+b=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Hemipteran_SLC_summary.txt_anc.txt')[`Family ID`=='SLC33']
+
+convert='(((PedHum<0>,(((LadFul<2>,CalSpl<4>)<3>,(LocMig<6>,(BlaGer<8>,ZooNev<10>)<9>)<7>)<5>,(((NilLug<12>,HomVit<14>)<13>,(GerBue<16>,((OncFas<18>,HalHal<20>)<19>,(CimLec<22>,RhoPro<24>)<23>)<21>)<17>)<15>,(BemTab<26>,(DiaCit<28>,((AphGly<30>,RhoPad<32>)<31>,(AcyPis<34>,(DiuNox<36>,(MyzCer<38>,MyzPer<40>)<39>)<37>)<35>)<33>)<29>)<27>)<25>)<11>)<1>,DroMel<42>)<41>);'
+writeLines(convert,'/data2/shane/Documents/Panos_CAFE_lepi/lab.tree')
+lab.tree=read.tree('/data2/shane/Documents/Panos_CAFE_lepi/lab.tree')
+
+
+c= b %>% select(-matches('[A-z]'))
+a$node.label=lab.tree$node.label
+
+d=as.numeric(c)
+names(d)=colnames(c)
+
+sort(order(names(a$node.label))[names(d)]) 
+sorted=c()
+for(i in a$node.label){
+  print(i)
+  temp=d[names(d)==i]
+ sorted=c(sorted,temp)
+}
+final=c('',as.character(sorted))
+
+u=a
+u$node.label=final
+
+gp=ggtree(u)#, mrsd = "2010-01-01")
+gp=gp+geom_tiplab(size=6)#,face='bold')
+gp=gp+geom_nodepoint(size=2)
+gp=gp+geom_nodelab(hjust=0)
+gp=gp+theme_tree2()
+#gp=gp+scale_x_continuous(breaks=diff+ma.r,labels=as.character(rev(ma.r)),limits=c(0,xma))
+print(gp)

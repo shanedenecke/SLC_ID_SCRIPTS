@@ -43,8 +43,14 @@ makeblastdb -in ./reference_proteome/proteome_SLC_mark.fa -parse_seqids -dbtype 
 
 ## extract list of SLC names to be used in future steps
 mkdir ./list
-cat $2 | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
+#cat $2 | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 #cat $B | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
+
+num=$(head -1 $2 | tr ',' '\n' | cat -n | grep "name")
+#num=$(head -1 $B | tr ',' '\n' | cat -n | grep "name")
+num2=$(echo $num | cut -d' ' -f 1) 
+cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
+#cut -d',' -f $num2 $B | tail -n+2 > ./list/SLC_names_final.txt
 
 ## extract fasta of gene lists from Dmel
 /data2/shane/Applications/custom/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
@@ -63,9 +69,17 @@ done
 mkdir ./muscle_alignments
 for i in ./family_fasta/*
 do
-mafft --threadtb 24 $i > $i.aln
-/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
+seq=$(cat $i | wc -l)
+
+if [ $seq -gt 2 ]
+  then
+    mafft --thread 24 $i > $i.aln
+    /home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
+  else
+    cat $i > $i.trimmed
+  fi
 done
+
 mv ./family_fasta/*.trimmed ./muscle_alignments
 rm -rf ./family_fasta/*.aln
 

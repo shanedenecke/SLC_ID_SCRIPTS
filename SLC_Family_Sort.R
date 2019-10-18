@@ -116,7 +116,8 @@ for (x in 1:length(unigenes)){
     filter.list[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
   }else if(length(which(slc_fams %in% top_hit_fam))==fam_count){ ## where all members of a family are present in the list
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
-  }else if(slc_tab[1]>=length(slc_tab)-1){ ## include any where all are from from one SLC family except 1
+  #}else if(slc_tab[1]>=length(slc_tab)-1){ ## include any where all are from from one SLC family except 1
+  }else if(slc_tab[1]>=nrow(sub.blast)-1){
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)
   }else if((evalues[2]/evalues[1]> 1e30) & grepl('SLC_',top_hit_fam)){ ## Keep where top hit is SLC and overwhelmingly significant
     slc.total[[i]]=data.table(geneid=top_hit_gene,family=top_hit_fam)

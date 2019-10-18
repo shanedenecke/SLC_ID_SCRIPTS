@@ -23,15 +23,15 @@ do
   rm ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   touch ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   echo '#!cafe' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_OrthoDB_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_OrthoDB_CAFE_logfile.txt -p 0.01' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_OrthoDB_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_OrthoDB_CAFE_logfile.txt -p 0.2' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   a=$(cat ./trees/$i'_tree_ultrametric.tre')
   echo 'tree '$a >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   l=$(cat ./trees/$i'_tree_lambda.txt')
-   echo 'lambda -s -t '$l >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  echo 'lambda -s -t '$l >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   echo 'report /data2/shane/Documents/SLC_id/CAFE/outputs/'$i'_OrthoDB_cafe_output' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   
   ## Run orthoDB CAFE to get lambda. Did not use because it overestimates every SLC as rapidly evolving
-  #cafe ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #/data2/shane/Applications/CAFE/release/cafe ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   #lambda=$(cat './logfiles/'$i'_OrthoDB_CAFE_logfile.txt' | grep "Lambda" | grep "Score" |  tail -n1 | perl -pe 's/Lam.+(0\.[0-9]+) & Score.+$/$1/g')
   
   
@@ -50,7 +50,7 @@ do
   echo 'report /data2/shane/Documents/SLC_id/CAFE/outputs/'$i'_SLC_cafe_output' >> ./scripts/$i'_SLC_Cafe_Script.cafe'
   
   ## run cafe
-  cafe ./scripts/$i'_SLC_Cafe_Script.cafe'
+  /data2/shane/Applications/CAFE/release/cafe ./scripts/$i'_SLC_Cafe_Script.cafe'
   python2  /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/Fulton_python_scripts/cafetutorial_report_analysis.py -i outputs/$i'_SLC_cafe_output.cafe' -o outputs/$i'_SLC_summary.txt'
 done
 
