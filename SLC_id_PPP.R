@@ -96,19 +96,22 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
   file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-  system('
-        /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
-        /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
-          ')
+#  system('
+#        /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
+#        /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
+#          ')
 }
 
+unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
+unnamed.fasta2=unnamed.fasta[grepl('__',names(unnamed.fasta))]
+write.fasta(unnamed.fasta2,names(unnamed.fasta2),file.out='./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 
 system("
-       /home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
+       #/home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
        /home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt
+       cat ./TMHMM_filter/SLC_TMHMM_full.txt | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
        ")
 
-unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
 
 
 all=rbindlist(l,use.names = T)
@@ -116,7 +119,7 @@ all=rbindlist(l,use.names = T)
 arth.hmm=fread('./TMHMM_filter/SLC_TMHMM_scores.txt',header=F,sep='\t') 
 #arth.hmm=fread('./TMHMM_filter/Cae_SLC_TMHMM_scores.txt',header=F,sep='\t') 
 colnames(arth.hmm)=c('name','tm_count')
-arth.hmm=arth.hmm[grepl('___',name)]
+#arth.hmm=arth.hmm[grepl('___',name)]
 
 m=merge(arth.hmm,all,by='name') %>% merge(meta.data,by=c('Species_name','abbreviation'))
 #m=merge(arth.hmm,all,by='name') 
@@ -196,7 +199,8 @@ write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_
 a=fread('./Final_raw_outputs/TableS3_Full_dict_table.csv') %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
   select(-family) %>% data.table()
 
-lapply(split(a,a$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./real_final_SLC_tables/',x$abbreviation[1],'_final_SLC_table.csv')))
+dir.create('real_final_SLC_dicts')
+lapply(split(a,a$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./real_final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))
 
 
 
