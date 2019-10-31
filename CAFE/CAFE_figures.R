@@ -6,6 +6,7 @@ library(ggtree)
 library(tidyr)
 library(stringr)
 setwd('/data2/shane/Documents/SLC_id/Figures')
+dir.create('CAFE_figures')
 
 arth.ids=gsub("# Output format for: ' Average Expansion', 'Expansions', 'No Change', 'Contractions', and 'Branch-specific P-values' = (node ID, node ID): ",
               "",readLines('/data2/shane/Documents/SLC_id/CAFE/outputs/Arthropod_SLC_cafe_output.cafe')[5],fixed=T)

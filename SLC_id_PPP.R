@@ -35,6 +35,7 @@ shane.transpose=function(dt,newcol){
 setwd('/data2/shane/Documents/SLC_id')
 dir.create('TMHMM_filter')
 dir.create('Final_raw_outputs')
+dir.create('Figures')
 
 
 ## read in data
@@ -96,10 +97,10 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
   file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-#  system('
-#        /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
-#        /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
-#          ')
+  #system('
+       # /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
+      #  /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
+   #       ')
 }
 
 unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
@@ -142,7 +143,8 @@ for(i in 1:nrow(model.hmm.key)){
 }
 tmhmm.filtered.full=rbindlist(g.l)
 tmhmm.removed=rbindlist(b.l)
-
+dros.addback=tmhmm.removed[abbreviation=='DroMel'] ## add back the one thing that was filtered out in DroMel
+tmhmm.filtered.full=rbindlist(list(tmhmm.filtered.full,dros.addback))
 count.summary=tmhmm.filtered.full %>% group_by(family,abbreviation) %>% summarize(count=length(family)) %>% spread(key=family,value=count) %>% data.table()
 count.summary[is.na(count.summary)]=0
 #select(count.summary,matches('SLC')) %>% as.matrix()  
@@ -189,14 +191,14 @@ fa.final=fa[!grepl(paste0(bad_spec,collapse='|'),names(fa))]
 
 
 ##write totals to file
-fwrite(count.summary2,'./Final_raw_outputs/TableS4_count_summary.csv')
+fwrite(count.summary2,'./Final_raw_outputs/TableS7_count_summary.csv')
 fwrite(tmhmm.removed,'./Final_raw_outputs/TMM_filtered_out.csv')
-fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS3_Full_dict_table.csv')
+fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS6_Full_dict_table.csv')
 write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_All_SLC_final.faa',nbchar=10000,as.string=T)
 #save(fa.final,file='./Final_raw_outputs//All_SLCs_fasta.Robj')
   
 
-a=fread('./Final_raw_outputs/TableS3_Full_dict_table.csv') %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
+a=fread('./Final_raw_outputs/TableS6_Full_dict_table.csv') %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
   select(-family) %>% data.table()
 
 dir.create('real_final_SLC_dicts')

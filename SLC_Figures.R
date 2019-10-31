@@ -15,8 +15,8 @@ setwd('Figures')
 
 co.var=fread('../general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
   #select(Species_name,abbreviation,Taxonomic_Classification,Phagy,Phagy2,Vory,Diet_category)
-full.count=fread('../Final_raw_outputs/TableS4_count_summary.csv')
-full.table=fread('../Final_raw_outputs/TableS3_Full_dict_table.csv') ### Need to generate this file
+full.count=fread('../Final_raw_outputs/TableS7_count_summary.csv')
+full.table=fread('../Final_raw_outputs/TableS6_Full_dict_table.csv') ### Need to generate this file
 #total.counts=full.table %>% group_by(Species_name) %>% summarize(fam_size=length(Species_name)) %>% data.table() ##  probably can delete
 
 
@@ -34,16 +34,16 @@ dros.slcs$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",dros.slcs$code)
 l=list(transporter.db$CG,flybase$CG,dros.slcs$CG)
 names(l)=c('TransporterDB','Flybase','This Study \n(Denecke et. al 2020)')
 ven=venn.diagram(l,filename=NULL,cex=1.5,fill=c('coral','cadetblue','gold'))
-ggsave(ven,file='./Pipeline_compare/Figure2_Pipeline_compare.svg',device='svg',width=10,height=10,units='cm')
+ggsave(ven,file='./Figure2_Pipeline_compare.svg',device='svg',width=10,height=10,units='cm')
 
 uni.shane=setdiff(dros.slcs$CG,transporter.db$CG) %>% setdiff(flybase$CG)
 uni.tdb=setdiff(transporter.db$CG,dros.slcs$CG) %>% setdiff(flybase$CG)
 
 shane.uni=dros.slcs[CG %in% uni.shane]
-fwrite(shane.uni,'Unique_to_our_study.csv')
+fwrite(shane.uni,'./Pipeline_compare/Unique_to_our_study.csv')
 
 tdb.uni=transporter.db[CG %in% uni.tdb]
-fwrite(tdb.uni,'Unique_to_transporter_DB.csv')
+fwrite(tdb.uni,'./Pipeline_compare/Unique_to_transporter_DB.csv')
 
 #################### FIGURE 3
 
@@ -63,7 +63,7 @@ gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_bla
             legend.position = 'none',plot.title = element_text(hjust = 0.5))
 print(gp)
 
-ggsave(gp,file='./Figure3_histogram.pdf',device='pdf',width=20,height=10,units='cm')
+ggsave(gp,file='./FigureS2_histogram.pdf',device='pdf',width=20,height=10,units='cm')
 
 ##################### FIGURE 4 #####################
 counts.summary=full.count
@@ -92,14 +92,14 @@ counts.matrix=m %>%
 colnames(counts.matrix)=m$Species_name[m$Species_name!='Homo_sapiens']
 
 #par(mar=c(1,4,10,3)) 
-pdf('Figure4_heatmap.pdf',width=20,height=10)
-heatmap.2(counts.matrix,Rowv=F,Colv=T,scale="row",dendrogram = 'column',tracecol=NA,colCol = final.cols,margins = c(10,5),cexRow=.7,
+pdf('Figure3_heatmap.pdf',width=20,height=10)
+heatmap.2(counts.matrix,Rowv=F,Colv=T,scale="row",col=colorpanel(75,'blue','grey','red'),dendrogram = 'column',tracecol=NA,colCol = final.cols,margins = c(10,5),cexRow=.7,
           density.info = 'density',denscol='black')
 dev.off()
 
 
 
-################# FIGURE 5 ##################33
+################# FIGURE 4 ##################33
 
 count.sum=select(full.count,-SLC_Unsorted,-SLC_total)
 
@@ -199,5 +199,5 @@ grid.plot=grid.arrange(Taxonomic_Classification.SLC_36,
              Taxonomic_Classification.SLC_33,
              nrow=2)
 
-ggsave(grid.plot,file='Figure5_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')
+ggsave(grid.plot,file='Figure4_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')
 

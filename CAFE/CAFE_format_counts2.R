@@ -7,7 +7,7 @@ shhh(library(ggtree))
 shhh(library(tidyr))
 
 setwd('/data2/shane/Documents/SLC_id')
-counts=fread('./Final_raw_outputs/TableS4_count_summary.csv')
+counts=fread('./Final_raw_outputs/TableS7_count_summary.csv')
 oly=fread('./general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) %>% 
   select(Species_name,abbreviation)
 taxid.codes=fread('./general_reference/non_model_proteomes/keys/OrthoDB_tax_key_3col.tsv',
@@ -86,7 +86,8 @@ trans.counts$`Family ID`=gsub('_','',trans.counts$`Family ID`)
 trans.counts$Desc='(null)'
 #trans.counts=rbindlist(list(trans.counts,sup.counts),use.names = T,fill=T)
 full.counts=select(trans.counts,Desc,everything())
-
+dir.create('CAFE')
+dir.create('./CAFE/CAFE_tables')
 fwrite(full.counts,'./CAFE/CAFE_tables/CAFE_FULL.tsv',sep='\t')
 
 

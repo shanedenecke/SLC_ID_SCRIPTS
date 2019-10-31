@@ -1,4 +1,7 @@
-cd /data2/shane/Documents/SLC_id/CAFE
+cd /data2/shane/Documents/SLC_id
+
+mkdir CAFE
+cd CAFE
 
 ### SETUP basic data
 DataList='Lepidopteran___Hemipteran___Arachnid___Arthropod'
@@ -15,6 +18,9 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/CAFE_format_counts2.R
 #rm ./scripts/*Cafe_Script.*
 #rm ./outputs/*
 #rm ./logfiles/*
+mkdir scripts
+mkdir logfiles
+mkdir outputs
 
 for i in $DataList
 do
