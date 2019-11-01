@@ -1,25 +1,31 @@
 cd /data2/shane/Documents/SLC_id/CAFE
-
+mkdir Ultrametric_tree_CAFE
 ### SETUP basic data
-DataList='Lepidopteran___Hemipteran___Arachnid___Arthropod'
+DataList='Hemipteran___Arachnid___Arthropod'
 Field_Separator=$IFS
 # set comma as internal field separator for the string list
 IFS=___
 
 ## Create ultrametric Trees
 cd Ultrametric_tree_CAFE
+mkdir odb_files
+cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.33208.tab ./odb_files/
+cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.6656.tab ./odb_files/
+
+##### NEED TO FIX
+mkdir species_lists
+cp /data2/shane/Documents/SLC_id/general_reference/CAFE/*species_list.txt ./species_lists
 
 for i in $DataList
 do
   mkdir $i
   cd $i
-  
   if [ $i = "Arthropod" ] || [ $i = "Arachnid" ]; then 
   #echo 'hello'
-       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl ../odb_files/odb10v0_OG2genes.33208.tab ../species_lists/$i'_species_list.txt' > orthology.txt
+       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl ../odb_files/odb10v0_OG2genes.33208.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
     else
     #echo 'goodbye'
-       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl ../odb_files/odb10v0_OG2genes.6656.tab ../species_lists/$i'_species_list.txt' > orthology.txt
+       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl  ../odb_files/odb10v0_OG2genes.6656.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
   fi
   
   

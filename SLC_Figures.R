@@ -72,7 +72,7 @@ m=merge(counts.summary,co.var,by='abbreviation') %>% filter(abbreviation!='HomSa
 
 
 groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida','Crustacea')
-cols=c('firebrick2','blue4','magenta','green3','brown','mediumorchid3','gold3')
+cols=c('firebrick2','blue4','magenta','green3','orange','mediumorchid3','gold3')
 #cols=pal_aaas('default')(7)
 
 names(groups)=cols

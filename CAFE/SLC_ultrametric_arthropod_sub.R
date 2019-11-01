@@ -3,6 +3,9 @@ library(dplyr)
 
 setwd('/data2/shane/Documents/SLC_id/ultrametric_tree')
 
+odb10.met=fread('/data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.33208.tab') %>%
+colnames()
+
 tax=fread('./odb10_taxid.txt')
 genes=fread('./odb10_genes.txt',header=F)
 groups=fread('./odb10_groups.txt',header=F)
