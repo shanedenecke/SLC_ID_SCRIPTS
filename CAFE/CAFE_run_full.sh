@@ -1,10 +1,8 @@
-cd /data2/shane/Documents/SLC_id
+cd /data2/shane/Documents/SLC_id/CAFE
 
-mkdir CAFE
-cd CAFE
 
 ### SETUP basic data
-DataList='Lepidopteran___Hemipteran___Arachnid___Arthropod'
+DataList='Hemipteran___Arachnid___Arthropod'
 Field_Separator=$IFS
 # set comma as internal field separator for the string list
 IFS=___
@@ -26,15 +24,15 @@ for i in $DataList
 do
   
   ### OrthoDB CAFE to calculate tree wide Lambda value
-  rm ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  touch ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  echo '#!cafe' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_OrthoDB_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_OrthoDB_CAFE_logfile.txt -p 0.2' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  a=$(cat ./trees/$i'_tree_ultrametric.tre')
-  echo 'tree '$a >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  l=$(cat ./trees/$i'_tree_lambda.txt')
-  echo 'lambda -s -t '$l >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
-  echo 'report /data2/shane/Documents/SLC_id/CAFE/outputs/'$i'_OrthoDB_cafe_output' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #rm ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #touch ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #echo '#!cafe' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_OrthoDB_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_OrthoDB_CAFE_logfile.txt -p 0.2' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #a=$(cat ./trees/$i'_tree_ultrametric.tre')
+  #echo 'tree '$a >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #l=$(cat ./trees/$i'_tree_lambda.txt')
+  #echo 'lambda -s -t '$l >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
+  #echo 'report /data2/shane/Documents/SLC_id/CAFE/outputs/'$i'_OrthoDB_cafe_output' >> ./scripts/$i'_OrthoDB_Cafe_Script.cafe'
   
   ## Run orthoDB CAFE to get lambda. Did not use because it overestimates every SLC as rapidly evolving
   #/data2/shane/Applications/CAFE/release/cafe ./scripts/$i'_OrthoDB_Cafe_Script.cafe'

@@ -1,5 +1,6 @@
 cd /data2/shane/Documents/SLC_id/CAFE
 mkdir Ultrametric_tree_CAFE
+mkdir /data2/shane/Documents/SLC_id/CAFE/trees/
 ### SETUP basic data
 DataList='Hemipteran___Arachnid___Arthropod'
 Field_Separator=$IFS
@@ -11,6 +12,7 @@ cd Ultrametric_tree_CAFE
 mkdir odb_files
 cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.33208.tab ./odb_files/
 cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.6656.tab ./odb_files/
+cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10_all_og_fasta.tab ./odb_files/
 
 ##### NEED TO FIX
 mkdir species_lists
@@ -35,7 +37,7 @@ do
   cd sc_fasta
   
   #Generate Fasta file with all species in list
-  fgrep -A1 -f ../../species_lists/$i'_species_list.txt' ../../odb_files/all_species.faa | grep -v "\-\-" > all_species.f.faa
+  fgrep -A1 -f ../../species_lists/$i'_species_list.txt' ../../odb_files/odb10_all_og_fasta.tab | grep -v "\-\-" > all_species.f.faa
   
   #Extract fasta sequences
   for x in *names; do /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/extract_specific_fasta_seqs_v3.pl $x all_species.f.faa > `basename $x .names`.fs; done 
@@ -47,9 +49,9 @@ do
   #for x in *raxml; do cd $x; ../create_tree_from_fasta_file.sh.pl `ls *.fs` 7227_0,7070_0,7460_0 16 > create_tree.stdout_stderr 2>&1; cd ../; done &
   
   ##make final phylip file
-  mkdir final_tree
-  rm ./final_tree/all_trimms_horiz.trimm.phy
-  touch ./final_tree/all_trimms_horiz.trimm.phy
+  #mkdir final_tree
+  #rm ./final_tree/all_trimms_horiz.trimm.phy
+  #touch ./final_tree/all_trimms_horiz.trimm.phy
   
   ### make individual phylips
   for x in ./fasta/*.fs

@@ -11,7 +11,7 @@ shhh(library(stringr))
 ## already got lengths from expression analysis
 
 args = commandArgs(trailingOnly=TRUE)
-#setwd('/data2/shane/Documents/Ultrametric_tree_CAFE/Arthropod2/sc_fasta')
+#setwd('/data2/shane/Documents/SLC_id/CAFE/Ultrametric_tree_CAFE/Hemipteran/sc_fasta')
 
 l=list()
 l2=list()

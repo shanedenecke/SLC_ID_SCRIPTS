@@ -1,10 +1,11 @@
-library(ape)
-library(ggplot2)
-library(data.table)
-library(dplyr)
-library(ggtree)
-library(tidyr)
-library(stringr)
+shhh <- suppressPackageStartupMessages
+shhh(library(dplyr))
+shhh(library(data.table))
+shhh(library(stringr))
+shhh(library(ape))
+shhh(library(ggtree))
+shhh(library(tidyr))
+
 setwd('/data2/shane/Documents/SLC_id/Figures')
 dir.create('CAFE_figures')
 
@@ -48,8 +49,8 @@ hemi.cafe %>% fwrite('./CAFE_figures/hemi_CAFE.csv')
 
 
 
-lepi.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Lepidopteran_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
-  filter(V3<.011) %>% data.table()
+#lepi.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Lepidopteran_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
+#  filter(V3<.011) %>% data.table()
 
 group='Hemipteran'
 family='SLC33'
@@ -114,13 +115,13 @@ tree.fig=function(group,family){
   print(gp)
 }
 
-dir.create('CAFE_figures')
+#dir.create('CAFE_figures')
 
 hemi.33=tree.fig(group='Hemipteran','SLC33')
 ggsave(filename='./CAFE_figures/Hemi_33.pdf',plot=hemi.33,device='pdf',width=15,height=10)
 
-lepi.22=tree.fig(group='Lepidopteran','SLC22')
-ggsave(filename='./CAFE_figures/Lepi.22.pdf',plot=lepi.22,device='pdf',width=15,height=10)
+#lepi.22=tree.fig(group='Lepidopteran','SLC22')
+#ggsave(filename='./CAFE_figures/Lepi.22.pdf',plot=lepi.22,device='pdf',width=15,height=10)
 
 arac.60=tree.fig(group='Arachnid','SLC60')
 ggsave(filename='./CAFE_figures/Arac.60.pdf',plot=arac.60,device='pdf',width=15,height=10)

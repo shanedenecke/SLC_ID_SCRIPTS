@@ -67,5 +67,3 @@ Rscript ./SLC_id_scripts/CAFE/CAFE_figures.R
 
 ##################### 9) Prepare shiny material
 #Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R
-
-Rscript 
