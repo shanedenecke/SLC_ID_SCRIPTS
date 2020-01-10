@@ -15,7 +15,7 @@ arth.ids2=unlist(strsplit(arth.ids,split=' '))
 sp=gsub('# IDs of nodes:','',readLines('/data2/shane/Documents/SLC_id/CAFE/outputs/Arthropod_SLC_cafe_output.cafe')[4])
 sp2=unlist(str_extract_all(sp,"[A-z]{6,}<[0-9]+>")) %>% str_remove_all('<|>')
 arth.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Arthropod_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
-  filter(V3<.011) %>% separate(col=V4,into=arth.ids2,sep='\\),\\(') %>%
+  filter(V3<.05) %>% separate(col=V4,into=arth.ids2,sep='\\),\\(') %>%
     data.table()
 #colnames(arth.cafe)[3]=arth.ids2
 arth.cafe %>% fwrite('./CAFE_figures/Arth_CAFE.csv')
@@ -28,7 +28,7 @@ arac.ids2=unlist(strsplit(arac.ids,split=' '))
 sp=gsub('# IDs of nodes:','',readLines('/data2/shane/Documents/SLC_id/CAFE/outputs/Arachnid_SLC_cafe_output.cafe')[4])
 sp2=unlist(str_extract_all(sp,"[A-z]{6,}<[0-9]+>")) %>% str_remove_all('<|>')
 arac.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Arachnid_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
-  filter(V3<.011) %>% separate(col=V4,into=arac.ids2,sep='\\),\\(') %>%
+  filter(V3<.05) %>% separate(col=V4,into=arac.ids2,sep='\\),\\(') %>%
   data.table()
 #colnames(arac.cafe)[3]=arac.ids2
 arac.cafe %>% fwrite('./CAFE_figures/Arac_CAFE.csv')
@@ -42,7 +42,7 @@ hemi.ids2=unlist(strsplit(hemi.ids,split=' '))
 sp=gsub('# IDs of nodes:','',readLines('/data2/shane/Documents/SLC_id/CAFE/outputs/Hemipteran_SLC_cafe_output.cafe')[4])
 sp2=unlist(str_extract_all(sp,"[A-z]{6,}<[0-9]+>")) %>% str_remove_all('<|>')
 hemi.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Hemipteran_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
-  filter(V3<.011) %>% separate(col=V4,into=hemi.ids2,sep='\\),\\(') %>%
+  filter(V3<.05) %>% separate(col=V4,into=hemi.ids2,sep='\\),\\(') %>%
   data.table()
 #colnames(hemi.cafe)[3]=hemi.ids2
 hemi.cafe %>% fwrite('./CAFE_figures/hemi_CAFE.csv')
@@ -52,8 +52,8 @@ hemi.cafe %>% fwrite('./CAFE_figures/hemi_CAFE.csv')
 #lepi.cafe=fread('/data2/shane/Documents/SLC_id/CAFE/outputs/Lepidopteran_SLC_cafe_output.cafe',skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
 #  filter(V3<.011) %>% data.table()
 
-group='Hemipteran'
-family='SLC33'
+group='Arthropod'
+family='SLC36'
 
 #ree.fig=function(raxtree,ultratree,fams.summary,counts,family){
 tree.fig=function(group,family){
@@ -116,18 +116,24 @@ tree.fig=function(group,family){
 }
 
 #dir.create('CAFE_figures')
+arth.21=tree.fig(group='Arthropod','SLC21')
+ggsave(filename='./CAFE_figures/Arth_21.pdf',plot=arth.21,device='pdf',width=10,height=8)
 
 hemi.33=tree.fig(group='Hemipteran','SLC33')
 ggsave(filename='./CAFE_figures/Hemi_33.pdf',plot=hemi.33,device='pdf',width=15,height=10)
 
+arac.2=tree.fig(group='Arachnid','SLC2')
+ggsave(filename='./CAFE_figures/Arac_2.pdf',plot=arac.2,device='pdf',width=15,height=10)
 #lepi.22=tree.fig(group='Lepidopteran','SLC22')
 #ggsave(filename='./CAFE_figures/Lepi.22.pdf',plot=lepi.22,device='pdf',width=15,height=10)
+
+hemi.36=tree.fig(group='Arthropod','SLC36')
 
 arac.60=tree.fig(group='Arachnid','SLC60')
 ggsave(filename='./CAFE_figures/Arac.60.pdf',plot=arac.60,device='pdf',width=15,height=10)
 
-ac.35=tree.fig(group='Arachnid','SLC35')
-ggsave(filename='./CAFE_figures/Arac.35.pdf',plot=ac.35,device='pdf',width=15,height=10)
+arac.35=tree.fig(group='Arachnid','SLC35')
+ggsave(filename='./CAFE_figures/Arac.35.pdf',plot=arac.35,device='pdf',width=15,height=10)
 
 arth.2=tree.fig(group='Arthropod','SLC2')
 ggsave(filename='./CAFE_figures/Arth.2.pdf',plot=arth.2,device='pdf',width=15,height=10)

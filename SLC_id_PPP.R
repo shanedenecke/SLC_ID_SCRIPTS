@@ -32,7 +32,7 @@ shane.transpose=function(dt,newcol){
 
 
 #setwd('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id') #local
-setwd('/data2/shane/Documents/SLC_id')
+setwd('/data2/shane/SLC_portable')
 dir.create('TMHMM_filter')
 dir.create('Final_raw_outputs')
 dir.create('Figures')
@@ -51,17 +51,17 @@ comp.score=fread('./genome_score/comp_score.txt') %>%
 dros.hmm=fread('./general_reference/SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
 colnames(dros.hmm)=c('code','tm_domains','family')
 
-slc_fams=readLines('/data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt')
+slc_fams=readLines('/data2/shane/SLC_portable/general_reference/SLC_info/SLC_families.txt')
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
 
 
 ### copy DroMel and HomSap databases to final_dicts directory
-file.remove('/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
-file.remove('/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
-file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/DroMelFinal_SLC_table.csv')
-file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/Documents/SLC_id/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+file.remove('/data2/shane/SLC_portable/final_SLC_dicts/DroMelFinal_SLC_table.csv')
+file.remove('/data2/shane/SLC_portable/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','/data2/shane/SLC_portable/final_SLC_dicts/DroMelFinal_SLC_table.csv')
+file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/SLC_portable/final_SLC_dicts/HomSapFinal_SLC_table.csv')
 
 file.copy('./general_reference/model_proteomes/DroMel_unigene.faa','./proteomes/')
 file.copy('./general_reference/model_proteomes/HomSap_unigene.faa','./proteomes/')
@@ -97,22 +97,16 @@ for(i in list.files('./final_SLC_dicts',full.names = T)){
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
   file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-  #system('
-       # /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa 
-      #  /data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa
-   #       ')
+  system('/data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa')
+  system('/data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 }
 
 unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
 unnamed.fasta2=unnamed.fasta[grepl('__',names(unnamed.fasta))]
 write.fasta(unnamed.fasta2,names(unnamed.fasta2),file.out='./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 
-system("
-       #/home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
-       /home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt
-       cat ./TMHMM_filter/SLC_TMHMM_full.txt | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\s+(\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt
-       ")
-
+system("/home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt")
+system(" cat ./TMHMM_filter/SLC_TMHMM_full.txt | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\\s+(\\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt")
 
 
 all=rbindlist(l,use.names = T)
@@ -153,11 +147,8 @@ count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 
 writeLines(tmhmm.filtered.full$name,'./TMHMM_filter/Filtered_SLC_codes.txt')
 
-system('
-  /data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa 
-  #python3 /data2/shane/Applications/custom/unigene_fa_sub_update.py ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw2.faa 
-     
-       ')
+system('/data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa')
+#system( #python3 /data2/shane/Applications/custom/unigene_fa_sub_update.py ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw2.faa ')
 
 
 
@@ -199,7 +190,8 @@ write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_
   
 
 a=fread('./Final_raw_outputs/TableS6_Full_dict_table.csv') %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
-  select(-family) %>% data.table()
+  select(-family) %>% unique.data.frame() %>% data.table()  ##### don't know why removing the family is here
+  #unique.data.frame() %>% data.table()
 
 dir.create('real_final_SLC_dicts')
 lapply(split(a,a$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./real_final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))

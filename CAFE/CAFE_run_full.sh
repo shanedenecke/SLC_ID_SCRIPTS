@@ -45,7 +45,7 @@ do
   rm ./scripts/$i'_SLC_Cafe_Script.cafe'
   touch ./scripts/$i'_SLC_Cafe_Script.cafe'
   echo '#!cafe' >> ./scripts/$i'_SLC_Cafe_Script.cafe'
-  echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_SLC_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_SLC_logfile.txt -p 0.01' >> ./scripts/$i'_SLC_Cafe_Script.cafe'
+  echo 'load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/'$i'_SLC_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/'$i'_SLC_logfile.txt -p 0.05' >> ./scripts/$i'_SLC_Cafe_Script.cafe'
   a=$(cat ./trees/$i'_tree_ultrametric.tre')
   echo 'tree '$a >> ./scripts/$i'_SLC_Cafe_Script.cafe'
   l=$(cat ./trees/$i'_tree_lambda.txt')
