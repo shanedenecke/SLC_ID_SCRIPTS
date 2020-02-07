@@ -7,7 +7,11 @@ shhh(library(tidyr))
 shhh(library(readr))
 
 ## collate all SLC transporter lists from human and drosophila searches 
-setwd('/data2/shane/Documents/SLC_id')
+
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
+
+setwd(H)
 
 sp.list=c()
 for(file in list.files('./proteomes')){
@@ -77,13 +81,13 @@ l=lapply(l,rem.dup)
 l=lapply(l,function(x) x[!duplicated(x$code),])
 
 
-dir.create('final_SLC_dicts')
-setwd('final_SLC_dicts')
+dir.create('preliminary_SLC_dicts')
+setwd('preliminary_SLC_dicts')
 
 for (i in 1:length(l)){ 
   sub=l[[i]]
   n=names(l)[i]
-  write.csv(sub,file=paste0(n,"Final_SLC_table.csv"),row.names = F)
+  write.csv(sub,file=paste0(n,"Preliminary_SLC_table.csv"),row.names = F)
 } 
 
 

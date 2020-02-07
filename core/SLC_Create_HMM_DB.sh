@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 ### ###################### Create HMM profiles for each SLC family in species ###################
-## currently stuck on server. Error is that /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.27' required by trimAL
 
 ## argument 1= Predicted unigene protein dataset
 ## argument 2= SLC dictionary with codes and names
@@ -14,14 +13,14 @@
 
 ## use these for debugging
 
-#A=/data2/shane/Documents/SLC_id/general_reference/model_proteomes/HomSap_unigene.faa
-#B=/data2/shane/Documents/SLC_id/general_reference/SLC_info/HomSap_SLC_dict.csv
-#C=/data2/shane/Documents/SLC_id/HomSap_Database
+#A=$H/GENERAL_REFERENCE/model_proteomes/HomSap_unigene.faa
+#B=$H/GENERAL_REFERENCE/model_SLC_info/HomSap_SLC_dict.csv
+#C=$H/HomSap_Database
 ################################################################################
 #
 
 ## reset bash
-source ~/.bashrc
+#source ~/.bashrc
 
 ## Create and set working directory
 mkdir $3
@@ -33,7 +32,8 @@ cd $3
 
 ## rename fasta files with tag for SLC family
 mkdir reference_proteome
-/data2/shane/Applications/custom/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
+$H/SLC_ID_SCRIPTS/general_scripts/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
+#$H/SLC_ID_SCRIPTS/general_scripts/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
 #/data2/shane/Applications/custom/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
 
 #/data2/shane/Applications/custom/fasta_rename.py /data2/shane/Documents/omics_data/Homo_sapiens/unigene/Hs_unigene.fa /data2/shane/Dropbox/wp7_prodrug/SLC_id/general_reference/Hs_SLC_dict.csv > ./reference_proteome/proteome_SLC_mark.fa
@@ -48,7 +48,7 @@ mkdir ./list
 
 num=$(head -1 $2 | tr ',' '\n' | cat -n | grep "name")
 #num=$(head -1 $B | tr ',' '\n' | cat -n | grep "name")
-num2=$(echo $num | cut -d' ' -f 1) 
+num2=$(echo $num | cut -f 1 | sed -E 's/\s+//g') 
 cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 #cut -d',' -f $num2 $B | tail -n+2 > ./list/SLC_names_final.txt
 
@@ -60,7 +60,7 @@ cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 mkdir ./family_fasta 
 rm -rf ./family_fasta/*
 IFS=$'\n'; 
-for next in $(cat /data2/shane/Documents/SLC_id/general_reference/SLC_info/SLC_families.txt)
+for next in $(cat $H/GENERAL_REFERENCE/family_species_lists_phylo/SLC_families.txt)
 do 
   grep -A 1 ${next} ./list/SLC_genes.fa | sed '/--/d' > ./family_fasta/${next}.fa
 done
@@ -74,7 +74,8 @@ seq=$(cat $i | wc -l)
 if [ $seq -gt 2 ]
   then
     mafft --thread 24 $i > $i.aln
-    /home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
+    #/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
+    $H'/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal' -in $i.aln -out $i.trimmed
   else
     cat $i > $i.trimmed
   fi
@@ -98,4 +99,4 @@ cd $3
 cp $2 $(pwd $3)'/SLC_source_dict.csv' ## needs to change name
 #cp $B $(pwd $C)'/dictionary_create_FIND/SLC_dict.csv' ## needs to change name
 #cp $B $(pwd $C'/SLC_dict.csv')
-#cp /data2/shane/Documents/SLC_id/general_reference/Hs_SLC_dict.csv /data2/shane/Documents/SLC_id/Human_HMM_SLC'/SLC_dict.csv'
+cd $H

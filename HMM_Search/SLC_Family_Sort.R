@@ -6,7 +6,7 @@
 ## 1st argument is an SLC dictionary (usually form the source database) which will be used against the reciprocal blast results
 
 #rm(list=ls())
-#setwd('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
+#setwd('/data2/shane/Transporter_ID/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
 ##Import libraries
 shhh <- suppressPackageStartupMessages
 shhh(library(data.table))
@@ -20,7 +20,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 ##debug
 #setwd('/home/shanedenecke/Documents/SLC_id/Human_search/HUMAN_AttCep_unigene.faa')
-#args[1]="/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Database/SLC_source_dict.csv"
+#args[1]="/data2/shane/Transporter_ID/SLC_id/HomSap_Database/SLC_source_dict.csv"
 
 setwd('./recip_blast')
 
@@ -128,15 +128,18 @@ for (x in 1:length(unigenes)){
   }
 }
 
-slc.table=rbindlist(slc.total) %>% arrange(family) %>% data.table()
-colnames(slc.table)=c('code','name')
 filter.table=rbindlist(filter.list) 
-colnames(filter.table)=c('code','name') 
-filter.output=filter.table %>% merge(source.table,by='code',all=T)
+slc.table=rbindlist(slc.total) %>% arrange(family) %>% data.table()
+if(nrow(filter.table)>0){
+  colnames(filter.table)=c('code','name') 
+  filter.output=filter.table %>% merge(source.table,by='code',all=T)
+  write.csv(filter.output,'../prelim_summary/filtered_out.csv')
+}
 
-write.csv(filter.output,'../prelim_summary/filtered_out.csv')
-#slc.table
-cat(format_csv(slc.table))
+if(nrow(slc.table)>0){
+  colnames(slc.table)=c('code','name')
+  cat(format_csv(slc.table))
+}
 
 
 

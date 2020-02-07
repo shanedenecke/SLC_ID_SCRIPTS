@@ -7,17 +7,20 @@ shhh(library(tidyr))
 shhh(library(readr))
 shhh(library(seqinr))
 
-key=fread('/data2/shane/Documents/SLC_id/general_reference/keys/Dm_master_key_by_gene.csv') %>% select(Dm_FBgn)
-  #mutate(full=paste(Dm_FBgn,name,CG,Dm_FBpp,sep='_')) %>% select(Dm_FBgn,full) %>% data.table() 
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
 
-dm_unigene=read.fasta('/data2/shane/Documents/SLC_id/general_reference/model_proteomes/DroMel_unigene.faa',
+key=fread(paste0(H,'/GENERAL_REFERENCE/keys/Dm_master_key_by_gene.csv')) %>% select(Dm_FBgn)
+  #mutate(full=paste0(Dm_FBgn,name,CG,Dm_FBpp,sep='_')) %>% select(Dm_FBgn,full) %>% data.table() 
+
+dm_unigene=read.fasta(paste0(H,'/GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa'),
                       set.attributes = F,as.string = T,forceDNAtolower = F) 
 dm_unigene2=data.table(full=names(dm_unigene)) %>% mutate(FBgn=full) %>% separate(FBgn,into=c('FBgn','junk'),sep='_') %>% 
   select(-junk) %>% data.table()
 
 
 
-fb.slc.gene=fread('/data2/shane/Documents/SLC_id/general_reference/SLC_info/DroMel_SLC_table_flybase.csv') %>% 
+fb.slc.gene=fread(paste0(H,'/GENERAL_REFERENCE/model_SLC_info/DroMel_SLC_table_flybase.csv')) %>% 
   select(FBgn,Family) %>%
   merge(dm_unigene2,by='FBgn') %>% select(-FBgn)
 colnames(fb.slc.gene)=c('Family','code')
@@ -25,7 +28,7 @@ colnames(fb.slc.gene)=c('Family','code')
   
 
 
-hs.slcs=fread('/data2/shane/Documents/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv')# %>%
+hs.slcs=fread(paste0(H,'/Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv'))# %>%
   #mutate(FBgn=code) %>% separate(FBgn,into=c('FBgn','junk'),sep='_') %>% select(-junk)
 
 

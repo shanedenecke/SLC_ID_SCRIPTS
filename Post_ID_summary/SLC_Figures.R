@@ -8,12 +8,15 @@ library(ggplot2)
 library(ggsci)
 library(gridExtra)
 
-setwd('/data2/shane/Documents/SLC_id')
+
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
+setwd(H)
 
 dir.create('Figures')
 setwd('Figures')
 
-co.var=fread('../general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
+co.var=fread('../GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
   #select(Species_name,abbreviation,Taxonomic_Classification,Phagy,Phagy2,Vory,Diet_category)
 full.count=fread('../Final_raw_outputs/TableS7_count_summary.csv')
 full.table=fread('../Final_raw_outputs/TableS6_Full_dict_table.csv') ### Need to generate this file
@@ -23,8 +26,8 @@ full.table=fread('../Final_raw_outputs/TableS6_Full_dict_table.csv') ### Need to
 
 ################ FIGURE 2
 dir.create('Pipeline_compare')
-transporter.db=fread('../general_reference/SLC_info/Dm_Transporter_DB_manual.csv')
-flybase=fread('../general_reference/SLC_info/DroMel_SLC_table_flybase.csv')
+transporter.db=fread('../GENERAL_REFERENCE/model_SLC_info/Dm_Transporter_DB_manual.csv')
+flybase=fread('../GENERAL_REFERENCE/model_SLC_info/DroMel_SLC_table_flybase.csv')
 
 dros.slcs=fread('../Dm_Database_Generate/Hs_to_DroMel_Search/final_output/total_slc_table.csv')
 dros.slcs$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",dros.slcs$code)
@@ -67,7 +70,7 @@ ggsave(gp,file='./FigureS2_histogram.pdf',device='pdf',width=20,height=10,units=
 
 ##################### FIGURE 4 #####################
 counts.summary=full.count
-counts.summary$SLC_62=NULL
+#counts.summary$SLC_62=NULL
 m=merge(counts.summary,co.var,by='abbreviation') %>% filter(abbreviation!='HomSap') %>% data.table()
 
 
@@ -87,7 +90,7 @@ for(i in 1:nrow(m)){
   }
 }
 counts.matrix=m %>% 
-  select(matches("SLC"),-SLC_Unsorted,-SLC_total) %>%
+  select(matches("SLC"),-matches('Unsorted'),-mathces('Unsorted'),-SLC_total) %>%
   as.matrix() %>% t()
 colnames(counts.matrix)=m$Species_name[m$Species_name!='Homo_sapiens']
 
@@ -101,7 +104,7 @@ dev.off()
 
 ################# FIGURE 4 ##################33
 
-count.sum=select(full.count,-SLC_Unsorted,-SLC_total)
+count.sum=select(full.count,-matches('Unsorted'),-SLC_total)
 
 ############### filter out SLC families which have <100 total members in dataset 
 v=c()

@@ -29,18 +29,19 @@ shane.transpose=function(dt,newcol){
 }
 ########################################3
 
-
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
 
 #setwd('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id') #local
-setwd('/data2/shane/SLC_portable')
+setwd(H)
 dir.create('TMHMM_filter')
 dir.create('Final_raw_outputs')
 dir.create('Figures')
 
 
 ## read in data
-meta.data=fread('./general_reference/Co_variables/Arthropod_species_metadata.csv',header=T)
-human.hmm=fread('./general_reference/SLC_info/Human_SLC_HMM.txt')
+meta.data=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.csv',header=T)
+human.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Human_SLC_HMM.txt')
 colnames(human.hmm)=c('code','tm_domains')
 
 comp.score=fread('./genome_score/comp_score.txt') %>% 
@@ -48,23 +49,23 @@ comp.score=fread('./genome_score/comp_score.txt') %>%
   data.table()
 
 
-dros.hmm=fread('./general_reference/SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
+dros.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
 colnames(dros.hmm)=c('code','tm_domains','family')
 
-slc_fams=readLines('/data2/shane/SLC_portable/general_reference/SLC_info/SLC_families.txt')
+slc_fams=readLines(paste0(H,'/GENERAL_REFERENCE/family_species_lists_phylo/SLC_families.txt'))
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
 
 
 ### copy DroMel and HomSap databases to final_dicts directory
-file.remove('/data2/shane/SLC_portable/final_SLC_dicts/DroMelFinal_SLC_table.csv')
-file.remove('/data2/shane/SLC_portable/final_SLC_dicts/HomSapFinal_SLC_table.csv')
-file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','/data2/shane/SLC_portable/final_SLC_dicts/DroMelFinal_SLC_table.csv')
-file.copy('./HomSap_Database/SLC_source_dict.csv','/data2/shane/SLC_portable/final_SLC_dicts/HomSapFinal_SLC_table.csv')
+file.remove(paste0(H,'/final_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+file.remove(paste0(H,'/final_SLC_dicts/HomSapPreliminary_SLC_table.csv'))
+file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+file.copy('./HomSap_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')) 
 
-file.copy('./general_reference/model_proteomes/DroMel_unigene.faa','./proteomes/')
-file.copy('./general_reference/model_proteomes/HomSap_unigene.faa','./proteomes/')
+file.copy('./GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa','./proteomes/')
+file.copy('./GENERAL_REFERENCE/model_proteomes/HomSap_unigene.faa','./proteomes/')
 
 
 
@@ -80,10 +81,10 @@ model.hmm.key=rbindlist(list(model.hmm.key,data.table(family='SLC_Unsorted',mini
 
 #i='./final_SLC_dicts/CaeEleFinal_SLC_table.csv'
 l=list()
-for(i in list.files('./final_SLC_dicts',full.names = T)){
+for(i in list.files('./preliminary_SLC_dicts',full.names = T)){
   dict=fread(i)
-  abbrev=gsub('./final_SLC_dicts/','',i,fixed=T)
-  abbrev=gsub('Final_SLC_table.csv','',abbrev,fixed=T)
+  abbrev=gsub('./preliminary_SLC_dicts/','',i,fixed=T)
+  abbrev=gsub('Preliminary_SLC_table.csv','',abbrev,fixed=T)
   fam=sapply(dict$name,dash.remove)
   dict$abbreviation=abbrev
   dict$family=fam

@@ -42,7 +42,7 @@ rm -rf ./SLC_fa
 mkdir ./SLC_fa
 for i in ./hmm_clean/*.table; do
   base=$(echo $(basename $i))
-  cut -f 9 $i | sed 's/\s+//g'| /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
+  cut -f 9 $i | sed 's/\s+//g'| $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
   #cut -f 9 $i | sed 's/\s+//g' | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./SLC_fa/$base'.fa'
 done
 find ./SLC_fa/* -size 0 -delete
@@ -62,7 +62,8 @@ find ./recip_blast/* -size 0 -delete
 ## Run R script to output table 
 mkdir ./prelim_summary
 #Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $A'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
-Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+Rscript $H/SLC_ID_SCRIPTS/HMM_Search/SLC_Family_Sort.R $1'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
+#Rscript $H/SLC_ID_SCRIPTS/HMM_Search/SLC_Family_Sort.R $A'/SLC_source_dict.csv' >  ./prelim_summary/Family_sort_preliminary.csv
 
 
 
@@ -70,7 +71,7 @@ Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_Family_Sort.R $1'/SLC_s
 mkdir length_analysis
 
 ### make fasta from reciprocal blast results
-cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
+cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
 #cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
 #B=/data2/shane/Documents/SLC_id/proteomes/AcrEch_unigene.faa
 
@@ -81,7 +82,7 @@ awk '/^>/ {if (seqlen) print seqlen;print;seqlen=0;next} {seqlen+=length($0)}END
 grep ">" ./length_analysis/names_lengths.txt | perl -pe  's/^>(.+$)/$1/;'| cut -d ' ' -f 1  > ./length_analysis/all_proteins.txt
 grep -E "^[0-9]" ./length_analysis/names_lengths.txt > ./length_analysis/all_lengths.txt
 paste -d',' ./length_analysis/all_proteins.txt ./length_analysis/all_lengths.txt ./length_analysis/length_families.txt > ./length_analysis/gene_lengths.txt
-Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_length_filter.R > ./length_analysis/total_slc_table.csv
+Rscript $H/SLC_ID_SCRIPTS/HMM_Search/SLC_length_filter.R $H > ./length_analysis/total_slc_table.csv
 
 
 
@@ -99,21 +100,6 @@ done
 mkdir final_output
 cp ./length_analysis/total_slc_table.csv ./final_output/total_slc_table.csv 
 cp ./length_analysis/SLC_final.faa ./final_output/SLC_final.faa
-Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/SLC_dictionary_format.R > ./final_output/SLC_final_output.csv
+Rscript $H/SLC_ID_SCRIPTS/HMM_Search/SLC_dictionary_format.R > ./final_output/SLC_final_output.csv
 
-
-
-
-#/data2/shane/Applications/custom/tmhmm_filter.sh ./length_analysis/preliminary_SLC.fa 0 > ./length_analysis/preliminary_SLC_TMM_table.txt
-
-##Re generate dictionary filtered for TMM values
-#rm -f ./length_analysis/SLC_TMM_filter_codes.csv
-#for i in $(cat ./length_analysis/preliminary_SLC_TMM_table.txt | cut -f 1)
-#do
-#grep $i ./prelim_summary/Family_sort_preliminary.csv >> ./length_analysis/SLC_TMM_filter_codes.csv
-#done
-#sed  -i '1i code,name' ./length_analysis/SLC_TMM_filter_codes.csv
-
-## regenerate fasta file
-#cut -d ',' -f 1 ./length_analysis/SLC_TMM_filter_codes.csv | sed '1d' | /data2/shane/Applications/custom/unigene_fa_sub.sh ./length_analysis/preliminary_SLC.fa - > ./length_analysis/TMM_Filter_SLC.fa
-
+cd $H
