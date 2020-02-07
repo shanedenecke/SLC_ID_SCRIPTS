@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd /data2/shane/Documents/SLC_id
+cd /data2/shane/Transporter_ID/SLC_id
 mkdir genome_score
 
 ######################## 0) Download and Clean Sequences 
