@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 H='/data2/shane/Transporter_ID/SLC_id'
+PHYLO=$H/GENERAL_REFERENCE/input_arguments/Phylo_list.txt
+SLC_FAM=$H/GENERAL_REFERENCE/input_arguments/SLC_Families.txt
+SPEC=$H/GENERAL_REFERENCE/input_arguments/target_species.tsv
+THREADS=12
+
 cd $H
 mkdir genome_score
 
 ######################## 0) Download and Clean Sequences 
-source ./SLC_ID_SCRIPTS/SLC_Proteome_prepare.sh
+source ./SLC_ID_SCRIPTS/core/SLC_Proteome_prepare.sh
 
 ######################## 1) Build Human Database
 source ./SLC_ID_SCRIPTS/core/SLC_Create_HMM_DB.sh $H/GENERAL_REFERENCE/model_proteomes/HomSap_unigene.faa $H/GENERAL_REFERENCE/model_SLC_info/HomSap_SLC_dict.csv $H/HomSap_Database
@@ -57,20 +62,13 @@ mv Human_search ./intermediate
 #Rscript ./SLC_ID_SCRIPTS/SLC_family_count_combine.R
 ### Ultrametric tree generate
 Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_id_PPP.R $H
-Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_Figures.R $H
+Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_Figures.R $H ### Maybe needs edits. Can't tell with low number of families
+
+mv TMHMM_filter ./intermediate/
+mv preliminary_SLC_dicts intermediate
+rm -r TMHMM_*
 
 ###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny
-source ./SLC_ID_SCRIPTS/SLC_id_Align_and_tree.sh
+source ./SLC_ID_SCRIPTS/Align_Tree/SLC_id_Align_and_tree.sh
 
 
-##################### 8) Prepare Ultrametric Tree
-#./SLC_id/scripts/CAFE/SLC_ultrametric_tree_prepare.sh
-./SLC_ID_SCRIPTS/CAFE/Ultrametric_tree_generate.sh
-
-
-## RUN CAFE
-./SLC_ID_SCRIPTS/CAFE/CAFE_run_full.sh
-Rscript ./SLC_ID_SCRIPTS/CAFE/CAFE_figures.R
-
-##################### 9) Prepare shiny material
-#Rscript ./SLC_id/scripts/shiny/SLC_shiny_prepare.R

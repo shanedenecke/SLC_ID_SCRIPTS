@@ -54,7 +54,7 @@ mkdir ./recip_blast
 for i in ./SLC_fa/*.fa; do
   base=$(echo $(basename $i))
   #blastp -query $i -db $A/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 5 -max_hsps 1 > ./recip_blast/$base'_blast.tsv'
-  blastp -query $i -db $1/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 6 -max_hsps 1 -num_threads 24 > ./recip_blast/$base'_blast.tsv'
+  blastp -query $i -db $1/reference_proteome/proteome_SLC_mark.fa -outfmt "6 qseqid sseqid pident evalue qcovs" -evalue 1e-3 -max_target_seqs 6 -max_hsps 1 -num_threads $THREADS > ./recip_blast/$base'_blast.tsv'
 done
 find ./recip_blast/* -size 0 -delete
 

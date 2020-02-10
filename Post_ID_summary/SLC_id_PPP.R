@@ -59,8 +59,8 @@ names(slc_fams)=NULL
 
 
 ### copy DroMel and HomSap databases to final_dicts directory
-file.remove(paste0(H,'/final_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
-file.remove(paste0(H,'/final_SLC_dicts/HomSapPreliminary_SLC_table.csv'))
+file.remove(paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+file.remove(paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv'))
 file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
 file.copy('./HomSap_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')) 
 

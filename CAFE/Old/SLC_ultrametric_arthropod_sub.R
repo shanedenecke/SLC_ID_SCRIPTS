@@ -1,9 +1,13 @@
 library(data.table)
 library(dplyr)
 
-setwd('/data2/shane/Documents/SLC_id/ultrametric_tree')
+#setwd('/data2/shane/Documents/SLC_id/ultrametric_tree')
 
-odb10.met=fread('/data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.33208.tab') %>%
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
+
+
+odb10.met=fread(paste0(H,'/GENERAL_REFERENCE/CAFE/odb10v0_OG2genes.33208.tab')) %>%
 colnames()
 
 tax=fread('./odb10_taxid.txt')

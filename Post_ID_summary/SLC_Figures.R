@@ -90,7 +90,7 @@ for(i in 1:nrow(m)){
   }
 }
 counts.matrix=m %>% 
-  select(matches("SLC"),-matches('Unsorted'),-mathces('Unsorted'),-SLC_total) %>%
+  select(matches("SLC"),-matches('Unsorted'),-matches('Unsorted'),-SLC_total) %>%
   as.matrix() %>% t()
 colnames(counts.matrix)=m$Species_name[m$Species_name!='Homo_sapiens']
 

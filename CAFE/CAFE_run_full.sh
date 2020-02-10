@@ -1,15 +1,15 @@
-cd /data2/shane/Documents/SLC_id/CAFE
+cd $H
 
 
 ### SETUP basic data
-DataList='Hemipteran___Arachnid___Arthropod'
+DataList='Hemipteran!!!Arachnid!!!Arthropod'
 Field_Separator=$IFS
 # set comma as internal field separator for the string list
-IFS=___
+IFS=!!!
 
 
 ### Format CAFE tables and make trees ultrametric. Essentially prepare everything that doesn't involve raxml
-Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/CAFE_format_counts2.R
+Rscript $H/SLC_ID_SCRIPTS/CAFE/CAFE_format_counts.R
 
 ## create CAFE script files
 

@@ -60,7 +60,7 @@ cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 mkdir ./family_fasta 
 rm -rf ./family_fasta/*
 IFS=$'\n'; 
-for next in $(cat $H/GENERAL_REFERENCE/family_species_lists_phylo/SLC_families.txt)
+for next in $(cat $SLC_FAM)
 do 
   grep -A 1 ${next} ./list/SLC_genes.fa | sed '/--/d' > ./family_fasta/${next}.fa
 done
@@ -73,7 +73,7 @@ seq=$(cat $i | wc -l)
 
 if [ $seq -gt 2 ]
   then
-    mafft --thread 24 $i > $i.aln
+    mafft --thread $THREADS $i > $i.aln
     #/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
     $H'/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal' -in $i.aln -out $i.trimmed
   else

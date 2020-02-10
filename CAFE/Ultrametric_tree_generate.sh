@@ -1,22 +1,23 @@
-cd /data2/shane/Documents/SLC_id/CAFE
+mkdir $H/CAFE
+cd $H/CAFE
 mkdir Ultrametric_tree_CAFE
-mkdir /data2/shane/Documents/SLC_id/CAFE/trees/
+mkdir $H/CAFE/trees/
 ### SETUP basic data
-DataList='Hemipteran___Arachnid___Arthropod'
+DataList='Hemipteran!!!Arachnid!!!Arthropod'
 Field_Separator=$IFS
 # set comma as internal field separator for the string list
-IFS=___
+IFS=!!!
 
 ## Create ultrametric Trees
 cd Ultrametric_tree_CAFE
 mkdir odb_files
-cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.33208.tab ./odb_files/
-cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10v0_OG2genes.6656.tab ./odb_files/
-cp /data2/shane/Documents/SLC_id/general_reference/CAFE/odb10_all_og_fasta.tab ./odb_files/
+cp $H/GENERAL_REFERENCE/CAFE/odb10v0_OG2genes.33208.tab ./odb_files/
+cp $H/GENERAL_REFERENCE/CAFE/odb10v0_OG2genes.6656.tab ./odb_files/
+cp $H/GENERAL_REFERENCE/CAFE/odb_all_metazoa.faa ./odb_files/
 
 ##### NEED TO FIX
 mkdir species_lists
-cp /data2/shane/Documents/SLC_id/general_reference/CAFE/*species_list.txt ./species_lists
+cp $H/GENERAL_REFERENCE/CAFE/*species_list.txt ./species_lists
 
 for i in $DataList
 do
@@ -24,10 +25,10 @@ do
   cd $i
   if [ $i = "Arthropod" ] || [ $i = "Arachnid" ]; then 
   #echo 'hello'
-       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl ../odb_files/odb10v0_OG2genes.33208.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
+       $H/SLC_ID_SCRIPTS/CAFE/find_orthologs_from_mapping_data.pl ../odb_files/odb10v0_OG2genes.33208.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
     else
     #echo 'goodbye'
-       /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/find_orthologs_from_mapping_data.pl  ../odb_files/odb10v0_OG2genes.6656.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
+       $H/SLC_ID_SCRIPTS/CAFE/find_orthologs_from_mapping_data.pl  ../odb_files/odb10v0_OG2genes.6656.tab  ../species_lists/$i'_species_list.txt' > orthology.txt
   fi
   
   
@@ -37,10 +38,10 @@ do
   cd sc_fasta
   
   #Generate Fasta file with all species in list
-  fgrep -A1 -f ../../species_lists/$i'_species_list.txt' ../../odb_files/odb10_all_og_fasta.tab | grep -v "\-\-" > all_species.f.faa
+  fgrep -A1 -f ../../species_lists/$i'_species_list.txt' ../../odb_files/odb_all_metazoa.faa | grep -v "\-\-" > all_species.f.faa
   
   #Extract fasta sequences
-  for x in *names; do /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/extract_specific_fasta_seqs_v3.pl $x all_species.f.faa > `basename $x .names`.fs; done 
+  for x in *names; do $H/SLC_ID_SCRIPTS/CAFE/extract_specific_fasta_seqs_v3.pl $x all_species.f.faa > `basename $x .names`.fs; done 
   mkdir fasta
   mv *.fs ./fasta
   #Move each OG to its own directory
@@ -64,15 +65,15 @@ do
     #cd $b
     cat $x | perl -pe 's/(^>[0-9]+_0).+$/$1/g' > $b'_aln'/$b'_renamed.fasta'
     mafft --thread 12 $b'_aln'/$b'_renamed.fasta' > $b'_aln'/$b'_renamed.fasta.aln'
-    /home/pioannidis/Programs/trimAl/source/trimal -in $b'_aln'/$b'_renamed.fasta.aln' -out $b'_aln'/$b'_renamed.fasta.aln.trimm'
-    /data2/shane/Applications/custom/fasta_2_phylip.sh $b'_aln'/$b'_renamed.fasta.aln.trimm' | sed '1d' > $b'_aln'/$b'_renamed.fasta.aln.trimm.phy'
+    $H/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal -in $b'_aln'/$b'_renamed.fasta.aln' -out $b'_aln'/$b'_renamed.fasta.aln.trimm'
+    $H/SLC_ID_SCRIPTS/general_scripts/fasta_2_phylip.sh $b'_aln'/$b'_renamed.fasta.aln.trimm' | sed '1d' > $b'_aln'/$b'_renamed.fasta.aln.trimm.phy'
     
     #cat ./final_tree/all_trimms_horiz.trimm.phy > temp_hold.txt
     #paste $b'_aln'/$b'_renamed.fasta.aln.trimm.phy'  temp_hold.txt >> ./final_tree/all_trimms_horiz.trimm.phy
   done
   
   ## RUN R SCRIPT Phylip_merge.R
- Rscript /data2/shane/Documents/SLC_id/SLC_id_scripts/CAFE/Phylip_merge.R
+ Rscript $H/SLC_ID_SCRIPTS/CAFE/Phylip_merge.R
   
   if [ $i = "Arthropod" ] || [ $i = "Arachnid" ]; then
        	#echo 'arth'
@@ -86,6 +87,6 @@ do
 	sed -i 's/\./A/g' Full_species.phy
 	/data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T 24 -m PROTGAMMAAUTO -s Full_species.phy -n $i -o 7227_0
  fi
-    cp 'RAxML_bipartitions.'$i /data2/shane/Documents/SLC_id/CAFE/trees/'raxml_tree_'$i'.tre'
+    cp 'RAxML_bipartitions.'$i $H/CAFE/trees/'raxml_tree_'$i'.tre'
   cd ../../
 done

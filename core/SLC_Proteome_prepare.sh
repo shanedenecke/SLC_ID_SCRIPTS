@@ -1,4 +1,4 @@
-cd /data2/shane/Transporter_ID/SLC_id
+cd $H
 mkdir proteome_clean
 
 
@@ -10,10 +10,11 @@ mkdir ./proteome_clean/clean_fasta
 while IFS=$'\t' read -r col1 col2
 do
 cp ./GENERAL_REFERENCE/non_model_proteomes/orthoDB_fasta/$col1* ./proteome_clean/clean_fasta/$col2'.fasta'
-grep -e "^$col1" ./GENERAL_REFERENCE/non_model_proteomes/keys/insect_orthoDB_genes.tsv | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
+grep -e "^$col1" ./GENERAL_REFERENCE/non_model_proteomes/keys/odb10v0_genes.tab | cut -f 1,3 > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt'
 echo -e "code,name" | cat - ./proteome_clean/clean_fasta/$col2'_OrthoDB_key.txt' | perl -pe 's/\t/,/g' > ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt'
 /data2/shane/Applications/custom/fasta_rename_fast_only_exact.py ./proteome_clean/clean_fasta/$col2'.fasta' ./proteome_clean/clean_fasta/$col2'_OrthoDB_key_DICT.txt' > ./proteome_clean/clean_fasta/$col2'_unigene.faa'
-done < ./GENERAL_REFERENCE/non_model_proteomes/keys/OrthoDB_tax_key_2col.tsv
+done < $SPEC
+
 
 
 #### Remove empty or duplicate sequences

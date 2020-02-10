@@ -6,11 +6,14 @@ shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
 
-setwd('/data2/shane/Documents/SLC_id')
+
+args = commandArgs(trailingOnly=TRUE)
+H=as.character(args[1])
+
 counts=fread('./Final_raw_outputs/TableS7_count_summary.csv')
-oly=fread('./general_reference/Co_variables/Arthropod_species_metadata.csv',header=T) %>% 
+oly=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.csv',header=T) %>% 
   select(Species_name,abbreviation)
-taxid.codes=fread('./general_reference/non_model_proteomes/keys/OrthoDB_tax_key_3col.tsv',
+taxid.codes=fread('./GENERAL_REFERENCE/non_model_proteomes/keys/OrthoDB_tax_key_3col.tsv',
                   col.names = c('taxid_code','abbreviation','species_name'))
 taxid.codes$cafe_code=paste(taxid.codes$taxid_code,'0',sep='_')
 taxid.codes=rbind(taxid.codes,data.table(taxid_code=6239,abbreviation='CaeEle',species_name='Caenorhabditis elegans',cafe_code="6239_0"))
@@ -19,7 +22,7 @@ taxid.codes=rbind(taxid.codes,data.table(taxid_code=7165,abbreviation='AnoGam',s
 taxid.codes=rbind(taxid.codes,data.table(taxid_code=7227,abbreviation='DroMel',species_name='Drosophila_melanogaster',cafe_code="7227_0"))
 
 
-ce.counts=fread('/data2/shane/Documents/SLC_id/general_reference/CAFE/Ce_counts.csv')
+ce.counts=fread(paste0(H,'GENERAL_REFERENCE/CAFE/Ce_counts.csv'))
 sup.counts=fread('/data2/shane/Documents/OrthoDB_Mapping/OrthoDB_10_family_counts/CAFE_orthoDB_supp.tsv') %>% 
   select(-MenMol,-LimLun,-ChiSup,-HelLat,-PacVen,-EurMay,-CerMar)
 
@@ -94,9 +97,9 @@ fwrite(full.counts,'./CAFE/CAFE_tables/CAFE_FULL.tsv',sep='\t')
 
 ##### OrthoDB CAFE tables 
 
-#arth.orthodb=fread('/data2/shane/Documents/SLC_id/CAFE/Ultrametric_tree_CAFE/odb_files/odb10v0_OG2genes.33208.tab') %>% 
+#arth.orthodb=fread(paste0(H,'CAFE/Ultrametric_tree_CAFE/odb_files/odb10v0_OG2genes.33208.tab') %>% 
 #  separate(V2,into=c('taxid','geneid'),sep = ':')
-arth.orthodb=fread('/data2/shane/Documents/SLC_id/CAFE/Ultrametric_tree_CAFE/odb_files/odb10v0_OG2genes.33208.tab') %>% 
+arth.orthodb=fread(paste0(H,'/CAFE/Ultrametric_tree_CAFE/odb_files/odb10v0_OG2genes.33208.tab')) %>% 
   separate(V2,into=c('taxid','geneid'),sep = ':')
 
 arth.orthodb.sel=arth.orthodb[taxid %in% taxid.codes$cafe_code]
@@ -112,7 +115,7 @@ for(i in 2:length(colnames(arth.orthodb.sel.counts))){
 na.count=apply(arth.orthodb.sel.counts, 1, function(x) sum(is.na(x)))
 arth.orthodb.sel.counts[is.na(arth.orthodb.sel.counts)]=0
 ra=arth.orthodb.sel.counts %>% select(-V1) %>% rowwise() %>% mutate(range=max(AcrEch:MyzCer)-min(AcrEch:MyzCer)) %>% data.table() %>% .[['range']]
-fwrite(arth.orthodb.sel.counts,'/data2/shane/Documents/SLC_id/CAFE/CAFE_tables/CAFE_orthoDB_RAW.tsv')
+fwrite(arth.orthodb.sel.counts,paste0(H,'CAFE/CAFE_tables/CAFE_orthoDB_RAW.tsv'))
 
 
 #rs=arth.orthodb.sel.counts %>% select(-V1) %>% rowSums()
@@ -131,7 +134,7 @@ orthodb.final=select(orthodb.final,Desc,everything())
 
 
 ######################### CLEAN UP TRE FILES
-iter=list.files('/data2/shane/Documents/SLC_id/CAFE/trees')[grepl('raxml_tree',list.files('/data2/shane/Documents/SLC_id/CAFE/trees'))] %>% 
+iter=list.files(paste0(H,'CAFE/trees'))[grepl('raxml_tree',list.files(paste0(H,'CAFE/trees')))] %>%
   {.[!str_detect(., "named_")]} %>%
   str_remove('raxml_tree_') %>% str_remove('.tre')
 
@@ -140,17 +143,17 @@ iter=list.files('/data2/shane/Documents/SLC_id/CAFE/trees')[grepl('raxml_tree',l
 for (i in iter){
   
   ### rename tree
-  rax.tree=readLines(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_',i,'.tre'))
+  rax.tree=readLines(paste0(paste0(H,'CAFE/trees/raxml_tree_',i,'.tre')))
   for(j in taxid.codes$cafe_code){
     if(grepl(j,rax.tree)){
       rax.tree=gsub(j,taxid.codes$abbreviation[which(taxid.codes$cafe_code==j)],rax.tree)
     }
   }
   rax.tree.name=gsub('7227_0','DroMel',rax.tree)
-  writeLines(rax.tree.name,paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre'))
+  writeLines(rax.tree.name,paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.tre')))
   
   ## read in named raxmL tree
-  tr=read.tree(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre'))
+  tr=read.tree(paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.tre')))
   
   
   nodes <- c(); maxes=c()
@@ -202,7 +205,7 @@ for (i in iter){
     print(gp)
   dev.off()
   
-  #l.tree.ch=chronopl(read.tree(paste0('/data2/shane/Documents/SLC_id/CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
+  #l.tree.ch=chronopl(read.tree(paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
   #l.tree.ch$edge.length=l.tree.ch$edge.length*1000
   #l.tree.ch$node.label=NULL
   #write.tree(l.tree.ch, file=paste0("./CAFE/trees/",i,'_tree_ultrametric.tre'))
