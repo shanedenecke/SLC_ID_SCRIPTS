@@ -16,7 +16,7 @@ setwd(H)
 dir.create('Figures')
 setwd('Figures')
 
-co.var=fread('../GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.csv',header=T) #%>%
+co.var=fread('../GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.tsv',header=T) #%>%
   #select(Species_name,abbreviation,Taxonomic_Classification,Phagy,Phagy2,Vory,Diet_category)
 full.count=fread('../Final_raw_outputs/TableS7_count_summary.csv')
 full.table=fread('../Final_raw_outputs/TableS6_Full_dict_table.csv') ### Need to generate this file
@@ -29,7 +29,7 @@ dir.create('Pipeline_compare')
 transporter.db=fread('../GENERAL_REFERENCE/model_SLC_info/Dm_Transporter_DB_manual.csv')
 flybase=fread('../GENERAL_REFERENCE/model_SLC_info/DroMel_SLC_table_flybase.csv')
 
-dros.slcs=fread('../Dm_Database_Generate/Hs_to_DroMel_Search/final_output/total_slc_table.csv')
+dros.slcs=fread('../DroMel_Database/SLC_source_dict.csv')
 dros.slcs$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",dros.slcs$code)
 #test=fread('./Dm_Database_Generate/DroMel_iterative_search/final_output/total_slc_table.csv')
 #test$CG=gsub('FBgn.+_.+_(CG[0-9]+)_.+$',"\\1",test$code)
@@ -133,11 +133,15 @@ for(i in colnames(meta)[grep('SLC_',colnames(meta))]){
     good=names(which(table(meta[[j]])>5)) ## filter for occurances which don't occur at least 5 times
     sub=meta[which(meta[[j]] %in% good)] ## subset for comparisons which have at least 5 occurances
     
+    if(nrow(sub)>0){ #### catch cases where no comparison available
+      if(length(unique(sub[[j]]))>1){
     ##anova
-    model=aov(formula=sub[[i]]~sub[[j]])
-    pval=summary(model)[[1]][["Pr(>F)"]][1]
-    ef=max(abs(model$coefficients[!grepl('Intercept',names(model$coefficients))]))
-    l[[paste(i,j,sep='_')]]=data.table(family=i,co_variable=j,pval=pval,max_effect=ef) 
+      model=aov(formula=sub[[i]]~sub[[j]])
+      pval=summary(model)[[1]][["Pr(>F)"]][1]
+      ef=max(abs(model$coefficients[!grepl('Intercept',names(model$coefficients))]))
+      l[[paste(i,j,sep='_')]]=data.table(family=i,co_variable=j,pval=pval,max_effect=ef) 
+      }
+    }
   }
 }
 
@@ -155,52 +159,55 @@ dir.create('ANOVA_meta_plots')
 
 plot.table=tab.one %>% distinct(family,co_variable) %>% data.table()
 
-for(i in 1:nrow(plot.table)){
-  row=plot.table[i]
-  co=row$co_variable
-  fam=row$family
-  red=select(m,fam,co)
-  red[[fam]]=as.numeric(red[[fam]])
+if(nrow(plot.table)>0){
   
-  plot=red[red[[co]] %in% names(which(table(red[[co]])>5))] ### remove elements that aren't present at least 5 times
+  for(i in 1:nrow(plot.table)){
+    row=plot.table[i]
+    co=row$co_variable
+    fam=row$family
+    red=select(m,fam,co)
+    red[[fam]]=as.numeric(red[[fam]])
+    
+    plot=red[red[[co]] %in% names(which(table(red[[co]])>5))] ### remove elements that aren't present at least 5 times
+    
+    ylab=paste0('Number of ',gsub('_',' ',fam),' Members','\n')
+    tit=paste0(gsub('_',' ',fam),' Family Size vrs. ',gsub('_',' ',co))
+    xlab=paste0('\n',gsub('_',' ',co))
+    
+    pdf(paste0('./ANOVA_meta_plots/',co,'_',fam,'.pdf'))
+    gp=ggplot(plot,aes_string(co,y=fam,fill=co))
+    gp=gp+geom_boxplot(outlier.size=1)
+    gp=gp+labs(x=xlab,y=ylab)
+    gp=gp+scale_fill_rickandmorty()
+    gp=gp+ggtitle(tit)
+    gp=gp+theme_bw()
+    gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
+                axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
+                strip.text=element_text(size=20),strip.background=element_rect("white"),
+                axis.title=element_text(size=17),axis.text.x=element_text(angle=45,hjust=1),
+                legend.position = 'none',plot.title = element_text(hjust = 0.5))
+    
+    print(gp)
+    
+    gp2=gp+labs(x='',y='')
+    gp2=gp2+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
+                     axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
+                     axis.text.x=element_blank(),title=element_text(size=10),
+                     legend.position='none',plot.title = element_text(hjust = 0.5))
+    gp2=gp2+ggtitle(fam)
+    
+    assign(paste0(co,'.',fam),gp2)
+    dev.off()
+  }
   
-  ylab=paste0('Number of ',gsub('_',' ',fam),' Members','\n')
-  tit=paste0(gsub('_',' ',fam),' Family Size vrs. ',gsub('_',' ',co))
-  xlab=paste0('\n',gsub('_',' ',co))
+  grid.plot=grid.arrange(Taxonomic_Classification.SLC_36,
+               Taxonomic_Classification.SLC_22,
+               Taxonomic_Classification.SLC_2,
+               Taxonomic_Classification.SLC_35,
+               Taxonomic_Classification.SLC_60,
+               Taxonomic_Classification.SLC_33,
+               nrow=2)
   
-  pdf(paste0('./ANOVA_meta_plots/',co,'_',fam,'.pdf'))
-  gp=ggplot(plot,aes_string(co,y=fam,fill=co))
-  gp=gp+geom_boxplot(outlier.size=1)
-  gp=gp+labs(x=xlab,y=ylab)
-  gp=gp+scale_fill_rickandmorty()
-  gp=gp+ggtitle(tit)
-  gp=gp+theme_bw()
-  gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
-              axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
-              strip.text=element_text(size=20),strip.background=element_rect("white"),
-              axis.title=element_text(size=17),axis.text.x=element_text(angle=45,hjust=1),
-              legend.position = 'none',plot.title = element_text(hjust = 0.5))
-  
-  print(gp)
-  
-  gp2=gp+labs(x='',y='')
-  gp2=gp2+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),
-                   axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
-                   axis.text.x=element_blank(),title=element_text(size=10),
-                   legend.position='none',plot.title = element_text(hjust = 0.5))
-  gp2=gp2+ggtitle(fam)
-  
-  assign(paste0(co,'.',fam),gp2)
-  dev.off()
+  ggsave(grid.plot,file='Figure4_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')
 }
-
-grid.plot=grid.arrange(Taxonomic_Classification.SLC_36,
-             Taxonomic_Classification.SLC_22,
-             Taxonomic_Classification.SLC_2,
-             Taxonomic_Classification.SLC_35,
-             Taxonomic_Classification.SLC_60,
-             Taxonomic_Classification.SLC_33,
-             nrow=2)
-
-ggsave(grid.plot,file='Figure4_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')
 

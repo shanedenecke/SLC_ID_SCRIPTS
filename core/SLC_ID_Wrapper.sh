@@ -7,6 +7,7 @@ THREADS=12
 
 cd $H
 mkdir genome_score
+mkdir intermediate
 
 ######################## 0) Download and Clean Sequences 
 source ./SLC_ID_SCRIPTS/core/SLC_Proteome_prepare.sh
@@ -27,7 +28,7 @@ Rscript ./SLC_ID_SCRIPTS/core/SLC_Flybase_human_SLCxref.R $H > ./Dm_Database_Gen
 
 ## Make final Drosophila database
 source ./SLC_ID_SCRIPTS/core/SLC_Create_HMM_DB.sh $H/GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa $H/Dm_Database_Generate/SLC_source_dict_flybaseXref.csv $H/DroMel_Database
-rm -rf Dm_Database_Generate
+mv Dm_Database_Generate intermediate
 
 ########################  3) Search species with Human database
 mkdir Human_search
@@ -50,20 +51,17 @@ done
 
 Rscript ./SLC_ID_SCRIPTS/core/SLC_crossref_human_dros_searches.R $H
 
+
+
+####################### 6) Post Process SLC tables
+Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_id_PPP.R $H
+Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_Figures.R $H ### Maybe needs edits. Can't tell with low number of families
+
 ### clean up folder
-mkdir intermediate
 mv DroMel_Database ./intermediate
 mv HomSap_Database ./intermediate
 mv Drosophila_search ./intermediate
 mv Human_search ./intermediate
-
-####################### 6) summarize counts of SLC tables
-
-#Rscript ./SLC_ID_SCRIPTS/SLC_family_count_combine.R
-### Ultrametric tree generate
-Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_id_PPP.R $H
-Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_Figures.R $H ### Maybe needs edits. Can't tell with low number of families
-
 mv TMHMM_filter ./intermediate/
 mv preliminary_SLC_dicts intermediate
 rm -r TMHMM_*

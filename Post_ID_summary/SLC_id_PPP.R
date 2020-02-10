@@ -40,7 +40,7 @@ dir.create('Figures')
 
 
 ## read in data
-meta.data=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.csv',header=T)
+meta.data=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.tsv',header=T,sep='\t')
 human.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Human_SLC_HMM.txt')
 colnames(human.hmm)=c('code','tm_domains')
 
@@ -52,7 +52,7 @@ comp.score=fread('./genome_score/comp_score.txt') %>%
 dros.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
 colnames(dros.hmm)=c('code','tm_domains','family')
 
-slc_fams=readLines(paste0(H,'/GENERAL_REFERENCE/family_species_lists_phylo/SLC_families.txt'))
+slc_fams=readLines(paste0(H,'/GENERAL_REFERENCE/input_arguments/SLC_Families.txt'))
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
@@ -61,7 +61,8 @@ names(slc_fams)=NULL
 ### copy DroMel and HomSap databases to final_dicts directory
 file.remove(paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
 file.remove(paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv'))
-file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+#file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+file.copy('./DroMel_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
 file.copy('./HomSap_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')) 
 
 file.copy('./GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa','./proteomes/')
