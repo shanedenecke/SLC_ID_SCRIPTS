@@ -23,6 +23,9 @@ do
   #awk -F "," '{print $code}' ./real_final_SLC_tables/$i'_final_SLC_table.csv' | head
   #paste  -d '_' nam.txt cod.txt | sed -e "s/^/"$i"_/g" | sed -e '1s/.*/name/g' > newcol.txt
   #paste -d ',' newcol.txt cod.txt > ./phylogeny/renamed_dicts/$i'Final_SLC_table.csv'
+  
+  
+  
   if [ $i == 'DroMel' ] || [ $i == 'HomSap' ]
   then
     $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh ./GENERAL_REFERENCE/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
@@ -41,7 +44,7 @@ mkdir ./phylogeny/alignments
 mkdir ./phylogeny/trimms
 mkdir ./phylogeny/phylip
 #cat ./general_reference/SLC_info/SLC_families.txt | while read i
-cat ./general_reference/SLC_info/SLC_families.txt | while read i
+cat ./GENERAL_REFERENCE/input_arguments/SLC_Families.txt | while read i
 do
   grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
   mafft --thread $THREADS './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
@@ -52,17 +55,22 @@ done
 Rscript ./SLC_ID_SCRIPTS/Align_Tree/Phylip_duplicate.R
 
 mkdir SLC_phylogeny
+mkdir SLC_phylogeny/raxml_trees
 for i in ./phylogeny/phylip/*.phy
 do
   b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
   raxfile=$i
   raxdir=$H/SLC_phylogeny/
-  #rm ./SLC_phylogeny/RAxML*
-  $H/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
-  #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
-done
   
+  ### hash next two lines if you don't want to actually make the trees. 
+  #$H/SLC_ID_SCRIPTS/general_scripts/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 200 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $b'.nwk' -w $raxdir 
+  #cp $b'.nwk' ./SLC_phylogeny/raxml_trees/
+done
 
-mv -r phylogeny ./intermediate/
+## hash if you are making the trees fresh
+cp ./GENERAL_REFERENCE/phylo_premade/* ./SLC_phylogeny/raxml_trees/
 
+mv phylogeny ./intermediate/
+
+#Rscript 
 

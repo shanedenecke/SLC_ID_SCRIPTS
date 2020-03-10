@@ -1,11 +1,23 @@
-cd /data2/shane/Documents/SLC_id
+#!/usr/bin/env bash
+H='/data2/shane/Transporter_ID/SLC_id'
+PHYLO=$H/GENERAL_REFERENCE/input_arguments/Phylo_list.txt
+SLC_FAM=$H/GENERAL_REFERENCE/input_arguments/SLC_Families.txt
+SPEC=$H/GENERAL_REFERENCE/input_arguments/target_species.tsv
+THREADS=32
 
-for i in /data2/shane/Documents/SLC_id/phylogeny/phylip/*.phy
-do
-  b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
-  raxfile=$i
-  raxdir=/data2/shane/Documents/SLC_id/SLC_phylogeny/
-  #rm ./SLC_phylogeny/RAxML*
-  /data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T 24 -m PROTGAMMAAUTO -s $raxfile -n $b'.tre' -w $raxdir 
-  #/data2/shane/Applications/standard-RAxML-master/raxmlHPC-AVX -f a -x 12345 -p 12345 -N 100 -m PROTGAMMAAUTO -s $raxfile -n $i'.tre' -w $raxdir ## LOCAL
+
+########################  3) Search species with Human database
+mkdir Human_search
+for i in $H/proteomes/*.faa; do
+  a=$(basename $i) 
+  echo 'HUMAN SEARCH '$a
+  source ./SLC_ID_SCRIPTS/HMM_Search/SLC_HMM_Search.sh $H/HomSap_Database $i $H/Human_search/'HUMAN_'$a
+done
+
+########################  4) Search other species with Drosohpila database
+mkdir Drosophila_search
+for i in $H/proteomes/*.faa; do
+  b=$(echo $(basename $i) | cut -d '_' -f 1) 
+  echo 'DROSOPHILA SEARCH '$b
+  source ./SLC_ID_SCRIPTS/HMM_Search/SLC_HMM_Search.sh $H/DroMel_Database $i $H/Drosophila_search/'DROSOPHILA_'$b
 done

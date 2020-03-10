@@ -9,9 +9,9 @@ library(ggsci)
 library(gridExtra)
 
 
-args = commandArgs(trailingOnly=TRUE)
-H=as.character(args[1])
-setwd(H)
+#args = commandArgs(trailingOnly=TRUE)
+#H=as.character(args[1])
+#setwd('/data2/shane/Transporter_ID/SLC_id')
 
 dir.create('Figures')
 setwd('Figures')
@@ -187,7 +187,7 @@ if(nrow(plot.table)>0){
                 axis.title=element_text(size=17),axis.text.x=element_text(angle=45,hjust=1),
                 legend.position = 'none',plot.title = element_text(hjust = 0.5))
     
-    print(gp)
+    #print(gp)
     
     gp2=gp+labs(x='',y='')
     gp2=gp2+theme(text=element_text(face="bold",family="serif"),panel.grid=element_blank(),

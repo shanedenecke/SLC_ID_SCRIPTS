@@ -29,11 +29,10 @@ shane.transpose=function(dt,newcol){
 }
 ########################################3
 
-args = commandArgs(trailingOnly=TRUE)
-H=as.character(args[1])
+#args = commandArgs(trailingOnly=TRUE)
+#H=as.character(args[1])
+#setwd('/data2/shane/Transporter_ID/SLC_id')
 
-#setwd('/home/shanedenecke/Dropbox/wp7_prodrug/SLC_id') #local
-setwd(H)
 dir.create('TMHMM_filter')
 dir.create('Final_raw_outputs')
 dir.create('Figures')
@@ -52,18 +51,18 @@ comp.score=fread('./genome_score/comp_score.txt') %>%
 dros.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
 colnames(dros.hmm)=c('code','tm_domains','family')
 
-slc_fams=readLines(paste0(H,'/GENERAL_REFERENCE/input_arguments/SLC_Families.txt'))
+slc_fams=readLines('./GENERAL_REFERENCE/input_arguments/SLC_Families.txt')
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
 
 
 ### copy DroMel and HomSap databases to final_dicts directory
-file.remove(paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
-file.remove(paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv'))
-#file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
-file.copy('./DroMel_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
-file.copy('./HomSap_Database/SLC_source_dict.csv',paste0(H,'/preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')) 
+file.remove('./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv')
+file.remove('./preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')
+#file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
+file.copy('./DroMel_Database/SLC_source_dict.csv','./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv')
+file.copy('./HomSap_Database/SLC_source_dict.csv','./preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')
 
 file.copy('./GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa','./proteomes/')
 file.copy('./GENERAL_REFERENCE/model_proteomes/HomSap_unigene.faa','./proteomes/')
@@ -175,7 +174,10 @@ comp.score4=comp.score3[comp.score<.3]
 
 good_spec=c(comp.score4$abbreviation,'DroMel','HomSap')
 bad_spec=comp.score3[comp.score>=.3]$abbreviation
-  
+good.spec.codes=meta.data[!(abbreviation %in% bad_spec)]$taxid_code
+writeLines(good.spec.codes,'./Final_raw_outputs/Good_quality_species.txt')
+
+
 count.summary2=count.summary[abbreviation %in% good_spec]
 tmhmm.filtered.full2=tmhmm.filtered.full[abbreviation %in% good_spec]
 

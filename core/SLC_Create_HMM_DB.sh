@@ -46,11 +46,13 @@ mkdir ./list
 #cat $2 | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 #cat $B | tr -s ' ' ',' | csvcut -c name  > ./list/SLC_names_final.txt
 
-num=$(head -1 $2 | tr ',' '\n' | cat -n | grep "name")
+#awk -F , 
+#num=$(head -1 $2 | tr ',' '\n' | cat -n | grep "name")
 #num=$(head -1 $B | tr ',' '\n' | cat -n | grep "name")
-num2=$(echo $num | cut -f 1 | sed -E 's/\s+//g') 
-cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
+#num2=$(echo $num | cut -f 1 | sed -E 's/\s+//g') 
+#cut -d',' -f $num2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 #cut -d',' -f $num2 $B | tail -n+2 > ./list/SLC_names_final.txt
+cut -d',' -f 2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 
 ## extract fasta of gene lists from Dmel
 /data2/shane/Applications/custom/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
@@ -73,7 +75,7 @@ seq=$(cat $i | wc -l)
 
 if [ $seq -gt 2 ]
   then
-    mafft --thread $THREADS $i > $i.aln
+    mafft --quiet --thread $THREADS $i > $i.aln
     #/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
     $H'/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal' -in $i.aln -out $i.trimmed
   else

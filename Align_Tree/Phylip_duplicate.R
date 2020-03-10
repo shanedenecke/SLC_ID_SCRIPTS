@@ -6,7 +6,7 @@ shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
 
-setwd('/data2/shane/Documents/SLC_id/phylogeny/phylip')
+setwd('./phylogeny/phylip')
 
 for(x in list.files()[grepl('SLC',list.files())]){
   a=fread(x)

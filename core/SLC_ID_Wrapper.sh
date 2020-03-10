@@ -3,7 +3,7 @@ H='/data2/shane/Transporter_ID/SLC_id'
 PHYLO=$H/GENERAL_REFERENCE/input_arguments/Phylo_list.txt
 SLC_FAM=$H/GENERAL_REFERENCE/input_arguments/SLC_Families.txt
 SPEC=$H/GENERAL_REFERENCE/input_arguments/target_species.tsv
-THREADS=12
+THREADS=16
 
 cd $H
 mkdir genome_score
@@ -31,6 +31,8 @@ source ./SLC_ID_SCRIPTS/core/SLC_Create_HMM_DB.sh $H/GENERAL_REFERENCE/model_pro
 mv Dm_Database_Generate intermediate
 
 ########################  3) Search species with Human database
+rm ./proteomes/HomSap_unigene.faa
+rm ./proteomes/DroMel_unigene.faa
 mkdir Human_search
 for i in $H/proteomes/*.faa; do
   a=$(basename $i) 
@@ -54,7 +56,7 @@ Rscript ./SLC_ID_SCRIPTS/core/SLC_crossref_human_dros_searches.R $H
 
 
 ####################### 6) Post Process SLC tables
-Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_id_PPP.R $H
+Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_id_PPP.R
 Rscript ./SLC_ID_SCRIPTS/Post_ID_summary/SLC_Figures.R $H ### Maybe needs edits. Can't tell with low number of families
 
 ### clean up folder
@@ -68,5 +70,13 @@ rm -r TMHMM_*
 
 ###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny
 source ./SLC_ID_SCRIPTS/Align_Tree/SLC_id_Align_and_tree.sh
+
+
+############# Build Ultrametric Trees
+#source ./SLC_ID_SCRIPTS/CAFE/SLC_Ultrametric_tree_generate ### run to build ultrametric trees. Will take a while
+cp ./GENERAL_REFERENCE/CAFE/premade_trees/* ./CAFE/clean_raxml_trees/
+Rscript ./SLC_ID_SCRIPTS/CAFE/SLC_CAFE_prep.R
+source ./SLC_ID_SCRIPTS/CAFE/SLC_CAFE_run_full.sh
+Rscript ./SLC_ID_SCRIPTS/CAFE/SLC_CAFE_figures.R
 
 
