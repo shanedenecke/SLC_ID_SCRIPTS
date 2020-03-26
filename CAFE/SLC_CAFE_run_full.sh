@@ -1,7 +1,4 @@
 cd $H
-THREADS=2
-
-
 
 ## create CAFE script files
 

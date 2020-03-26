@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-mkdir CAFE
+
 mkdir ./CAFE/Ultrametric_tree
 mkdir ./CAFE/species_lists
-mkdir ./CAFE/clean_raxml_trees
+
 
 
 for i in ./GENERAL_REFERENCE/CAFE/*preliminary_species.txt; do
@@ -33,8 +33,8 @@ do
   for x in  $fulltemp/*
   do
     mafft --quiet --thread $THREADS $x > $x'.aln'
-    /data2/shane/Applications/trimAl/source/trimal -in $x'.aln' -out $x'.aln.trimm'
-    /data2/shane/Applications/custom/fasta_2_phylip.sh $x'.aln.trimm' | sed '1d' > $x'.aln.trimm.phy'
+   ~/Applications/trimAl/source/trimal -automated1 -in $x'.aln' -out $x'.aln.trimm'
+    ~/Applications/Custom_Applications/fasta_2_phylip.sh $x'.aln.trimm' | sed '1d' > $x'.aln.trimm.phy'
   done
   
   #### merge all phylip files
@@ -42,17 +42,17 @@ do
   
   #### make trees 
   if [ $b = "Arthropod" ]; then
-	/data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp -o 6239_0
+	~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp -o 6239_0
   elif [ $b = 'Lepidopteran' ]; then
 	echo 'lep'
-	#/data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp -o 7029_0
+	#~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp -o 7029_0
   elif [ $b = "Hemipteran" ]; then
 	sed -i 's/J/A/g' $fulltemp/Full_species.phy
 	sed -i 's/\./A/g' $fulltemp/Full_species.phy
 	echo "Hemi"
 	#/data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp -o 7227_0
   elif [ $b = 'Arachnid' ]; then
-	/data2/shane/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp
+	~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $fulltemp/Full_species.phy -n $b.tre -w $fulltemp
  fi
  cp $fulltemp'/RAxML_bipartitions.'$b'.tre' ./CAFE/clean_raxml_trees/
 done

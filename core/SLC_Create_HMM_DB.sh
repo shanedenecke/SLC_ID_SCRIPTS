@@ -32,11 +32,10 @@ cd $3
 
 ## rename fasta files with tag for SLC family
 mkdir reference_proteome
-$H/SLC_ID_SCRIPTS/general_scripts/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
-#$H/SLC_ID_SCRIPTS/general_scripts/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
-#/data2/shane/Applications/custom/fasta_rename.py $A $B > ./reference_proteome/proteome_SLC_mark.fa
+~/Applications/Custom_Applications/fasta_rename.py $1 $2 > ./reference_proteome/proteome_SLC_mark.fa
+#~/Applications/Custom_Applications/fasta_rename.py$A $B > ./reference_proteome/proteome_SLC_mark.fa
 
-#/data2/shane/Applications/custom/fasta_rename.py /data2/shane/Documents/omics_data/Homo_sapiens/unigene/Hs_unigene.fa /data2/shane/Dropbox/wp7_prodrug/SLC_id/general_reference/Hs_SLC_dict.csv > ./reference_proteome/proteome_SLC_mark.fa
+#~/Applications/Custom_Applications/fasta_rename.py /data2/shane/Documents/omics_data/Homo_sapiens/unigene/Hs_unigene.fa /data2/shane/Dropbox/wp7_prodrug/SLC_id/general_reference/Hs_SLC_dict.csv > ./reference_proteome/proteome_SLC_mark.fa
 
 ##Make blast dbs for target reference proteome
 makeblastdb -in ./reference_proteome/proteome_SLC_mark.fa -parse_seqids -dbtype prot
@@ -55,7 +54,7 @@ mkdir ./list
 cut -d',' -f 2 $2 | tail -n+2 > ./list/SLC_names_final.txt
 
 ## extract fasta of gene lists from Dmel
-/data2/shane/Applications/custom/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
+~/Applications/Custom_Applications/unigene_fa_sub.sh ./reference_proteome/proteome_SLC_mark.fa  ./list/SLC_names_final.txt > ./list/SLC_genes.fa
 
 
 ## divide each family into independent fasta
@@ -76,8 +75,8 @@ seq=$(cat $i | wc -l)
 if [ $seq -gt 2 ]
   then
     mafft --quiet --thread $THREADS $i > $i.aln
-    #/home/pioannidis/Programs/trimAl/source/trimal -in $i.aln -out $i.trimmed
-    $H'/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal' -in $i.aln -out $i.trimmed
+    ~/Applications/trimAl/source/trimal -in $i.aln -out $i.trimmed
+    ~/Applications/trimAl/source/trimal -automated1  -in $i.aln -out $i.trimmed
   else
     cat $i > $i.trimmed
   fi
@@ -90,8 +89,7 @@ rm -rf ./family_fasta/*.aln
 mkdir ./hmm_profiles
 for i in ./muscle_alignments/*
 do
-#hmmbuild --cpu $threads $i.hmm $i
-hmmbuild $i.hmm $i
+hmmbuild --cpu $THREADS $i.hmm $i
 done
 mv ./muscle_alignments/*.hmm ./hmm_profiles
 

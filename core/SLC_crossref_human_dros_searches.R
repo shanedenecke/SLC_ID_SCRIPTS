@@ -8,11 +8,6 @@ shhh(library(readr))
 
 ## collate all SLC transporter lists from human and drosophila searches 
 
-args = commandArgs(trailingOnly=TRUE)
-H=as.character(args[1])
-
-setwd(H)
-
 sp.list=c()
 for(file in list.files('./proteomes')){
   if(grepl(".fa",file)){

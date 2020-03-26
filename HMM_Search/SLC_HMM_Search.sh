@@ -42,7 +42,7 @@ rm -rf ./SLC_fa
 mkdir ./SLC_fa
 for i in ./hmm_clean/*.table; do
   base=$(echo $(basename $i))
-  cut -f 9 $i | sed 's/\s+//g'| $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
+  cut -f 9 $i | sed 's/\s+//g'| ~/Applications/Custom_Applications/unigene_fa_sub.sh $2 - > ./SLC_fa/$base'.fa'
   #cut -f 9 $i | sed 's/\s+//g' | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./SLC_fa/$base'.fa'
 done
 find ./SLC_fa/* -size 0 -delete
@@ -71,7 +71,7 @@ Rscript $H/SLC_ID_SCRIPTS/HMM_Search/SLC_Family_Sort.R $1'/SLC_source_dict.csv' 
 mkdir length_analysis
 
 ### make fasta from reciprocal blast results
-cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
+cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | ~/Applications/Custom_Applications/unigene_fa_sub.sh $2 - > ./length_analysis/preliminary_SLC.fa
 #cut -d ',' -f 1 ./prelim_summary/Family_sort_preliminary.csv | /data2/shane/Applications/custom/unigene_fa_sub.sh $B - > ./length_analysis/preliminary_SLC.fa
 #B=/data2/shane/Documents/SLC_id/proteomes/AcrEch_unigene.faa
 

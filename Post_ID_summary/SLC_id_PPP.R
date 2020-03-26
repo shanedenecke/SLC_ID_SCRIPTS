@@ -98,15 +98,15 @@ for(i in list.files('./preliminary_SLC_dicts',full.names = T)){
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
   file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-  system('/data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa')
-  system('/data2/shane/Applications/custom/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa')
+  system('~/Applications/Custom_Applications/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa')
+  system('~/Applications/Custom_Applications/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 }
 
 unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
 unnamed.fasta2=unnamed.fasta[grepl('__',names(unnamed.fasta))]
 write.fasta(unnamed.fasta2,names(unnamed.fasta2),file.out='./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 
-system("/home/pioannidis/Programs/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt")
+system("~/Applications/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt")
 system(" cat ./TMHMM_filter/SLC_TMHMM_full.txt | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\\s+(\\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt")
 
 
@@ -148,7 +148,7 @@ count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 
 writeLines(tmhmm.filtered.full$name,'./TMHMM_filter/Filtered_SLC_codes.txt')
 
-system('/data2/shane/Applications/custom/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa')
+system('~/Applications/Custom_Applications/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa')
 #system( #python3 /data2/shane/Applications/custom/unigene_fa_sub_update.py ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw2.faa ')
 
 

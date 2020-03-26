@@ -28,11 +28,11 @@ do
   
   if [ $i == 'DroMel' ] || [ $i == 'HomSap' ]
   then
-    $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh ./GENERAL_REFERENCE/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
+    ~/Applications/Custom_Applications/unigene_fa_sub.sh ./GENERAL_REFERENCE/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
   else
-    $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh ./proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa' ||  $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh ./GENERAL_REFERENCE/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
+    ~/Applications/Custom_Applications/unigene_fa_sub.sh ./proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa' ||  $H/SLC_ID_SCRIPTS/general_scripts/unigene_fa_sub.sh ./GENERAL_REFERENCE/model_proteomes/$i'_unigene.faa' cod.txt > ./phylogeny/SLC_fa/$i'_SLC.faa'
   fi
-   $H/SLC_ID_SCRIPTS/general_scripts/fasta_rename.py ./phylogeny/SLC_fa/$i'_SLC.faa' ./phylogeny/renamed_dicts/$i'_final_SLC_table.csv' >> ./phylogeny/SLC_fa/combined_renamed.faa
+   ~/Applications/Custom_Applications/fasta_rename.py ./phylogeny/SLC_fa/$i'_SLC.faa' ./phylogeny/renamed_dicts/$i'_final_SLC_table.csv' >> ./phylogeny/SLC_fa/combined_renamed.faa
 rm cod.txt
 done
 
@@ -48,27 +48,26 @@ cat ./GENERAL_REFERENCE/input_arguments/SLC_Families.txt | while read i
 do
   grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
   mafft --thread $THREADS './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
-  $H/SLC_ID_SCRIPTS/general_scripts/trimAl/source/trimal -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
-  $H/SLC_ID_SCRIPTS/general_scripts/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
+  ~/Applications/trimAl/source/trimal -automated1 -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
+  ~/Applications/Custom_Applications/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
+  Rscript ~/Applications/Custom_Applications/Phylip_duplicate.R './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy.phy'
 done
-
-Rscript ./SLC_ID_SCRIPTS/Align_Tree/Phylip_duplicate.R
 
 mkdir SLC_phylogeny
 mkdir SLC_phylogeny/raxml_trees
-for i in ./phylogeny/phylip/*.phy
+for i in ./phylogeny/phylip/*.phy.phy
 do
   b=$(echo $(basename $i) | cut -d '_' -f 1,2) 
   raxfile=$i
   raxdir=$H/SLC_phylogeny/
   
   ### hash next two lines if you don't want to actually make the trees. 
-  #$H/SLC_ID_SCRIPTS/general_scripts/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 200 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $b'.nwk' -w $raxdir 
-  #cp $b'.nwk' ./SLC_phylogeny/raxml_trees/
+  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 200 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $b'.nwk' -w $raxdir 
+  cp $b'.nwk' ./SLC_phylogeny/raxml_trees/
 done
 
 ## hash if you are making the trees fresh
-cp ./GENERAL_REFERENCE/phylo_premade/* ./SLC_phylogeny/raxml_trees/
+#cp ./GENERAL_REFERENCE/phylo_premade/* ./SLC_phylogeny/raxml_trees/
 
 mv phylogeny ./intermediate/
 
