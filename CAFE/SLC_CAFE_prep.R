@@ -5,11 +5,12 @@ shhh(library(stringr))
 shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
+shhh(library(ggplot2))
 
 
 #args = commandArgs(trailingOnly=TRUE)
 #H=as.character(args[1])
-setwd('/data2/shane/Transporter_ID/SLC_id')
+#setwd('/data2/shane/Transporter_ID/SLC_id')
 used.species=readLines('./Final_raw_outputs/Good_quality_species.txt')
 dir.create('./CAFE',showWarnings = F)
 dir.create('./CAFE/CAFE_tables',showWarnings = F)
@@ -121,10 +122,10 @@ for (i in iter){
   gp=gp+theme_tree2()
   gp=gp+theme(axis.text.x=element_text(size=20,face='bold',color = 'black'))
   gp=gp+scale_x_continuous(breaks=diff+ma.r,labels=as.character(rev(ma.r)),limits=c(0,xma))
-  print(gp)
+  #print(gp)
   #dev.off()
   
-  ggsave(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.pdf'),plot=gp,,width=14,height=10)
+  ggsave(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.pdf'),plot=gp,width=14,height=10)
   
   #l.tree.ch=chronopl(read.tree(paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
   #l.tree.ch$edge.length=l.tree.ch$edge.length*1000
@@ -136,9 +137,9 @@ for (i in iter){
   
   
   sp=str_extract_all(readLines(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre')),pattern = "[A-z]+",simplify = T)
-  #sp_clean=sp[sp='_']
+  sp=as.character(sp)
   
-  sp.counts=slc.counts %>% select(c('Desc','Family ID',sp))
+  sp.counts=slc.counts %>% select(c('Desc','Family ID',all_of(sp)))
   fwrite(sp.counts,paste0('./CAFE/CAFE_tables/',i,'_SLC_CAFE_table.tsv'),sep='\t')
   #orthodb.counts=orthodb.final %>% select(c('Desc','Family ID',sp))
   #fwrite(orthodb.counts,paste0('./CAFE/CAFE_tables/',i,'_OrthoDB_CAFE_table.tsv'),sep='\t')

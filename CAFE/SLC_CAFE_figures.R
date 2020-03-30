@@ -28,18 +28,31 @@ for(i in iter){
 group='Hemipteran'
 family='SLC_36'
 
-#ree.fig=function(raxtree,ultratree,fams.summary,counts,family){
-tree.fig=function(group,family){
+
+### tree.fig function                 
+tree.fig=function(group,family,node.annot='',label.annot=''){
   
   ##import ultrametric tree
   base.tree=read.tree(paste0('./CAFE/clean_raxml_trees/',group,'_tree_ultrametric.tre'))
+  tbl=as_tibble(base.tree) %>% data.table()
   
-  ##import node labels
-  lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_fams.txt'))[1])
+  #### set colors
+  node.scores=as.numeric(base.tree$node.label)
+  cols=c()
+  for(j in node.scores){
+    if(is.na(j)){cols=c(cols,'grey50')
+    }else if(j>90){cols=c(cols,'green4')
+    }else if(j>70){cols=c(cols,'gold4')
+    }else{cols=c(cols,'red')}
+  }
+  
+  
+  ### Import node labels
+  lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_ABC_summary.txt_fams.txt'))[1])
   lab.tree=read.tree(text=paste0('(',lab.text,')',';'))
   
   ## import counts
-  count.table=fread(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_anc.txt'))[`Family ID`==family]
+  count.table=fread(paste0('./CAFE/outputs/',group,'_ABC_summary.txt_anc.txt'))[`Family ID`==family]
   count.reduce=count.table %>% select(-matches('[A-z]'))
   count.term=count.table %>% select(matches('[A-z]')) %>% select(-`Family ID`)
   colnames(count.term)=gsub('<[0-9]+>','',colnames(count.term))
@@ -59,28 +72,38 @@ tree.fig=function(group,family){
     base.tree$tip.label[which(base.tree$tip.label==i)]=paste0(i,' (',temp,')')
   }
   
-  ## create color scheme from ultrametric
-  node.scores=read.tree(paste0('./CAFE/clean_raxml_trees/raxml_tree_named_',group,'.tre'))$node.label %>% as.numeric()
-  cols=c()
-  for(j in node.scores){
-    if(is.na(j)){cols=c(cols,'grey50')
-    }else if(j>90){cols=c(cols,'green3')
-    }else if(j>70){cols=c(cols,'#e4d948ff')
-    }else{cols=c(cols,'red')}
-  }
-  
   ##Set scaling factors
+  #ma=max(sapply(1:base.tree$Nnode,function(x) tbl[node %in% ancestor(base.tree,x)]$branch.length %>% sum(na.rm = T)))
+  #xma=ma*1.4
+  #ma.r=seq(0,round(ma,-2),by=50)
+  #diff=ma-round(ma,-2)
+  
   ma=max(base.tree$edge.length)
-  xma=ma+100
+  xma=ma*1.3
   ma.r=seq(0,round(ma,-2),by=100)
   diff=ma-round(ma,-2)
-  #gsub("(^[0-9]+)","\\(\\1\\)",base.tree$node.label)
+  
+  
+  
+  #### Make plot
   
   gp=ggtree(base.tree,size=2)
   gp=gp+geom_tiplab(size=8,fontface='bold')#,aes(label=paste0('bold(', label, ')')), parse=TRUE)
-  gp=gp+geom_nodepoint(size=16,col=cols)
-  gp=gp+geom_nodelab(hjust=.75,size=8,fontface='bold')
-  #gp=gp+geom_nodelab(hjust=1.9,vjust=-.4,size=8,fontface='bold')
+  gp=gp+geom_nodepoint(size=16,color=cols)
+  gp=gp+geom_nodelab(hjust=.75,size=8,fontface='bold',color='white')
+  
+  if(is.list(node.annot)){
+    names(node.annot)=label.annot
+    plot.annot=vector("list",length=length(label.annot))
+    names(plot.annot)=label.annot
+    for(i in names(plot.annot)){
+      plot.annot[[i]][1]=tbl[grepl(node.annot[[i]][1],label)]$node %>% as.numeric()
+      plot.annot[[i]][2]=tbl[grepl(node.annot[[i]][2],label)]$node %>% as.numeric()
+      gp=gp+geom_strip(taxa1=plot.annot[[i]][1],taxa2=plot.annot[[i]][2],offset.text=4,fontsize=10,
+                       barsize=5,color='black',label=i,offset=ma/6.5)
+    }
+  }
+  #gp=gp+geom_hilight(node=list(node1,55),fill='darkgreen',alpha=.3)
   gp=gp+theme_tree2()
   gp=gp+theme(axis.text.x=element_text(size=20,face='bold',color = 'black'),axis.line.x=element_line(size=3),
               axis.title.x=element_text(size=20))
@@ -89,26 +112,9 @@ tree.fig=function(group,family){
 }
 
 
-#dir.create('CAFE_figures')
-arth.21=tree.fig(group='Arthropod','SLC_21')
-ggsave(filename='./CAFE/CAFE_figures/Arth_21.pdf',plot=arth.21,device='pdf',width=10,height=8)
-
-hemi.33=tree.fig(group='Hemipteran','SLC_33')
-ggsave(filename='./CAFE/CAFE_figures/Hemi_33.pdf',plot=hemi.33,device='pdf',width=15,height=10)
-
-arac.2=tree.fig(group='Arachnid','SLC_2')
-ggsave(filename='./CAFE/CAFE_figures/Arac_2.pdf',plot=arac.2,device='pdf',width=15,height=10)
-#lepi.22=tree.fig(group='Lepidopteran','SLC22')
-#ggsave(filename='./CAFE_figures/Lepi.22.pdf',plot=lepi.22,device='pdf',width=15,height=10)
-
-hemi.36=tree.fig(group='Arthropod','SLC_36')
-
-arac.60=tree.fig(group='Arachnid','SLC_60')
-ggsave(filename='./CAFE/CAFE_figures/Arac.60.pdf',plot=arac.60,device='pdf',width=15,height=10)
-
-arac.35=tree.fig(group='Arachnid','SLC_35')
-ggsave(filename='./CAFE/CAFE_figures/Arac.35.pdf',plot=arac.35,device='pdf',width=15,height=10)
-
-arth.2=tree.fig(group='Arthropod','SLC_2')
-ggsave(filename='./CAFE/CAFE_figures/Arth.2.pdf',plot=arth.2,device='pdf',width=15,height=10)
-
+for (i in iter){ 
+  for(j in counts$fam[!grepl('Unsorted',counts$fam)]){ 
+    temp=tree.fig(group = i,family = j)
+    ggsave(plot=temp,filename=paste0('./CAFE/CAFE_figures/',i,'_',j,'.pdf'),device='pdf',width=25,height=15)
+  }
+}

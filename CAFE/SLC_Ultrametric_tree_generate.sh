@@ -19,9 +19,9 @@ do
   b=$(echo $(basename $i) | sed 's/.+CAFE.//g' | sed 's/_final_species.txt//g')
   
   if [ $b = "Arthropod" ]; then
-    /data2/shane/Applications/custom/OrthoDB/one_to_one_ID_exec.py -node "Metazoa" -taxid $i -output seq
+    ~/Applications/Custom_Applications/one_to_one_ID_exec.py -node "Metazoa" -taxid $i -output seq
   else
-    /data2/shane/Applications/custom/OrthoDB/one_to_one_ID_exec.py -node "Arthropod" -taxid $i -output seq
+    ~/Applications/Custom_Applications/one_to_one_ID_exec.py -node "Arthropod" -taxid $i -output seq
   fi
   
   ### rename identified foler of sequences 
@@ -38,7 +38,7 @@ do
   done
   
   #### merge all phylip files
-  Rscript ./ABC_ID_SCRIPTS/ABC_Phylip_merge.R $fulltemp
+  Rscript ~/Applications/Custom_Applications/Phylip_merge.R $fulltemp > $fulltemp'/Full_species.phy'
   
   #### make trees 
   if [ $b = "Arthropod" ]; then

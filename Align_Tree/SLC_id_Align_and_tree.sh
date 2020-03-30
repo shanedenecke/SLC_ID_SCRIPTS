@@ -7,7 +7,7 @@
 #cp ./DroMel_Database/SLC_source_dict.csv ./final_SLC_dicts/DroMelFinal_SLC_table.csv
 #cp ./HomSap_Database/SLC_source_dict.csv ./final_SLC_dicts/HomSapFinal_SLC_table.csv
 
-mkdir phylogeny
+mkdir ./phylogeny
 mkdir ./phylogeny/renamed_dicts
 mkdir ./phylogeny/SLC_fa
 rm ./phylogeny/renamed_dicts/*

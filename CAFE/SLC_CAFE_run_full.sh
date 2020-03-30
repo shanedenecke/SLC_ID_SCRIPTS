@@ -26,17 +26,8 @@ do
   echo 'report '$H'/CAFE/outputs/'$b'_SLC_cafe_output' >> ./CAFE/scripts/$b'_SLC_Cafe_Script.cafe'
   
   ## run cafe
-  /data2/shane/Applications/CAFE/release/cafe ./CAFE/scripts/$b'_SLC_Cafe_Script.cafe'
+  ~/Applications/CAFE/release/cafe ./CAFE/scripts/$b'_SLC_Cafe_Script.cafe'
   python2  $H/SLC_ID_SCRIPTS/CAFE/Fulton_python_scripts/cafetutorial_report_analysis.py -i ./CAFE/outputs/$b'_SLC_cafe_output.cafe' -o ./CAFE/outputs/$b'_SLC_summary.txt'
-
-
-  t=$(grep 'Tree:' ./CAFE/outputs/$b'_SLC_cafe_output.cafe' | sed 's/Tree://g')
-  d=$(grep "IDs of nodes:" ./CAFE/outputs/$b'_SLC_cafe_output.cafe' | sed 's/# IDs of nodes://g')
-  
-  python2 $H/SLC_ID_SCRIPTS/CAFE/Fulton_python_scripts/cafetutorial_draw_tree.py -i ./CAFE/outputs/$b'_SLC_summary.txt_node.txt' \
-  -t $t \
-  -d $d \
-  -y Expansions -o ./CAFE/outputs/$b'_Expansions_tree.png'
 done
 
 
