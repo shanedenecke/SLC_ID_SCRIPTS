@@ -5,8 +5,9 @@ shhh(library(stringr))
 shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
+shhh(library(ggplot2))
 
-#setwd('/data2/shane/Transporter_ID/SLC_id/')
+#setwd('~/Transporter_ID/SLC_id/')
 dir.create('./CAFE/CAFE_figures')
 
 iter=list.files('./CAFE/CAFE_tables/') %>% gsub('_SLC_CAFE_table.tsv','',.)
@@ -25,8 +26,8 @@ for(i in iter){
 }
   
 
-group='Hemipteran'
-family='SLC_36'
+#group=i
+#family=j
 
 
 ### tree.fig function                 
@@ -37,7 +38,8 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   tbl=as_tibble(base.tree) %>% data.table()
   
   #### set colors
-  node.scores=as.numeric(base.tree$node.label)
+  node.tree=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',group,'.tre'))
+  node.scores=as.numeric(node.tree$node.label)
   cols=c()
   for(j in node.scores){
     if(is.na(j)){cols=c(cols,'grey50')
@@ -48,11 +50,11 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   
   
   ### Import node labels
-  lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_ABC_summary.txt_fams.txt'))[1])
+  lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_fams.txt'))[1])
   lab.tree=read.tree(text=paste0('(',lab.text,')',';'))
   
   ## import counts
-  count.table=fread(paste0('./CAFE/outputs/',group,'_ABC_summary.txt_anc.txt'))[`Family ID`==family]
+  count.table=fread(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_anc.txt'))[`Family ID`==family]
   count.reduce=count.table %>% select(-matches('[A-z]'))
   count.term=count.table %>% select(matches('[A-z]')) %>% select(-`Family ID`)
   colnames(count.term)=gsub('<[0-9]+>','',colnames(count.term))
@@ -113,7 +115,8 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
 
 
 for (i in iter){ 
-  for(j in counts$fam[!grepl('Unsorted',counts$fam)]){ 
+  counts=fread(paste0('./CAFE/CAFE_tables/',i,'_SLC_CAFE_table.tsv'))
+  for(j in counts[['Family ID']][!grepl('Unsorted',counts[['Family ID']])]){ 
     temp=tree.fig(group = i,family = j)
     ggsave(plot=temp,filename=paste0('./CAFE/CAFE_figures/',i,'_',j,'.pdf'),device='pdf',width=25,height=15)
   }
