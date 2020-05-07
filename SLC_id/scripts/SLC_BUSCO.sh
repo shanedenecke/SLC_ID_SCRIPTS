@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 cd $H
 
 mkdir BUSCO
