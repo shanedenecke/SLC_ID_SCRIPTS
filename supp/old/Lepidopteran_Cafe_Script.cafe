@@ -1,6 +1,0 @@
-#!cafe
-## Lepidoptera
-load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/Lepidotperan_SLC_CAFE_table.tsv -t 10 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/Lepi_logfile.txt -p 0.05
-tree ((AcyPis:711.7649398,((FraOcc:585.7314918,LocMig:585.7314918):71.40820331,((TriCas:603.9649631,((PluXyl:253.5494823,(((PapGla:58.22630076,(PapPol:36.61084968,PapXut:36.61084968):21.61545108):145.238105,(PieRap:179.6743168,(DanPle:148.1985816,(MelCin:125.6298448,HelMel:125.6298448):22.56873678):31.47573522):23.79008887):20.0325078,(((ManSex:162.2229771,BomMor:162.2229771):32.59187408,(OpeBru:182.7749885,(HelArm:78.78583246,SpoLit:78.78583246):103.989156):12.03986269):16.81989415,AmyTra:211.6347453):11.86216818):30.05256875):308.3139157,DroMel:561.8633979):42.10156514):34.23023193,ApiMel:638.195195):18.94450016):54.62524461):288.2350602,TetUrt:1000);
-lambda -s -t ((1,((1,1)1,((1,((1,(((1,(1,1)1)1,(1,(1,(1,1)1)1)1)1,(((1,1)1,(1,(1,1)1)1)1,1)1)1)1,1)1)1,1)1)1)1,1);
-report /data2/shane/Documents/SLC_id/CAFE/outputs/Lepidopteran_cafe_output

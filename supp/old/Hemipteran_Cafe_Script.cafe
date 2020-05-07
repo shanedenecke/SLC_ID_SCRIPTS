@@ -1,6 +1,0 @@
-#!cafe
-## Hemiptera
-load -i /data2/shane/Documents/SLC_id/CAFE/CAFE_tables/Hemipteran_SLC_CAFE_table.tsv -t 36 -l /data2/shane/Documents/SLC_id/CAFE/logfiles/Hemi_logfile.txt -p 0.05
-tree ((FraOcc:95.24237355,(((HomVit:70.0290631,NilLug:70.0290631):9.118605695,(GerBue:61.55875364,((RhoPro:41.9759561,CimLec:41.9759561):8.361451822,(OncFas:30.18902677,HalHal:30.18902677):20.14838116):11.22134572):17.58891515):5.597694879,(BemTab:78.12736443,(DiaCit:71.95282651,((RhoPad:2.567083752,AphGly:2.567083752):1.323422136,(AcyPis:2.747793034,((MyzCer:1.544881883,MyzPer:1.544881883):0.899960938,DiuNox:2.444842821):0.3029502129):1.142712854):68.06232062):6.174537922):6.61799924):10.49700988):4.757626447,(((BomMor:74.58918654,DroMel:74.58918654):10.29767767,TriCas:84.88686421):10.11162783,ApiMel:94.99849204):5.001507956);
-lambda -s -t ((1,(((1,1)1,(1,((1,1)1,(1,1)1)1)1)1,(1,(1,((1,1)1,(1,((1,1)1,1)1)1)1)1)1)1)1,(((1,1)1,1)1,1)1)
-report /data2/shane/Documents/SLC_id/CAFE/outputs/Hemipteran_cafe_output
