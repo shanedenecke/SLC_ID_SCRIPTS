@@ -63,6 +63,4 @@ SLC_63_
 SLC_64_
 SLC_65_
 SLC_66_
-SLC_65_
-SLC_66_
 SLC_Unsorted_

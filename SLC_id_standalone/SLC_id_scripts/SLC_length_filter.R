@@ -14,8 +14,9 @@ shhh(library(stringr))
 args = commandArgs(trailingOnly=TRUE)
 H=as.character(args[1])
 
-#setwd('/data2/shane/Transporter_ID/SLC_id/Dm_Database_Generate/Hs_to_DroMel_Search')
+#setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/Dm_Database_Generate/Hs_to_DroMel_Search')
 setwd('./length_analysis')
+
 ## import all data calucated in bash SLC_HMM_Search script
 gene_lengths=fread('./gene_lengths.txt',colClasses = 'character',col.names = c('gene','len','family'))
 gene_lengths$family=gsub('(SLC_.+)_','\\1',gene_lengths$family,perl=T)
@@ -30,14 +31,12 @@ if(slc.len<rows){
 
 
 ## import keys and dictionaries for human SLC
-hs.key=fread(paste0(H,'/GENERAL_REFERENCE/keys/Hs_master_key.csv'))
-#hs.dict=fread('/data2/shane/Documents/SLC_id/GENERAL_REFERENCE/SLC_info/HomSap_SLC_dict_new.csv',col.names = c('sd_name','HUGO_name')) %>% 
-#  separate(sd_name,into=c('1','2','C'),sep="_") %>% unite("slc_family",'1','2') %>% select(-C) 
-hs.dict=fread(paste0(H,'/GENERAL_REFERENCE/model_SLC_info/HomSap_SLC_dict.csv')) %>% rename(HUGO_name=code) %>% data.table()
+hs.key=fread(paste0(H,'/SLC_id_reference/Hs_master_key.csv'))
+hs.dict=fread(paste0(H,'/SLC_id_reference/HomSap_SLC_dict.csv')) %>% rename(HUGO_name=code) %>% data.table()
 hs.dict$family=gsub('(^SLC_[0-9|A-Z]+).+$','\\1',hs.dict$name)
 hs.dict$HUGO_name=gsub(" PE","",hs.dict$HUGO_name)
-dm.key=fread(paste0(H,'/GENERAL_REFERENCE/keys/Dm_master_key_by_gene.csv'))
-dm.dict=fread(paste0(H,'/GENERAL_REFERENCE/model_SLC_info/Dm_SLC_length.csv'))
+dm.key=fread(paste0(H,'/SLC_id_reference/Dm_master_key_by_gene.csv'))
+dm.dict=fread(paste0(H,'/SLC_id_reference/Dm_SLC_length.csv'))
 
 
 
@@ -105,16 +104,8 @@ for(i in 1:nrow(gene_lengths)){
 
 total=rbindlist(l)
 
-
-comp.score=nrow(total[evaluation=='SHORT'])/nrow(total)
-a=str_split(getwd(),c('_','/')) %>% unlist() 
-score.name=a[length(a)-1]
-fwrite(data.table(comp.score,score.name),paste0(H,'/genome_score/comp_score.txt'),append=T)
-
-
-
 write.csv(total,'./Total_length_analysis.csv')
-final=total %>% filter(evaluation=='GOOD' | evaluation=='UNK' ) %>% select(gene,family) %>% data.table()
+final=total %>% select(gene,family) %>% data.table()
 colnames(final)=c('code','name')
 cat(format_csv(final))
 

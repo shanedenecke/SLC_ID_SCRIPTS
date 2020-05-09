@@ -1,22 +1,17 @@
+#!/usr/bin/env R
 library(dplyr)
 library(data.table)
 library(VennDiagram)
-#library(venn)
 library(svglite)
 library(gplots)
 library(ggplot2)
 library(ggsci)
 library(gridExtra)
 
-
-#args = commandArgs(trailingOnly=TRUE)
-#H=as.character(args[1])
-#setwd('/data2/shane/Transporter_ID/SLC_id')
-
 dir.create('Figures')
 setwd('Figures')
 
-co.var=fread('../GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.tsv',header=T) #%>%
+co.var=fread('../GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv',header=T) #%>%
   #select(Species_name,abbreviation,Taxonomic_Classification,Phagy,Phagy2,Vory,Diet_category)
 full.count=fread('../Final_raw_outputs/TableS7_count_summary.csv')
 full.table=fread('../Final_raw_outputs/TableS6_Full_dict_table.csv') ### Need to generate this file
@@ -64,7 +59,7 @@ gp=gp+theme(text=element_text(face="bold",family="serif"),panel.grid=element_bla
             axis.ticks.x=element_line(),panel.border=element_rect(colour="black",fill=NA),
             axis.title=element_text(size=22),axis.text.x=element_text(size=18),
             legend.position = 'none',plot.title = element_text(hjust = 0.5))
-print(gp)
+#print(gp)
 
 ggsave(gp,file='./FigureS2_histogram.pdf',device='pdf',width=20,height=10,units='cm')
 

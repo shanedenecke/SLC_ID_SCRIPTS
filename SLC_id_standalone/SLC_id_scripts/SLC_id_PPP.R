@@ -1,5 +1,6 @@
 #!/usr/bin/Rscript
 
+### Import packages
 shhh <- suppressPackageStartupMessages
 shhh(library(data.table))
 shhh(library(dplyr))
@@ -11,7 +12,7 @@ shhh(library(stringi))
 shhh(library(seqinr))
 
 
-######################## functions
+### functions
 dash.remove=function(x){
   split=unlist(strsplit(x,'_'))
   toge=paste(split[1],split[2],sep='_')
@@ -27,47 +28,56 @@ shane.transpose=function(dt,newcol){
   b=mutate(a,newcol=new.rows) %>% select(newcol,everything())
   return(b)
 }
-########################################3
 
-#args = commandArgs(trailingOnly=TRUE)
-#H=as.character(args[1])
-#setwd('/data2/shane/Transporter_ID/SLC_id')
+### Set working directories and source directory
+setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
+scriptPath <- normalizePath(dirname(sub("^--file=", "", args[grep("^--file=", args)])))
+scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_id_standalone/SLC_id_scripts'
+sourcePath=dirname(scriptPath)
 
+### Import argument for metadata file
+args <- commandArgs(trailingOnly = F) 
+args[1]=paste0(sourcePath,'/SLC_id_reference/Arthropod_species_metadata.tsv') 
+
+#### Create new directories for outputs
 dir.create('TMHMM_filter')
 dir.create('Final_raw_outputs')
 dir.create('Figures')
 
+## read in metadata
+meta.data=fread(args[1],header=T,sep='\t')
+busco.data=fread('./BUSCO/BUSCO_final_summary.tsv') %>% rename(abbreviation=Species)
+meta.full=merge(meta.data,busco.data,by='abbreviation') %>% filter(Completeness>75) %>% data.table()
+meta.full=rbind(meta.full,meta.data[abbreviation=='DroMel'],fill=T) %>% rbind(meta.data[abbreviation=='HomSap'],fill=T)
 
-## read in data
-meta.data=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.tsv',header=T,sep='\t')
-human.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Human_SLC_HMM.txt')
+
+### Read in HMM files and family names
+human.hmm=fread(paste0(sourcePath,'/SLC_id_reference/Human_SLC_HMM.txt'))
 colnames(human.hmm)=c('code','tm_domains')
 
-comp.score=fread('./genome_score/comp_score.txt') %>% 
-  filter(grepl('DROSOPHILA',score.name)) %>% separate(score.name,into=c('dros','abbreviation'),'_') %>% 
-  data.table()
-
-
-dros.hmm=fread('./GENERAL_REFERENCE/model_SLC_info/Drosophila_Flybase_SLC_TMHMM.csv')
+dros.hmm=fread(paste0(sourcePath,'/SLC_id_reference/Drosophila_Flybase_SLC_TMHMM.csv'))
 colnames(dros.hmm)=c('code','tm_domains','family')
 
-slc_fams=readLines('./GENERAL_REFERENCE/input_arguments/SLC_Families.txt')
+slc_fams=readLines(paste0(sourcePath,'/SLC_id_reference/SLC_Families.txt'))
 slc_fams=sapply(slc_fams,dash.remove)
 names(slc_fams)=NULL
 
 
-
-### copy DroMel and HomSap databases to final_dicts directory
+#### Copy Drosphila and Human dictionaries and proteomes into directory with the other targets 
 file.remove('./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv')
 file.remove('./preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')
-#file.copy('./Dm_Database_Generate/SLC_source_dict_flybaseXref.csv','./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv'))
 file.copy('./DroMel_Database/SLC_source_dict.csv','./preliminary_SLC_dicts/DroMelPreliminary_SLC_table.csv')
 file.copy('./HomSap_Database/SLC_source_dict.csv','./preliminary_SLC_dicts/HomSapPreliminary_SLC_table.csv')
 
-file.copy('./GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa','./proteomes/')
-file.copy('./GENERAL_REFERENCE/model_proteomes/HomSap_unigene.faa','./proteomes/')
+
+file.remove('./filtered_proteomes/DroMel_unigene.faa')
+file.remove('./filtered_proteomes/HomSap_unigene.faa')
+file.copy(paste0(sourcePath,'/SLC_id_reference/DroMel_unigene.faa'),'./filtered_proteomes/')
+file.copy(paste0(sourcePath,'/SLC_id_reference/HomSap_unigene.faa'),'./filtered_proteomes/')
 
 
+
+######################################### START THE ANALYSIS PROPER
 
 
 ###Generate HMM filter tables
@@ -78,8 +88,6 @@ model.hmm.key=rbindlist(list(model.hmm.key,data.table(family='SLC_Unsorted',mini
 
 
 ########## GET PRELIMINARY LIST AND SUBSET FASTA
-
-#i='./final_SLC_dicts/CaeEleFinal_SLC_table.csv'
 l=list()
 for(i in list.files('./preliminary_SLC_dicts',full.names = T)){
   dict=fread(i)
@@ -89,36 +97,39 @@ for(i in list.files('./preliminary_SLC_dicts',full.names = T)){
   dict$abbreviation=abbrev
   dict$family=fam
   dict2=merge(dict,select(meta.data,Species_name,abbreviation),by='abbreviation',use.names=T) %>% mutate(name)
-  #dict2=dict
   dict2$name=paste(dict2$Species_name,dict2$abbreviation,dict2$code,dict2$name,sep='___')
   dict2$name=gsub(' ','_',dict2$name)
+  dict2$code=as.character(dict2$code)
   l[[i]]=dict2
   ind.rename.dict= dict2 %>% select(name,code)
   writeLines(ind.rename.dict$code,'./TMHMM_filter/slc_unfiltered_codes.txt')
   fwrite(ind.rename.dict,'./TMHMM_filter/temp_rename_dict.csv')
-  file.copy(paste0('./proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
+  file.copy(paste0('./filtered_proteomes/',abbrev,'_unigene.faa'),'./TMHMM_filter/temp_proteome.faa',overwrite = T)
   
-  system('~/Applications/Custom_Applications/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa')
-  system('~/Applications/Custom_Applications/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa')
+  system(paste0(scriptPath,'/unigene_fa_sub.sh ./TMHMM_filter/temp_proteome.faa ./TMHMM_filter/slc_unfiltered_codes.txt > ./TMHMM_filter/SLC_unfiltered_all_raw.faa'))
+  system(paste0(scriptPath,'/fasta_rename.py ./TMHMM_filter/SLC_unfiltered_all_raw.faa ./TMHMM_filter/temp_rename_dict.csv >> ./TMHMM_filter/Renamed_unfiltered_SLC.faa'))
 }
 
+### remove any fasta files that didn't get renamed properly
 unnamed.fasta=read.fasta('./TMHMM_filter/Renamed_unfiltered_SLC.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
 unnamed.fasta2=unnamed.fasta[grepl('__',names(unnamed.fasta))]
 write.fasta(unnamed.fasta2,names(unnamed.fasta2),file.out='./TMHMM_filter/Renamed_unfiltered_SLC.faa')
 
-system("~/Applications/tmhmm-2.0c/bin/tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt")
+system("tmhmm  ./TMHMM_filter/Renamed_unfiltered_SLC.faa > ./TMHMM_filter/SLC_TMHMM_full.txt")
 system(" cat ./TMHMM_filter/SLC_TMHMM_full.txt | grep 'Number of predicted' | perl -pe 's/..(.+) Number of predicted TMHs:\\s+(\\S+)/$1\t$2/g' > ./TMHMM_filter/SLC_TMHMM_scores.txt")
 
 
 all=rbindlist(l,use.names = T)
 
 arth.hmm=fread('./TMHMM_filter/SLC_TMHMM_scores.txt',header=F,sep='\t') 
-#arth.hmm=fread('./TMHMM_filter/Cae_SLC_TMHMM_scores.txt',header=F,sep='\t') 
 colnames(arth.hmm)=c('name','tm_count')
 #arth.hmm=arth.hmm[grepl('___',name)]
 
-m=merge(arth.hmm,all,by='name') %>% merge(meta.data,by=c('Species_name','abbreviation'))
+m=merge(arth.hmm,all,by='name') %>% merge(meta.full,by=c('Species_name','abbreviation'))
+rbind(m,)
+
 #m=merge(arth.hmm,all,by='name') 
+
 
 g.l=list()
 b.l=list()
@@ -148,48 +159,12 @@ count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 
 writeLines(tmhmm.filtered.full$name,'./TMHMM_filter/Filtered_SLC_codes.txt')
 
-system('~/Applications/Custom_Applications/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw.faa')
-#system( #python3 /data2/shane/Applications/custom/unigene_fa_sub_update.py ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./TMHMM_filter/SLC_filtered_all_raw2.faa ')
-
-
-
-###### Now filter out those with very bad genome completeness scores
-
-
-## so you don't have to run the same script over and over again
-## count.summary=fread('./Final_raw_outputs/count_summary.csv')
-## tmhmm.filtered.full=fread('./Final_raw_outputs/Full_dict_table.csv')
-
-comp.score2=comp.score[!duplicated(abbreviation)] 
-
-comp.score3=merge(comp.score2,count.summary,by='abbreviation')
-
-with(comp.score3,cor.test(comp.score,SLC_total))
-
-pdf('./Figures/FigureS1_length_filter_out.pdf',width=20,height=10)
-with(comp.score3,plot(comp.score~SLC_total,xlab='Total Number of SLCs',ylab='Fracion of proteins too short',cex=1.5,cex.lab=1.5)) ### make figure
-dev.off()
-
-comp.score4=comp.score3[comp.score<.3]
-
-good_spec=c(comp.score4$abbreviation,'DroMel','HomSap')
-bad_spec=comp.score3[comp.score>=.3]$abbreviation
-good.spec.codes=meta.data[!(abbreviation %in% bad_spec)]$taxid_code
-writeLines(good.spec.codes,'./Final_raw_outputs/Good_quality_species.txt')
-
-
-count.summary2=count.summary[abbreviation %in% good_spec]
-tmhmm.filtered.full2=tmhmm.filtered.full[abbreviation %in% good_spec]
-
-fa=read.fasta('./TMHMM_filter/SLC_filtered_all_raw.faa',seqtype='AA',as.string=T,set.attributes = F,strip.desc=T)
-fa.final=fa[!grepl(paste0(bad_spec,collapse='|'),names(fa))]
-
+system('~/Applications/Custom_Applications/unigene_fa_sub.sh ./TMHMM_filter/Renamed_unfiltered_SLC.faa ./TMHMM_filter/Filtered_SLC_codes.txt > ./Final_raw_outputs/FileS1_All_SLC_final.faa')
 
 ##write totals to file
-fwrite(count.summary2,'./Final_raw_outputs/TableS7_count_summary.csv')
+fwrite(count.summary,'./Final_raw_outputs/TableS7_count_summary.csv')
 fwrite(tmhmm.removed,'./Final_raw_outputs/TMM_filtered_out.csv')
-fwrite(tmhmm.filtered.full2,'./Final_raw_outputs/TableS6_Full_dict_table.csv')
-write.fasta(fa.final,names=names(fa.final),file.out='./Final_raw_outputs/FileS1_All_SLC_final.faa',nbchar=10000,as.string=T)
+fwrite(tmhmm.filtered.full,'./Final_raw_outputs/TableS6_Full_dict_table.csv')
 #save(fa.final,file='./Final_raw_outputs//All_SLCs_fasta.Robj')
   
 
@@ -199,7 +174,5 @@ a=fread('./Final_raw_outputs/TableS6_Full_dict_table.csv') %>% select(abbreviati
 
 dir.create('real_final_SLC_dicts')
 lapply(split(a,a$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./real_final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))
-
-
 
 

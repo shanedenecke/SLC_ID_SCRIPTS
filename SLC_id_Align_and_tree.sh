@@ -48,9 +48,9 @@ cat ./GENERAL_REFERENCE/input_arguments/SLC_Families.txt | while read i
 do
   grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
   mafft --thread $THREADS './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
-  ~/Applications/trimAl/source/trimal -automated1 -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
-  ~/Applications/Custom_Applications/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
-  Rscript ~/Applications/Custom_Applications/Phylip_duplicate.R './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy.phy'
+  ~/Applications/trimAl/source/trimal -automated1 -phylip_paml -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
+  #~/Applications/Custom_Applications/fasta_2_phylip.sh './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
+  Rscript ~/Applications/Custom_Applications/Phylip_duplicate.R './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
 done
 
 mkdir SLC_phylogeny

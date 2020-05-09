@@ -7,30 +7,33 @@ shhh(library(tidyr))
 shhh(library(readr))
 shhh(library(seqinr))
 
+### set working directory to source path
+args <- commandArgs(trailingOnly = F) 
+#args[1]='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline' 
+outdir='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline'
+
+scriptPath <- normalizePath(dirname(sub("^--file=", "", args[grep("^--file=", args)])))
+#scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_id_standalone/SLC_id_scripts'
+setwd(scriptPath)
+setwd('..')
 
 
-key=fread('./GENERAL_REFERENCE/keys/Dm_master_key_by_gene.csv') %>% select(Dm_FBgn)
-  #mutate(full=paste0(Dm_FBgn,name,CG,Dm_FBpp,sep='_')) %>% select(Dm_FBgn,full) %>% data.table() 
+key=fread('./SLC_id_reference/Dm_master_key_by_gene.csv') %>% select(Dm_FBgn)
 
-dm_unigene=read.fasta('./GENERAL_REFERENCE/model_proteomes/DroMel_unigene.faa',
+dm_unigene=read.fasta('./SLC_id_reference/DroMel_unigene.faa',
                       set.attributes = F,as.string = T,forceDNAtolower = F) 
 dm_unigene2=data.table(full=names(dm_unigene)) %>% mutate(FBgn=full) %>% separate(FBgn,into=c('FBgn','junk'),sep='_') %>% 
   select(-junk) %>% data.table()
 
 
 
-fb.slc.gene=fread('./GENERAL_REFERENCE/model_SLC_info/DroMel_SLC_table_flybase.csv') %>% 
+fb.slc.gene=fread('./SLC_id_reference/DroMel_SLC_table_flybase.csv') %>% 
   select(FBgn,Family) %>%
   merge(dm_unigene2,by='FBgn') %>% select(-FBgn)
 colnames(fb.slc.gene)=c('Family','code')
   
-  
 
-
-hs.slcs=fread('./Dm_Database_Generate/Hs_to_DroMel_Search/final_output/SLC_final_output.csv')# %>%
-  #mutate(FBgn=code) %>% separate(FBgn,into=c('FBgn','junk'),sep='_') %>% select(-junk)
-
-
+hs.slcs=fread(paste0(outdir,'/Hs_to_DroMel_Search/final_output/SLC_final_output.csv'))
 
 
 a=merge(hs.slcs,fb.slc.gene,by='code',all=T) %>% data.table() %>% arrange(name) %>% data.table()
@@ -64,29 +67,3 @@ final=rbindlist(l)
 cat(format_csv(final))
 
 
-
-
-
-
-
-
-
-
-
-#hs.slcs[!(code %in% flybase.slc$code)]
-
-
-#fly.new=flybase.slc[!(code %in% hs.slcs$code)]
-
-#final_table=rbind(hs.slcs,fly.new)
-#col.names = c('CG','refseq','name','family','Dm_FBgn','FBpp')) %>% select(CG,name,family,Dm_FBgn) %>%
-#  merge(key,by='Dm_FBgn')
-
-#colnames(flybase.slc)=c('code','name')
-
-
-
-
-#                  ,select=c('FBgn','Family','SYMBOL','FBpp','ANNOTATION_SYMBOL')) #%>% 
-#  unite(col='code',FBgn,SYMBOL,ANNOTATION_SYMBOL,FBpp,sep='_')
-#colnames(flybase.slc)=c('Dm_FBgn','name')

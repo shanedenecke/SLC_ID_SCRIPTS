@@ -1,23 +1,26 @@
-H=/mnt/disk/shane/Transporter_ID/Comparative_SLC_Arthropod
+#!/bin/bash
+H=/mnt/disk/shane/Transporter_ID/SLC_id
 PHYLO=$H/GENERAL_REFERENCE/CAFE/Phylo_list.txt
 SPEC=$H/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv
 THREADS=14
 
 
-
 cd $H
 
-mkdir BUSCO
-mkdir BUSCO/clean_summary
-
-cd BUSCO
-for i in ../proteomes/*; do
-  b=$(echo $(basename $i) | sed 's/_unigene.faa//g')
-  mkdir ./BUSCO/$i
-  python3 ~/Applications/busco/bin/busco -c $THREADS --config ~/Applications/busco/config/myconfig.ini -m proteins -i $i -o $b -f -l arthropoda_odb10
-  cp $b/*.txt > ./clean_summary/$b'_clean_summary.txt'
+########################  3) Search species with Human database
+rm ./proteomes/HomSap_unigene.faa
+rm ./proteomes/DroMel_unigene.faa
+mkdir Human_search
+for i in $H/proteomes/*.faa; do
+  a=$(basename $i) 
+  echo 'HUMAN SEARCH '$a
+  source ./SLC_ID_SCRIPTS/SLC_id/SLC_HMM_Search.sh $H/HomSap_Database $i $H/Human_search/'HUMAN_'$a
 done
-python3 ~/Applications/Custom_Applications/BUSCO_parse.py -dir ./clean_summary/ > $H/BUSCO/BUSCO_final_summary.tsv
 
-
-cd $H
+########################  4) Search other species with Drosohpila database
+mkdir Drosophila_search
+for i in $H/proteomes/*.faa; do
+  b=$(echo $(basename $i) | cut -d '_' -f 1) 
+  echo 'DROSOPHILA SEARCH '$b
+  source ./SLC_ID_SCRIPTS/SLC_id/SLC_HMM_Search.sh $H/DroMel_Database $i $H/Drosophila_search/'DROSOPHILA_'$b
+done

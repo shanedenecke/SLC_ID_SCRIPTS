@@ -1,3 +1,4 @@
+#!/usr/bin/env R
 shhh <- suppressPackageStartupMessages
 shhh(library(dplyr))
 shhh(library(data.table))
@@ -7,7 +8,7 @@ shhh(library(ggtree))
 shhh(library(tidyr))
 shhh(library(ggplot2))
 
-#setwd('~/Transporter_ID/SLC_id/')
+#setwd('mnt/disk/shane/Transporter_ID/SLC_id/')
 dir.create('./CAFE/CAFE_figures')
 
 iter=list.files('./CAFE/CAFE_tables/') %>% gsub('_SLC_CAFE_table.tsv','',.)
