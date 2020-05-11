@@ -7,21 +7,11 @@ shhh(library(ggtree))
 shhh(library(tidyr))
 shhh(library(ggplot2))
 
-
-#args = commandArgs(trailingOnly=TRUE)
-#H=as.character(args[1])
-#setwd('/data2/shane/Transporter_ID/SLC_id')
-used.species=readLines('./Final_raw_outputs/Good_quality_species.txt')
-dir.create('./CAFE',showWarnings = F)
 dir.create('./CAFE/CAFE_tables',showWarnings = F)
 
+full.metadata=fread('./Final_outputs/Full_Metadata_summary.csv')
+used.species=full.metadata$abbreviation
 
-### Import data
-slc.counts=fread('./Final_raw_outputs/TableS7_count_summary.csv')
-metadata=fread('./GENERAL_REFERENCE/Co_variables/Arthropod_species_metadata.tsv',header=T) %>% 
-  select(Species_name,abbreviation,taxid_code) %>% filter(taxid_code %in% used.species) %>% data.table()
-#taxid_key=fread('./GENERAL_REFERENCE/species_metadata/taxid_key.tsv',col.names = c('taxid_code','abbreviation','species_name'))
-#system('cp ./GENERAL_REFERENCE/ultrametric_tree_backup/* ./CAFE/clean_raxml_trees')
 
 ### Import functions
 lambda.convert=function(x){
@@ -45,36 +35,21 @@ shane.transpose=function(dt,newcol){
 
 ### format table for CAFE
 
-slc.counts=slc.counts %>% select(-SLC_total,-SLC_Unsorted) %>% shane.transpose()
+slc.counts=fread('./Final_outputs/Total_count_summary_transpose.csv')
 colnames(slc.counts)[1]='Family ID'
-#slc.counts$`Family ID`=gsub('_','',slc.counts$`Family ID`)
 slc.counts$Desc='(null)'
-#trans.counts=rbindlist(list(trans.counts,sup.counts),use.names = T,fill=T)
-slc.counts=select(slc.counts,Desc,'Family ID',metadata$abbreviation)
-
+slc.counts=select(slc.counts,Desc,'Family ID',everything())
 fwrite(slc.counts,'./CAFE/SLC_COUNTS_CAFE_FULL.tsv',sep='\t')
 
 
 ### create list of tree base names
 iter=list.files('./CAFE/clean_raxml_trees')[grepl('RAxML_bipartitions.',list.files('./CAFE/clean_raxml_trees'))] %>%
-  str_remove('RAxML_bipartitions.') %>% str_remove('.tre')
+  str_remove('RAxML_bipartitions.') %>% str_remove('.nwk')
 
 ###### RUN LOOP
 for (i in iter){
   
-  ### rename tree
-  rax.tree=readLines(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'.tre'))
-  for(j in metadata$taxid_code){
-    if(grepl(j,rax.tree)){
-      rax.tree=gsub(j,metadata[taxid_code==j]$abbreviation,rax.tree)
-    }
-  }
-  rax.tree.name=gsub('7227_0','DroMel',rax.tree)
-  writeLines(rax.tree.name,paste0('./CAFE/clean_raxml_trees/raxml_tree_named_',i,'.tre'))
-  
-  ## read in named raxmL tree
-  tr=read.tree(paste0('./CAFE/clean_raxml_trees/raxml_tree_named_',i,'.tre'))
-  
+  tr=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'.nwk'))
   
   nodes <- c(); maxes=c()
   maxes=c()

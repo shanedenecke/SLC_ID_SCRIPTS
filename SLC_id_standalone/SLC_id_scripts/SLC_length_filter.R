@@ -31,14 +31,13 @@ if(slc.len<rows){
 
 
 ## import keys and dictionaries for human SLC
-hs.key=fread(paste0(H,'/SLC_id_reference/Hs_master_key.csv'))
-hs.dict=fread(paste0(H,'/SLC_id_reference/HomSap_SLC_dict.csv')) %>% rename(HUGO_name=code) %>% data.table()
+hs.key=fread(paste0(H,'/SLC_id_reference/HOMSAP_GENE_KEY.csv'))
+hs.dict=fread(paste0(H,'/SLC_id_reference/HOMSAP_SLC_DICT.csv')) %>% rename(HUGO_name=code) %>% data.table()
 hs.dict$family=gsub('(^SLC_[0-9|A-Z]+).+$','\\1',hs.dict$name)
 hs.dict$HUGO_name=gsub(" PE","",hs.dict$HUGO_name)
-dm.key=fread(paste0(H,'/SLC_id_reference/Dm_master_key_by_gene.csv'))
-dm.dict=fread(paste0(H,'/SLC_id_reference/Dm_SLC_length.csv'))
-
-
+dm.key=fread(paste0(H,'/SLC_id_reference/DROMEL_GENE_KEY.csv'))
+dm.dict=fread(paste0(H,'/SLC_id_reference/DROMEL_SLC_LENGTH_KEY.csv'))
+#dm.dict$family=dm.dict$Family
 
 
 ## get table of all SL lentths in humans

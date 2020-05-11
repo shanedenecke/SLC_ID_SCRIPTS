@@ -16,15 +16,21 @@ source ./SLC_ID_SCRIPTS/SLC_Proteome_prepare.sh #Relies on parsing OrthoDB files
 #### Run SLC_id standalone
 nohup ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh -proteomes $H/proteomes -busco_thresh 75 -threads $THREADS -outdir $H -metadata ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_reference/Arthropod_species_metadata.tsv &
 
-Rscript ./SLC_ID_SCRIPTS/SLC_id/SLC_Figures.R
+### Create figures
+Rscript ./SLC_ID_SCRIPTS/SLC_Figures.R
 
-### clean up folder
-mv DroMel_Database ./intermediate
-mv HomSap_Database ./intermediate
-mv Drosophila_search ./intermediate
-mv Human_search ./intermediate
-mv TMHMM_filter ./intermediate/
-mv preliminary_SLC_dicts intermediate
+#### Build Ultrametric Trees
+###### 5) CAFE
+mkdir CAFE
+mkdir ./CAFE/clean_raxml_trees
+
+#source ./ABC_ID_SCRIPTS/SLC_species_phylogeny.sh
+cp ./GENERAL_REFERENCE/CAFE/ultrametric_tree_backup/*.nwk ./CAFE/clean_raxml_trees/
+
+#### Prepare CAFE trees
+./SLC_ID_SCRIPTS/SLC_CAFE_prep.R
+
+
 
 
 ###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny

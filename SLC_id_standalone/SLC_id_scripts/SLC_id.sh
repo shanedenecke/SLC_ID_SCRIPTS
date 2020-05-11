@@ -12,7 +12,10 @@ if [ "$1" == "-h" ]; then
   -busco_thresh: Threshold that you wish to set for BUSCO completeness scores. e.g. 75 means that only proteomes with >75 BUSCO score will be considered for the analysis
   -threads: Self explanatory
   -outdir: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
-  -metadata: A tab separated table containign the 'Species_name' and the 'abbreviation' of the targeted species"
+  -metadata: A tab separated table containign the 'Species_name' and the 'abbreviation' of the targeted species
+  example
+  ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh -proteomes $H/proteomes -busco_thresh 75 -threads $THREADS -outdir $H -metadata ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_reference/Arthropod_species_metadata.tsv
+  "
   exit 0
 fi
 
@@ -37,7 +40,7 @@ PROTEOMES=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/proteomes
 BUSCO_THRESH=75
 THREADS=14
 OUTDIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline
-META=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_reference/Arthropod_species_metadata.tsv
+META=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv
 SCRIPT_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/
 SOURCE_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/
 
@@ -77,12 +80,12 @@ fi
 
 
 #### 5) Build Human database
-$SCRIPT_DIR/SLC_Create_HMM_DB.sh -proteome $SOURCE_DIR/SLC_id_reference/HomSap_unigene.faa -dict $SOURCE_DIR/SLC_id_reference/HomSap_SLC_dict.csv -out $OUTDIR/HomSap_Database -threads $THREADS
+$SCRIPT_DIR/SLC_Create_HMM_DB.sh -proteome $SOURCE_DIR/SLC_id_reference/HomSap_unigene.faa -dict $SOURCE_DIR/SLC_id_reference/HOMSAP_SLC_DICT.csv -out $OUTDIR/HomSap_Database -threads $THREADS
 
 
 ### 6) Bulild good quality Drosophila database
 $SCRIPT_DIR/SLC_HMM_Search.sh -database $OUTDIR/HomSap_Database -target $SOURCE_DIR/SLC_id_reference/DroMel_unigene.faa -out $OUTDIR/Hs_to_DroMel_Search -threads $THREADS ## Target Drosophila proteome with human database
-$SCRIPT_DIR/SLC_Flybase_human_SLCxref.R $OUTDIR > $OUTDIR/Hs_to_DroMel_Search/SLC_source_dict_flybaseXref.csv ## Xref Human search with known SLCs from Flybase
+$SCRIPT_DIR/SLC_Flybase_human_SLCxref.R --out $OUTDIR > $OUTDIR/Hs_to_DroMel_Search/SLC_source_dict_flybaseXref.csv ## Xref Human search with known SLCs from Flybase
 $SCRIPT_DIR/SLC_Create_HMM_DB.sh -proteome $SOURCE_DIR/SLC_id_reference/DroMel_unigene.faa -dict $OUTDIR/Hs_to_DroMel_Search/SLC_source_dict_flybaseXref.csv -out $OUTDIR/DroMel_Database -threads $THREADS ## create Drosophila database
 
 ### 7) Search species with Human and Drosophila databases
@@ -112,3 +115,6 @@ mv $OUTDIR/HomSap_Database $OUTDIR/SLC_search_intermediates
 mv $OUTDIR/TMHMM* $OUTDIR/SLC_search_intermediates
 mv $OUTDIR/BUSCO $OUTDIR/SLC_search_intermediates
 mv $OUTDIR/filtered_proteomes $OUTDIR/SLC_search_intermediates
+mv $OUTDIR/preliminary_SLC_dicts $OUTDIR/SLC_search_intermediates
+mv $OUTDIR/*_search $OUTDIR/SLC_search_intermediates
+cp $OUTDIR/SLC_search_intermediates/BUSCO/BUSCO_final_summary.tsv $OUTDIR/Final_outputs/

@@ -6,19 +6,31 @@ shhh(library(dplyr))
 shhh(library(tidyr))
 shhh(library(readr))
 shhh(library(seqinr))
+shhh(library(argparser))
+
 
 ### set working directory to source path
-args <- commandArgs(trailingOnly = F) 
-#args[1]='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline' 
-outdir='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline'
+p=arg_parser('Flybase Xref')
+p <- add_argument(p, "--out", help="path to outdir")
+argv=parse_args(p)
+outdir=argv$out
 
-scriptPath <- normalizePath(dirname(sub("^--file=", "", args[grep("^--file=", args)])))
-#scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_id_standalone/SLC_id_scripts'
+getScriptPath <- function(){
+  cmd.args <- commandArgs()
+  m <- regexpr("(?<=^--file=).+", cmd.args, perl=TRUE)
+  script.dir <- dirname(regmatches(cmd.args, m))
+  if(length(script.dir) == 0) stop("can't determine script dir: please call the script with Rscript")
+  if(length(script.dir) > 1) stop("can't determine script dir: more than one '--file' argument detected")
+  return(script.dir)
+}
+scriptPath=getScriptPath()
+sourcePath=dirname(scriptPath)
+
 setwd(scriptPath)
 setwd('..')
 
 
-key=fread('./SLC_id_reference/Dm_master_key_by_gene.csv') %>% select(Dm_FBgn)
+key=fread('./SLC_id_reference/DROMEL_GENE_KEY.csv') %>% select(Dm_FBgn)
 
 dm_unigene=read.fasta('./SLC_id_reference/DroMel_unigene.faa',
                       set.attributes = F,as.string = T,forceDNAtolower = F) 
@@ -27,7 +39,7 @@ dm_unigene2=data.table(full=names(dm_unigene)) %>% mutate(FBgn=full) %>% separat
 
 
 
-fb.slc.gene=fread('./SLC_id_reference/DroMel_SLC_table_flybase.csv') %>% 
+fb.slc.gene=fread('./SLC_id_reference/DROMEL_SLC_TABLE_FLYBASE.csv') %>% 
   select(FBgn,Family) %>%
   merge(dm_unigene2,by='FBgn') %>% select(-FBgn)
 colnames(fb.slc.gene)=c('Family','code')

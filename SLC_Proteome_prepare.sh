@@ -27,7 +27,7 @@ done < ./proteome_clean/target_species.tsv
 #find ./proteome_clean/clean_fasta/ -size  0 -print0 | xargs -0 rm --
 for i in ./proteome_clean/clean_fasta/*_unigene.faa
 do
-sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' | sed 's/\\//g' | tr '[:lower:]' '[:upper:]' > temp.fasta
+sed 's/\.//g' $i | sed 's/\*//g' | sed 's/ /_/g' | sed 's/\\//g' | sed 's/\///g' | tr '[:lower:]' '[:upper:]' > temp.fasta
 awk '/^>/{id=$0;getline;arr[id]=$0}END{for(id in arr)printf("%s\n%s\n",id,arr[id])}' temp.fasta > $i
 done
 rm temp.fasta

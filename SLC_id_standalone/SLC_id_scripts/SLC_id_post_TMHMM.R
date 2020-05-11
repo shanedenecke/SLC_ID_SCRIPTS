@@ -62,16 +62,16 @@ last.remove=function(x){
 #setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
 #scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts'
 #sourcePath=dirname(scriptPath)
-#argv$meta=paste0(sourcePath,'/SLC_id_reference/Arthropod_species_metadata.tsv') 
+#argv$meta='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv'
 
 
 ################### IMPORT DATA AND DO SOME BASIC PROCESSING
 
 ### Read in HMM files and family names
-human.hmm=fread(paste0(sourcePath,'/SLC_id_reference/Human_SLC_HMM.txt'))
+human.hmm=fread(paste0(sourcePath,'/SLC_id_reference/HOMSAP_SLC_TMHMM.txt'))
 colnames(human.hmm)=c('code','tm_domains')
 
-dros.hmm=fread(paste0(sourcePath,'/SLC_id_reference/Drosophila_Flybase_SLC_TMHMM.csv'))
+dros.hmm=fread(paste0(sourcePath,'/SLC_id_reference/DROMEL_SLC_TMHMM.csv'))
 colnames(dros.hmm)=c('code','tm_domains','family')
 
 slc_fams=readLines(paste0(sourcePath,'/SLC_id_reference/SLC_Families.txt'))
@@ -136,8 +136,12 @@ count.summary=tmhmm.filtered.full %>% group_by(family,abbreviation) %>% summariz
 count.summary[is.na(count.summary)]=0
 count.summary$SLC_total=rowSums(select(count.summary,matches('SLC')))
 transposed.counts=shane.transpose(count.summary,abbreviation)
+full.meta.counts=merge(meta.full,count.summary,by='abbreviation')
+
+
 fwrite(count.summary,'./Final_outputs/Total_count_summary.csv')
-fwrite(count.summary,'./Final_outputs/Total_count_summary_transpose.csv')
+fwrite(transposed.counts,'./Final_outputs/Total_count_summary_transpose.csv')
+fwrite(full.meta.counts,'./Final_outputs/Full_Metadata_summary.csv')
 
 
 
@@ -150,8 +154,9 @@ filtered.fasta=raw.fasta[as.character(sapply(names(raw.fasta),last.remove)) %in%
 write.fasta(filtered.fasta,names=names(filtered.fasta),nbchar=10000,file.out='./Final_outputs/Total_raw_fasta.faa')
 
 ### OUTPUT SPECIES SPECIFIC DICTIONARIES
-out.base=tmhmm.filtered.full %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
-  select(-family) %>% unique.data.frame() %>% data.table()  
+#out.base=tmhmm.filtered.full %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
+#  select(-family) %>% unique.data.frame() %>% data.table()  
+out.base=tmhmm.filtered.full %>% select(abbreviation,code,family)
 
 dir.create('./Final_outputs/Final_SLC_dicts')
 lapply(split(out.base,out.base$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./Final_outputs/Final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))
