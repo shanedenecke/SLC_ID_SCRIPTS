@@ -13,10 +13,8 @@ cd $H
 mkdir -p proteomes
 source ./SLC_ID_SCRIPTS/SLC_Proteome_prepare.sh #Relies on parsing OrthoDB files and copies manually curated proteome files
 
-
-
 #### Run SLC_id standalone
-source ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh
+nohup ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh -proteomes $H/proteomes -busco_thresh 75 -threads $THREADS -outdir $H -metadata ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_reference/Arthropod_species_metadata.tsv &
 
 Rscript ./SLC_ID_SCRIPTS/SLC_id/SLC_Figures.R
 

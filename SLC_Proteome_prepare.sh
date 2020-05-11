@@ -5,7 +5,7 @@ mkdir proteome_clean
 #Subset all orthoDB gene files for only insect ones 
 #while read i; do grep $i ./GENERAL_REFERENCE/non_model_proteomes/keys/odb10v0_genes.tab >> ./GENERAL_REFERENCE/non_model_proteomes/Insect_OrthoDB.genes.tab; done < ./GENERAL_REFERENCE/non_model_proteomes/keys/OrthoDB_taxids.tsv
 # R script ./SLC_id_scripts/supp/orthodb_table_prepare.R
-cat $SPEC | awk '{print $2 "\t" $1}'| tail -n +2 | grep -v "DroMel" | grep "HomSap" > ./proteome_clean/target_species.tsv
+cat $SPEC | awk '{print $2 "\t" $1}'| tail -n +2 | grep -v "DroMel" | grep -v "HomSap" > ./proteome_clean/target_species.tsv
 mkdir ./proteome_clean/clean_fasta
 
 while IFS=$'\t' read -r taxid abbrev
