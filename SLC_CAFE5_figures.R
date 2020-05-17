@@ -1,4 +1,4 @@
-#!/usr/bin/env R
+#!/usr/bin/env Rscript
 shhh <- suppressPackageStartupMessages
 shhh(library(dplyr))
 shhh(library(data.table))
@@ -8,56 +8,51 @@ shhh(library(ggtree))
 shhh(library(tidyr))
 shhh(library(ggplot2))
 
-#setwd('mnt/disk/shane/Transporter_ID/SLC_id/')
+setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
 dir.create('./CAFE/CAFE_figures')
 
 iter=list.files('./CAFE/CAFE_tables/') %>% gsub('_SLC_CAFE_table.tsv','',.)
-
-for(i in iter){
-  ids=gsub("# Output format for: ' Average Expansion', 'Expansions', 'No Change', 'Contractions', and 'Branch-specific P-values' = (node ID, node ID): ",
-           "",readLines(paste0('./CAFE/outputs/',i,'_SLC_cafe_output.cafe'))[5],fixed=T)
-  ids2=unlist(strsplit(ids,split=' '))
-  sp=gsub('# IDs of nodes:','',readLines(paste0('./CAFE/outputs/',i,'_SLC_cafe_output.cafe'))[4])
-  sp2=unlist(str_extract_all(sp,"[A-z]{6,}<[0-9]+>")) %>% str_remove_all('<|>')
-  cafe=fread(paste0('./CAFE/outputs/',i,'_SLC_cafe_output.cafe'),skip=11,sep='\t') %>% select(V1,V3,V4) %>% 
-    filter(V3<.05) %>% separate(col=V4,into=ids2,sep='\\),\\(') %>%
-    data.table()
-  
-  fwrite(cafe,paste0('./CAFE/CAFE_figures/',i,'_CAFE.csv'))
-}
-  
-
-#group=i
-#family=j
+full.metadata=fread('./Final_outputs/Full_Metadata_summary.csv')
+group=iter[2]
+family='SLC_33'
+node.annot=''
+label.annot=''
 
 
 ### tree.fig function                 
 tree.fig=function(group,family,node.annot='',label.annot=''){
   
   ##import ultrametric tree
-  base.tree=read.tree(paste0('./CAFE/clean_raxml_trees/',group,'_tree_ultrametric.tre'))
-  tbl=as_tibble(base.tree) %>% data.table()
+  ultra.tree=read.tree(paste0('./CAFE/clean_raxml_trees/',group,'_tree_ultrametric.nwk'))
+  tbl=as_tibble(ultra.tree) %>% data.table()
   
   #### set colors
-  node.tree=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',group,'.tre'))
+  node.tree=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',group,'_subset.nwk'))
   node.scores=as.numeric(node.tree$node.label)
   cols=c()
   for(j in node.scores){
     if(is.na(j)){cols=c(cols,'grey50')
-    }else if(j>90){cols=c(cols,'green4')
-    }else if(j>70){cols=c(cols,'gold4')
+    }else if(j>80){cols=c(cols,'green4')
+    }else if(j>50){cols=c(cols,'gold4')
     }else{cols=c(cols,'red')}
   }
   
   
   ### Import node labels
-  lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_fams.txt'))[1])
+  lab.text=readLines(paste0('./CAFE/outputs/',group,'/','Base_asr.tre'))[3] %>% 
+    gsub("^.+ = ",'',.) %>% gsub('>_[0-9|\\:|\\.]+','>',.) %>%
+    gsub(';','',.)
+  #lab.text=gsub('# The labeled CAFE tree:\t','',readLines(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_fams.txt'))[1])
   lab.tree=read.tree(text=paste0('(',lab.text,')',';'))
   
   ## import counts
-  count.table=fread(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_anc.txt'))[`Family ID`==family]
+  #count.table=fread(paste0('./CAFE/outputs/',group,'_SLC_summary.txt_anc.txt'))[`Family ID`==family]
+  count.table=fread(paste0('./CAFE/outputs/',group,'/','Base_count.tab'))[`FamilyID`==family]
+  if(nrow(count.table)==0){
+    break
+  }
   count.reduce=count.table %>% select(-matches('[A-z]'))
-  count.term=count.table %>% select(matches('[A-z]')) %>% select(-`Family ID`)
+  count.term=count.table %>% select(matches('[A-z]')) %>% select(-`FamilyID`)
   colnames(count.term)=gsub('<[0-9]+>','',colnames(count.term))
   
   ## add node labels to ultrametric
@@ -67,21 +62,22 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
     sorted=c(sorted,temp)
   }
   final=c('',as.character(sorted))
-  base.tree$node.label=final
+  final2=final[-1]
+  ultra.tree$node.label=final2
   
   ## add tip labels to ultrametric with numbers
-  for(i in base.tree$tip.label){
+  for(i in ultra.tree$tip.label){
     temp=count.term[[i]]
-    base.tree$tip.label[which(base.tree$tip.label==i)]=paste0(i,' (',temp,')')
+    ultra.tree$tip.label[which(ultra.tree$tip.label==i)]=paste0(i,' (',temp,')')
   }
   
   ##Set scaling factors
-  #ma=max(sapply(1:base.tree$Nnode,function(x) tbl[node %in% ancestor(base.tree,x)]$branch.length %>% sum(na.rm = T)))
+  #ma=max(sapply(1:ultra.tree$Nnode,function(x) tbl[node %in% ancestor(ultra.tree,x)]$branch.length %>% sum(na.rm = T)))
   #xma=ma*1.4
   #ma.r=seq(0,round(ma,-2),by=50)
   #diff=ma-round(ma,-2)
   
-  ma=max(base.tree$edge.length)
+  ma=max(ultra.tree$edge.length)
   xma=ma*1.3
   ma.r=seq(0,round(ma,-2),by=100)
   diff=ma-round(ma,-2)
@@ -90,7 +86,7 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   
   #### Make plot
   
-  gp=ggtree(base.tree,size=2)
+  gp=ggtree(ultra.tree,size=2)
   gp=gp+geom_tiplab(size=8,fontface='bold')#,aes(label=paste0('bold(', label, ')')), parse=TRUE)
   gp=gp+geom_nodepoint(size=16,color=cols)
   gp=gp+geom_nodelab(hjust=.75,size=8,fontface='bold',color='white')
@@ -114,10 +110,12 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   print(gp)
 }
 
-
+tree.fig(group='Hemiptera_species',family='SLC_33')
+fams=counts[['Family ID']][!grepl('Unsorted',counts[['Family ID']])]
+fams=fams[fams!='SLC_14']
 for (i in iter){ 
   counts=fread(paste0('./CAFE/CAFE_tables/',i,'_SLC_CAFE_table.tsv'))
-  for(j in counts[['Family ID']][!grepl('Unsorted',counts[['Family ID']])]){ 
+  for(j in fams){ 
     temp=tree.fig(group = i,family = j)
     ggsave(plot=temp,filename=paste0('./CAFE/CAFE_figures/',i,'_',j,'.pdf'),device='pdf',width=25,height=15)
   }

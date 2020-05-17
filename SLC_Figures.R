@@ -76,44 +76,52 @@ ggsave(gp,file='./Figures/Species_counts_histogram.pdf',device='pdf',width=40,he
 
 ##################### HEATMAP
   
-  groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida')
-  cols=c('red3','blue3','cadetblue','green3','gold4','mediumorchid3')
+species.groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida')
+vory.groups=
+cols=c('red3','blue3','cadetblue','green3','gold4','mediumorchid3')
+
   
-  names(groups)=cols
-  final.cols=c()
-  for(i in full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']){
-    g=full.metadata[Species_name==i]$Taxonomic_Classification
-    
-    if(g %in% groups){
-      add=names(groups[which(groups==g)])
-    }else{
-      add='black'
-    }
-    final.cols=c(final.cols,add)
+names(groups)=cols
+final.cols=c()
+for(i in full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']){
+  g=full.metadata[Species_name==i]$Taxonomic_Classification
+  
+  if(g %in% groups){
+    add=names(groups[which(groups==g)])
+  }else{
+    add='black'
   }
-  names(final.cols)=full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']
-  
-  counts.matrix=full.metadata %>% filter(Species_name!='Homo_sapiens') %>%
-    select(matches("SLC"),-matches('Unsorted'),-matches('Unsorted'),-SLC_total) %>% 
-    as.matrix() %>% t()
-  colnames(counts.matrix)=full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']
-  counts.matrix=counts.matrix[rowSums(counts.matrix)>0,]
-  
-  
-  pdf('./Figures/HeatMap.pdf',width=20,height=10)
-  heatmap.2(counts.matrix,Rowv=T,Colv=T,scale="row",col=colorpanel(75,'blue','grey','red'),colCol=final.cols,dendrogram = 'both',tracecol=NA,margins = c(10,5),cexRow=.7,
-            density.info = 'density',denscol='black')
-  dev.off()
+  final.cols=c(final.cols,add)
+}
+names(final.cols)=full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']
+
+counts.matrix=full.metadata %>% filter(Species_name!='Homo_sapiens') %>%
+  select(matches("SLC"),-matches('Unsorted'),-matches('Unsorted'),-SLC_total) %>% 
+  as.matrix() %>% t()
+colnames(counts.matrix)=full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']
+counts.matrix=counts.matrix[rowSums(counts.matrix)>0,]
+
+
+pdf('./Figures/HeatMap.pdf',width=20,height=10)
+heatmap.2(counts.matrix,Rowv=T,Colv=T,scale="row",col=colorpanel(75,'blue','grey','red'),colCol=final.cols,dendrogram = 'both',tracecol=NA,margins = c(10,5),cexRow=.7,
+          density.info = 'density',denscol='black')
+dev.off()
 
 ################# ANOVA PLOTS ##################33
 
 anova.raw=select(full.metadata,-matches('Unsorted'),-SLC_total)
+
+### calculate most conserved families
+conserved=apply(counts,2,function(x) sd(x)/mean(x))
+conserved2=data.table(Family=names(conserved),coefficient_of_variance=conserved)
+fwrite(conserved2,'./Figures/Most_conserved_families.csv')
+
 ############### filter out SLC families which have <100 total members in dataset 
 slc.fam.var=c()
 for(i in colnames(anova.raw)[grepl('SLC',colnames(anova.raw))]){
   sub=as.numeric(anova.raw[[i]])
   #if(max(sub)<10){# & sub[173]<.5){
-  if(sum(sub)<100 | max(sub)<10){
+  if(sum(sub)<20 | max(sub)<3){
     slc.fam.far=c(slc.fam.var,i)
     anova.raw[[i]]=NULL
   }
@@ -146,17 +154,18 @@ for(i in colnames(anova.raw)[grep('SLC_',colnames(anova.raw))]){
 anova.sum=rbindlist(l)  
 anova.sum$bonf=p.adjust(anova.sum$pval,method='bonferroni') 
 
-tab.one=anova.sum %>% arrange(bonf)  %>% filter(max_effect>3.5) %>% data.table()
+tab.one=anova.sum %>% arrange(bonf)  %>% filter(bonf<1e-08) %>% filter(max_effect>4) %>% data.table()
+
 
 
 fwrite(anova.sum,'./Figures/ANOVA_full.csv')
 fwrite(tab.one,'./Figures/Table1_ANOVA_significant.csv')
-
+fwrite(conserved,'./Figures/Most_conserved_families.csv')
 
 
 #### Create boxplots
 dir.create('./Figures/ANOVA_meta_plots',showWarnings = F)
-plot.table=tab.one %>% distinct(family,co_variable) %>% data.table()
+plot.table=anova.sum %>% distinct(family,co_variable) %>% data.table()
 
 for(i in 1:nrow(plot.table)){
   row=plot.table[i]
@@ -171,10 +180,13 @@ for(i in 1:nrow(plot.table)){
   tit=paste0(gsub('_',' ',fam),' Family Size vrs. ',gsub('_',' ',co))
   xlab=paste0('\n',gsub('_',' ',co))
   
+  if(co=='Taxonomic_Classification'){
+  plot=plot[Taxonomic_Classification %in% c('Arachnida','Hemiptera','Hymenoptera',
+                                                'Coleoptera','Diptera','Lepidoptera')]
   plot$Taxonomic_Classification=factor(plot$Taxonomic_Classification,
                                        levels=c('Arachnida','Hemiptera','Hymenoptera',
                                                 'Coleoptera','Diptera','Lepidoptera'))
-  
+  }
   
   gp=ggplot(plot,aes_string(co,y=fam,fill=co))
   gp=gp+geom_boxplot(outlier.size=1)

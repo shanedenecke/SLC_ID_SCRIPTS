@@ -9,4 +9,9 @@
 
 #~/Applications/Custom_Applications/Species_phylogeny.sh -taxid_codes ../GENERAL_REFERENCE/CAFE/Arthropod_species.txt -ortho_algo Orthofinder -outgroups "CaeEle" -threads $THREADS
 
+#~/Applications/Custom_Applications/Species_phylogeny.sh -taxid_codes ./GENERAL_REFERENCE/CAFE/Insect_species.txt -ortho_algo Orthofinder -outgroups "DapPul" -threads 14
+
+#~/Applications/Custom_Applications/Species_phylogeny.sh -taxid_codes ./GENERAL_REFERENCE/CAFE/Arachnid_species.txt -ortho_algo Orthofinder -outgroups "ApiMel DroMel FraOcc MyzPer DapPul" -threads 14
+
+
 #cp ./*/rax_output/RAxML_bipartitions.*.nwk ./clean_raxml_trees/

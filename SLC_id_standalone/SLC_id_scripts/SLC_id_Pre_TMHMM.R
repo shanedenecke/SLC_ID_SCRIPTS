@@ -40,10 +40,10 @@ argv=parse_args(p)
 
 
 ### Debugging
-setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
-scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts'
-sourcePath=dirname(scriptPath)
-argv$meta=paste0(sourcePath,'/SLC_id_reference/Arthropod_species_metadata.tsv') 
+#setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
+#scriptPath='/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts'
+#sourcePath=dirname(scriptPath)
+#argv$meta='./GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv'
 
 print(argv$meta)
 print(sourcePath)

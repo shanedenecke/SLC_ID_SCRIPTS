@@ -152,17 +152,17 @@ table.names=as.character(sapply(tmhmm.filtered.full$name,last.remove)) ### remov
 tmhmm.filtered.full$fasta_name=table.names
 filtered.fasta=raw.fasta[as.character(sapply(names(raw.fasta),last.remove)) %in% table.names]
 write.fasta(filtered.fasta,names=names(filtered.fasta),nbchar=10000,file.out='./Final_outputs/Total_raw_fasta.faa')
-
-### OUTPUT SPECIES SPECIFIC DICTIONARIES
-#out.base=tmhmm.filtered.full %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
-#  select(-family) %>% unique.data.frame() %>% data.table()  
-out.base=tmhmm.filtered.full %>% select(abbreviation,code,family)
-
-dir.create('./Final_outputs/Final_SLC_dicts')
-lapply(split(out.base,out.base$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./Final_outputs/Final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))
-
-### OUTPUT SPECIES SPECIFIC FASTA
-dir.create('./Final_outputs/Final_SLC_fasta')
-for(i in unique(tmhmm.filtered.full$abbreviation)){
-  system2(command="grep",args=c(i,'./Final_outputs/Total_raw_fasta.faa'),stdout=paste0('./Final_outputs/Final_SLC_fasta/',i,'SLCs.faa'))
-}
+  
+  ### OUTPUT SPECIES SPECIFIC DICTIONARIES
+  out.base=tmhmm.filtered.full %>% select(abbreviation,code,family) %>% mutate(name=paste0(abbreviation,'__',code,'__',family,'_')) %>% 
+    select(-family) %>% unique.data.frame() %>% data.table()  
+  #out.base=tmhmm.filtered.full %>% select(abbreviation,code,family)
+  out.base$code=gsub('_PE',' PE',out.base$code)
+  dir.create('./Final_outputs/Final_SLC_dicts')
+  lapply(split(out.base,out.base$abbreviation),function(x) fwrite(select(x,-abbreviation),file=paste0('./Final_outputs/Final_SLC_dicts/',x$abbreviation[1],'_final_SLC_table.csv')))
+  
+  ### OUTPUT SPECIES SPECIFIC FASTA
+  dir.create('./Final_outputs/Final_SLC_fasta')
+  for(i in unique(tmhmm.filtered.full$abbreviation)){
+    system2(command="grep",args=c(i,'./Final_outputs/Total_raw_fasta.faa'),stdout=paste0('./Final_outputs/Final_SLC_fasta/',i,'SLCs.faa'))
+  }

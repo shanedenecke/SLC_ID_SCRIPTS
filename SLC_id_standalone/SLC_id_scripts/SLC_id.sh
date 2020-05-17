@@ -14,7 +14,7 @@ if [ "$1" == "-h" ]; then
   -outdir: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
   -metadata: A tab separated table containign the 'Species_name' and the 'abbreviation' of the targeted species
   example
-  ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh -proteomes $H/proteomes -busco_thresh 75 -threads $THREADS -outdir $H -metadata ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_reference/Arthropod_species_metadata.tsv
+  ./SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/SLC_id.sh -proteomes $H/proteomes -busco_thresh 75 -threads $THREADS -outdir $H -metadata /mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv
   "
   exit 0
 fi
@@ -36,13 +36,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SOURCE_DIR="$(dirname "$SCRIPT_DIR")"
 
 ### For debugging
-PROTEOMES=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/proteomes
-BUSCO_THRESH=75
-THREADS=14
-OUTDIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline
-META=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv
-SCRIPT_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/
-SOURCE_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/
+#PROTEOMES=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/proteomes
+#BUSCO_THRESH=75
+#THREADS=14
+#OUTDIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline
+#META=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/GENERAL_REFERENCE/keys/Arthropod_species_metadata.tsv
+#SCRIPT_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/SLC_id_scripts/
+#SOURCE_DIR=/mnt/disk/shane/Transporter_ID/SLC_id_pipeline/SLC_ID_SCRIPTS/SLC_id_standalone/
 
 echo 'The proteomes folder is '$PROTEOMES
 echo 'The BUSCO THRESHOLD is '$BUSCO_THRESH

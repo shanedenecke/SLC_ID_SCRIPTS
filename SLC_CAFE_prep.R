@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript
 shhh <- suppressPackageStartupMessages
 shhh(library(dplyr))
 shhh(library(data.table))
@@ -6,6 +7,8 @@ shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
 shhh(library(ggplot2))
+
+setwd("/mnt/disk/shane/Transporter_ID/SLC_id_pipeline")
 
 dir.create('./CAFE/CAFE_tables',showWarnings = F)
 
@@ -39,17 +42,23 @@ slc.counts=fread('./Final_outputs/Total_count_summary_transpose.csv')
 colnames(slc.counts)[1]='Family ID'
 slc.counts$Desc='(null)'
 slc.counts=select(slc.counts,Desc,'Family ID',everything())
+slc.counts=slc.counts[`Family ID`!='SLC_total']
 fwrite(slc.counts,'./CAFE/SLC_COUNTS_CAFE_FULL.tsv',sep='\t')
 
 
 ### create list of tree base names
 iter=list.files('./CAFE/clean_raxml_trees')[grepl('RAxML_bipartitions.',list.files('./CAFE/clean_raxml_trees'))] %>%
   str_remove('RAxML_bipartitions.') %>% str_remove('.nwk')
+iter=iter[grep('species$',iter)]
 
 ###### RUN LOOP
 for (i in iter){
   
-  tr=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'.nwk'))
+  tr1=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'.nwk'))
+  drops=tr1$tip.label[!(tr1$tip.label %in% full.metadata$abbreviation)]
+  if(grepl('Arthropod',i)){drops=c(drops,'CaeEle')} #'LimPol','ParTep','CenScu','FolCan',
+  tr=drop.tip(tr1,drops)
+  write.tree(tr,paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'_subset.nwk'))
   
   nodes <- c(); maxes=c()
   maxes=c()
@@ -70,11 +79,11 @@ for (i in iter){
   num=mytimetree$node.label %>% as.numeric()
   mytimetree$node.label=NULL
   #mytimetree$edge.length=round(mytimetree$edge.length)
-  write.tree(mytimetree, file=paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre'))
+  write.tree(mytimetree, file=paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.nwk'))
   
   
   #### Plot tree
-  plot.tree=read.tree(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre'))
+  plot.tree=read.tree(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.nwk'))
   cols=c()
   for(j in num){
     if(is.na(j)){cols=c(cols,'black')
@@ -102,19 +111,22 @@ for (i in iter){
   
   ggsave(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.pdf'),plot=gp,width=14,height=10)
   
-  #l.tree.ch=chronopl(read.tree(paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.tre')), lambda=0.1)
-  #l.tree.ch$edge.length=l.tree.ch$edge.length*1000
-  #l.tree.ch$node.label=NULL
-  #write.tree(l.tree.ch, file=paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre'))
+  #l.nwke.ch=chronopl(read.nwke(paste0(paste0(H,'CAFE/trees/raxml_tree_named_',i,'.nwk')), lambda=0.1)
+  #l.nwke.ch$edge.length=l.nwke.ch$edge.length*1000
+  #l.nwke.ch$node.label=NULL
+  #write.nwke(l.nwke.ch, file=paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.nwk'))
   
   ## create lambda file
-  writeLines(lambda.convert(readLines(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre'))),paste0("./CAFE/clean_raxml_trees/",i,'_tree_lambda.txt')) 
+  writeLines(lambda.convert(readLines(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.nwk'))),paste0("./CAFE/clean_raxml_trees/",i,'_tree_lambda.txt')) 
   
   
-  sp=str_extract_all(readLines(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.tre')),pattern = "[A-z]+",simplify = T)
+  sp=str_extract_all(readLines(paste0("./CAFE/clean_raxml_trees/",i,'_tree_ultrametric.nwk')),pattern = "[A-z]+",simplify = T)
   sp=as.character(sp)
   
   sp.counts=slc.counts %>% select(c('Desc','Family ID',all_of(sp)))
+  if(grepl('Arthropod',i)){
+	sp.counts=sp.counts[!(`Family ID` %in% c('SLC_16','SLC_17'))] #,'SLC_22','SLC_46','SLC_2'
+	}
   fwrite(sp.counts,paste0('./CAFE/CAFE_tables/',i,'_SLC_CAFE_table.tsv'),sep='\t')
   #orthodb.counts=orthodb.final %>% select(c('Desc','Family ID',sp))
   #fwrite(orthodb.counts,paste0('./CAFE/CAFE_tables/',i,'_OrthoDB_CAFE_table.tsv'),sep='\t')
