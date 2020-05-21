@@ -40,7 +40,7 @@ mkdir ./phylogeny/phylip
 cat ./GENERAL_REFERENCE/SLC_Families.txt | while read i
 do
   grep -E -A 1 $i ./phylogeny/SLC_fa/combined_renamed.faa | sed '/--/d' > './phylogeny/SLC_byfam/'$i'phylo_subset.faa'
-  mafft-linsi --quiet --thread $THREADS './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
+  mafft-linsi --thread $THREADS './phylogeny/SLC_byfam/'$i'phylo_subset.faa' > './phylogeny/alignments/'$i'phylo_subset.faa.aln'
   ~/Applications/trimal/source/trimal -automated1 -phylip_paml -in './phylogeny/alignments/'$i'phylo_subset.faa.aln' -out './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm'
   Rscript ~/Applications/Custom_Applications/Phylip_duplicate.R './phylogeny/trimms/'$i'phylo_subset.faa.aln.trimm' > './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'
   sed -i 's/\;/_/g' './phylogeny/phylip/'$i'phylo_subset.faa.aln.trimm.phy'

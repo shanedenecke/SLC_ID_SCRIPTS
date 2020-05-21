@@ -75,14 +75,14 @@ seq=$(cat $i | wc -l)
 if [ $seq -gt 2 ]
   then
     mafft-linsi --quiet --thread $THREADS $i > $i.aln
-    ~/Applications/trimal/source/trimal -automated1 -in $i.aln -out $i.trimmed
+    #~/Applications/trimal/source/trimal -automated1 -in $i.aln -out $i.trimmed
   else
-    cat $i > $i.trimmed
+    cat $i > $i.aln
   fi
 done
 
-mv ./family_fasta/*.trimmed ./alignments
-rm -rf ./family_fasta/*.aln
+mv ./family_fasta/*.aln ./alignments
+#rm -rf ./family_fasta/*.aln
 
 ## build HMM profiles for each family
 mkdir ./hmm_profiles

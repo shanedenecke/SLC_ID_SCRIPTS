@@ -7,7 +7,7 @@ rm -r ./CAFE/outputs
 
 
 #mkdir ./CAFE/scripts
-#mkdir ./CAFE/logfiles
+#mkdir ./CAFE/logfiles  
 mkdir ./CAFE/outputs
 
 for i in ./CAFE/CAFE_tables/*.tsv

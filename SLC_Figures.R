@@ -55,7 +55,8 @@ ggsave(gp,file='./Figures/SLC_counts_histogram.pdf',device='pdf',width=20,height
 
 
 ############# Taxonomic group histogram 
-taxa.counts=full.metadata %>% group_by(Taxonomic_Classification) %>% summarize(count=n()) %>% 
+full.full.meta=fread('./Final_outputs/Full_metadata_no_filter.tsv')
+taxa.counts=full.full.meta %>% group_by(Taxonomic_Classification) %>% summarize(count=n()) %>% 
   arrange(desc(count)) %>% filter(Taxonomic_Classification!='') %>% data.table()
 taxa.counts$Taxonomic_Classification=factor(taxa.counts$Taxonomic_Classification,levels=taxa.counts$Taxonomic_Classification)
 
@@ -76,12 +77,13 @@ ggsave(gp,file='./Figures/Species_counts_histogram.pdf',device='pdf',width=40,he
 
 ##################### HEATMAP
   
-species.groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida')
-vory.groups=
+groups=c('Hymenoptera','Coleoptera','Hemiptera','Lepidoptera','Diptera','Arachnida')
+#groups=c("polyphagous","oligophagous")
+#groups=c('Herbivore',"Omniovre",'Carnivore')
 cols=c('red3','blue3','cadetblue','green3','gold4','mediumorchid3')
 
   
-names(groups)=cols
+names(groups)=cols[1:length(groups)]
 final.cols=c()
 for(i in full.metadata$Species_name[full.metadata$Species_name!='Homo_sapiens']){
   g=full.metadata[Species_name==i]$Taxonomic_Classification
@@ -112,6 +114,7 @@ dev.off()
 anova.raw=select(full.metadata,-matches('Unsorted'),-SLC_total)
 
 ### calculate most conserved families
+counts=anova.raw %>% select(contains('SLC'))
 conserved=apply(counts,2,function(x) sd(x)/mean(x))
 conserved2=data.table(Family=names(conserved),coefficient_of_variance=conserved)
 fwrite(conserved2,'./Figures/Most_conserved_families.csv')
@@ -199,7 +202,7 @@ for(i in 1:nrow(plot.table)){
               strip.text=element_text(size=20),strip.background=element_rect("white"),
               axis.title=element_text(size=17),axis.text.x=element_text(angle=45,hjust=1),
               legend.position = 'none',plot.title = element_text(hjust = 0.5))
-  ggsave(paste0('./Figures/ANOVA_meta_plots/',co,'_',fam,'.pdf'),device='pdf',plot=gp)
+  ggsave(paste0('./Figures/ANOVA_meta_plots/',co,'_',fam,'.pdf'),device='pdf',plot=gp,width=10,height=10)
   
   
   #print(gp)
@@ -214,12 +217,12 @@ for(i in 1:nrow(plot.table)){
   assign(paste0(co,'.',fam),gp2)
 }
 
-grid.plot=grid.arrange(Taxonomic_Classification.SLC_36,
-             Taxonomic_Classification.SLC_22,
-             Taxonomic_Classification.SLC_2,
-             Taxonomic_Classification.SLC_35,
+grid.plot=grid.arrange(Taxonomic_Classification.SLC_22,
+             Taxonomic_Classification.SLC_36,
              Taxonomic_Classification.SLC_60,
+             Taxonomic_Classification.SLC_6,
              Taxonomic_Classification.SLC_33,
+             Taxonomic_Classification.SLC_2,
              nrow=2)
 
 ggsave(grid.plot,file='./Figures/Figure4_ANOVA_comparisons.pdf',device='pdf',width=20,height=15,units='cm')

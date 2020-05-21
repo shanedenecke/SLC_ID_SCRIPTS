@@ -7,17 +7,24 @@ shhh(library(ape))
 shhh(library(ggtree))
 shhh(library(tidyr))
 shhh(library(ggplot2))
-
+shhh(library(treeio))
 setwd('/mnt/disk/shane/Transporter_ID/SLC_id_pipeline')
 dir.create('./CAFE/CAFE_figures')
 
 iter=list.files('./CAFE/CAFE_tables/') %>% gsub('_SLC_CAFE_table.tsv','',.)
 full.metadata=fread('./Final_outputs/Full_Metadata_summary.csv')
-group=iter[2]
-family='SLC_33'
-node.annot=''
-label.annot=''
+#group='Hemiptera_species'
+#family='SLC_33'
+#node.annot=''
+#label.annot=''
 
+
+xma.calc=function(tree){
+  table=as_tibble(tree) %>% data.table()
+  sum1=table[node %in% tidytree::ancestor(tree,1)]$branch.length %>% sum(na.rm=T)
+  sum2=table[node==1]$branch.length
+  return(sum1+sum2)
+}
 
 ### tree.fig function                 
 tree.fig=function(group,family,node.annot='',label.annot=''){
@@ -77,7 +84,9 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   #ma.r=seq(0,round(ma,-2),by=50)
   #diff=ma-round(ma,-2)
   
-  ma=max(ultra.tree$edge.length)
+  #ma=max(ultra.tree$edge.length)
+  #if(grepl('ArachIn',group)){ma=(254.90342+254.90367+45.39890)}
+  ma=xma.calc(ultra.tree)
   xma=ma*1.3
   ma.r=seq(0,round(ma,-2),by=100)
   diff=ma-round(ma,-2)
@@ -87,9 +96,9 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   #### Make plot
   
   gp=ggtree(ultra.tree,size=2)
-  gp=gp+geom_tiplab(size=8,fontface='bold')#,aes(label=paste0('bold(', label, ')')), parse=TRUE)
-  gp=gp+geom_nodepoint(size=16,color=cols)
-  gp=gp+geom_nodelab(hjust=.75,size=8,fontface='bold',color='white')
+  gp=gp+geom_tiplab(size=10,fontface='bold')#,aes(label=paste0('bold(', label, ')')), parse=TRUE)
+  gp=gp+geom_nodepoint(size=21,color=cols)
+  gp=gp+geom_nodelab(hjust=.6,size=12,fontface='bold',color='white')
   
   if(is.list(node.annot)){
     names(node.annot)=label.annot
@@ -107,16 +116,25 @@ tree.fig=function(group,family,node.annot='',label.annot=''){
   gp=gp+theme(axis.text.x=element_text(size=20,face='bold',color = 'black'),axis.line.x=element_line(size=3),
               axis.title.x=element_text(size=20))
   gp=gp+scale_x_continuous(breaks=diff+ma.r,labels=as.character(rev(ma.r)),limits=c(0,xma))
-  print(gp)
+  #print(gp)
 }
 
-tree.fig(group='Hemiptera_species',family='SLC_33')
-fams=counts[['Family ID']][!grepl('Unsorted',counts[['Family ID']])]
-fams=fams[fams!='SLC_14']
+a=tree.fig(group='Hemiptera_species',family='SLC_33')
+ggsave(a,filename='test.pdf',device='pdf',width=15,height=10)
+#fams=counts[['Family ID']][!grepl('Unsorted',counts[['Family ID']])]
+fams=colnames(full.metadata)[grepl('SLC_',colnames(full.metadata))]
+fams=fams[fams!='SLC_14' & fams!='SLC_Unsorted' & fams!='SLC_total']
+
+
+iter=iter[c(1,3,5)]
+iter=iter[2]
 for (i in iter){ 
   counts=fread(paste0('./CAFE/CAFE_tables/',i,'_SLC_CAFE_table.tsv'))
   for(j in fams){ 
-    temp=tree.fig(group = i,family = j)
-    ggsave(plot=temp,filename=paste0('./CAFE/CAFE_figures/',i,'_',j,'.pdf'),device='pdf',width=25,height=15)
+    res=try(tree.fig(group = i,family = j),silent=T)
+    if(class(res)!='try-error'){
+      temp=tree.fig(group = i,family = j)
+      ggsave(plot=temp,filename=paste0('./CAFE/CAFE_figures/',i,'_',j,'.pdf'),device='pdf',width=20,height=15)
+    }
   }
 }

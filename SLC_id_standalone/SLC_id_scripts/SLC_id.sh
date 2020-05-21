@@ -72,6 +72,7 @@ if [ "$BUSCO_THRESH" -gt 0 ]; then
 
 	### Parse BUSCO files and filter out crap
 	$SCRIPT_DIR/BUSCO_parse.py -dir $OUTDIR/BUSCO/clean_summary/ -thresh $BUSCO_THRESH > $OUTDIR/BUSCO/BUSCO_final_summary.tsv
+	$SCRIPT_DIR/BUSCO_parse.py -dir $OUTDIR/BUSCO/clean_summary/ > $OUTDIR/BUSCO/BUSCO_final_summary_unfiltered.tsv
 	ls $OUTDIR/BUSCO/ | grep -E '^[[:alpha:]]{6}$' | while read i; do mv $OUTDIR/BUSCO/$i* $OUTDIR/BUSCO/junk/;done ### move all BUSCO junk to junk folder
 	cat $OUTDIR/BUSCO/BUSCO_final_summary.tsv | cut -f 6 | tail -n +2 | while read i; do cp $PROTEOMES/"$i"* $OUTDIR/filtered_proteomes/; done ### copy all good proteomes to final folder
 else 
@@ -118,3 +119,4 @@ mv $OUTDIR/filtered_proteomes $OUTDIR/SLC_search_intermediates
 mv $OUTDIR/preliminary_SLC_dicts $OUTDIR/SLC_search_intermediates
 mv $OUTDIR/*_search $OUTDIR/SLC_search_intermediates
 cp $OUTDIR/SLC_search_intermediates/BUSCO/BUSCO_final_summary.tsv $OUTDIR/Final_outputs/
+cp $OUTDIR/SLC_search_intermediates/BUSCO/BUSCO_final_summary_unfiltered.tsv $OUTDIR/Final_outputs/

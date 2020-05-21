@@ -56,21 +56,24 @@ for (i in iter){
   
   tr1=read.tree(paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'.nwk'))
   drops=tr1$tip.label[!(tr1$tip.label %in% full.metadata$abbreviation)]
-  if(grepl('Arthropod',i)){drops=c(drops,'CaeEle')} #'LimPol','ParTep','CenScu','FolCan',
+  if(grepl('Arthropod',i)){drops=c(drops,'CaeEle')} 
+  if(grepl('Arachnid',i)){drops=c(drops,'DapPul')} 
+  if(grepl('ArachInsect',i)){tr1=root(tr1,outgroup=c('SarSca','LepDel','TetUrt','SteMim','ParTep','CenScu','TroMer','VarAac','VarDes','GalOcc','IxoSca'))}
   tr=drop.tip(tr1,drops)
   write.tree(tr,paste0('./CAFE/clean_raxml_trees/RAxML_bipartitions.',i,'_subset.nwk'))
   
   nodes <- c(); maxes=c()
   maxes=c()
   mins=c()
-  if(("CaeEle" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("CaeEle","DroMel")));maxes=c(maxes,1000);mins=c(800)}
+  #if(("CaeEle" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("CaeEle","DroMel")));maxes=c(maxes,1000);mins=c(800)}
   if(("AcyPis" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AcyPis","DroMel")));maxes=c(maxes,401);mins=c(mins,345)}
   if(("ApiMel" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("ApiMel","DroMel")));maxes=c(maxes,372);mins=c(mins,317)} ## has fossil
   if(("AedAeg" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AedAeg","DroMel")));maxes=c(maxes,206);mins=c(mins,107)} ## has fossil
   if(("NilLug" %in% tr$tip.label) & ("AcyPis" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("AcyPis","NilLug")));maxes=c(maxes,346);mins=c(mins,232)}
   if(("TetUrt" %in% tr$tip.label) & ("DroMel" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("TetUrt","DroMel")));maxes=c(maxes,579);mins=c(mins,539)}
   if(("PluXyl" %in% tr$tip.label) & ("BomMor" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("PluXyl","BomMor")));maxes=c(maxes,178);mins=c(mins,116)} ## has fossil
-  
+  if(("DroMel" %in% tr$tip.label) & ("BomMor" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("DroMel","BomMor")));maxes=c(maxes,328);mins=c(mins,244)} ## has fossil
+  #if(("ParTep" %in% tr$tip.label) & ("CenScu" %in% tr$tip.label)){nodes=c(nodes,getMRCA(tr, tip = c("ParTep","CenScu")));maxes=c(maxes,420);mins=c(mins,374)} 
   
   ## create ultrametric tree
   ### Credit to Alex SL for format https://phylobotanist.blogspot.com/2019/
@@ -92,7 +95,7 @@ for (i in iter){
     }else{cols=c(cols,'red')}
   }
   
-  ma=max(mytimetree$edge.length)
+  ma=max(mytimetree$edge.length)*2
   xma=ma+100
   ma.r=seq(0,round(ma,-2),by=100)
   

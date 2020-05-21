@@ -32,7 +32,7 @@ cp ./GENERAL_REFERENCE/CAFE/ultrametric_tree_backup/*.nwk ./CAFE/clean_raxml_tre
 #### Run CAFE
 ./SLC_ID_SCRIPTS/SLC_CAFE_prep.R
 ./SLC_ID_SCRIPTS/SLC_CAFE5_run_full.sh
-./SLC_ID_SCRIPTS/SLC_CAFE_figures.sh
+./SLC_ID_SCRIPTS/SLC_CAFE5_figures.R
 
 
 ###################### 7) Extract sequences from each relevant species. Perform alignment and phylogeny
